@@ -1,0 +1,21 @@
+{
+    "name": "RoyalVault.Editor",
+    "rootNamespace": "RoyalVault.EditorTools",
+    "references": [
+        "RoyalVault.Core",
+        "RoyalVault.Unity",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

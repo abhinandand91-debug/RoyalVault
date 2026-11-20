@@ -1,0 +1,25 @@
+{
+    "name": "RoyalVault.PlayModeTests",
+    "rootNamespace": "RoyalVault.Tests",
+    "references": [
+        "RoyalVault.Core",
+        "RoyalVault.Unity",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

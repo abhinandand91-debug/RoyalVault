@@ -1,0 +1,40 @@
+# Unity generated
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# IDE and OS
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+.DS_Store
+
+# Licensed art that may not be redistributed (Crowns of Kemet, Retro Style Games).
+# The game runs without it: the guardian niches stay empty.
+/Assets/RoyalVault/Art.Private/
+/Assets/RoyalVault/Art.Private.meta
+
+# Crash and build reports
+crashlytics-build.properties
+sysinfo.txt
+*.apk
+*.aab
+*.app

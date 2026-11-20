@@ -1,0 +1,88 @@
+# Royal Vault
+
+A premium 1920s art deco slot game built in Unity 6: black lacquer and champagne gold, faceted gems, a jewelled
+crown jackpot and Egyptian revival details. Five reels, three rows, 20 paylines, scatter free spins with a
+multiplier, three progressive jackpots, and a full presentation layer (reel physics, win lines, BIG / MEGA / EPIC
+celebrations, coin showers). A 3 x 3 classic machine ships alongside it on the same code and art.
+
+![Royal Vault](docs/screenshots/02_idle.jpg)
+
+| Loading | Big win | Free spins |
+|---|---|---|
+| ![Loading](docs/screenshots/01_loading.jpg) | ![Big win](docs/screenshots/06_big_win.jpg) | ![Free spins](docs/screenshots/10_free_spin.jpg) |
+| **Win lines** | **Pay table** | **Classic 3 x 3** |
+| ![Win lines](docs/screenshots/04_win_lines.jpg) | ![Pay table](docs/screenshots/11_paytable.jpg) | ![Classic 3x3](docs/screenshots/13_classic_3x3.jpg) |
+
+## Running it
+
+- Unity **6000.3.10f1** (Unity 6.3). Open the project, open `Assets/RoyalVault/Scenes/Boot.unity` and press Play.
+  Boot shows the loading screen and switches to the Game scene by itself.
+- `Game_Classic3x3.unity` is the same game prefab playing the 3 x 3 machine.
+- **Royal Vault > Build Everything** regenerates the fonts, generated textures, theme, prefab and scenes after you
+  change art or presets. Machine assets that already exist are kept, so balancing done in the Inspector survives.
+
+## How it is built
+
+```
+GameBootstrap  (single entry point: reads the assets, builds Core, hands it to the views)
+   │
+   ├── Core  (plain C#, no Unity references: RoyalVault.Core.asmdef has noEngineReferences)
+   │     MachineDefinition ─► SpinEngine ─► WinEvaluator [PaylineRule, ScatterRule, JackpotRule] ─► SpinOutcome
+   │     GameSession [Wallet, BetModel, JackpotPool, FreeSpinState] ◄── ISaveStore
+   │     SpinFlow ─► FeaturePipeline [FreeSpins, Jackpot, WinTier, AutoPlay]   (ISlotFeature plug-ins)
+   │
+   └── Unity  (presentation only: shows what Core decided, never decides itself)
+         MachineView ─► ReelView ─► SymbolView, PaylineView
+         WinPresenter, BigWinView, JackpotPanelView, ConsoleView, SpinButtonView, CharacterView, PaytableView
+         RoundController  (console presses → flow requests; flow events → reel spins and win shows)
+```
+
+- **Data, not code.** A machine is a `MachineDefinitionAsset` (ScriptableObject): grid size, symbols, reel
+  strips, paylines, pays, scatter and jackpot rules, bets. The look is a `ThemeDefinition` (ScriptableObject):
+  symbol art by id, machine and UI sprites, fonts, colours and the reel area.
+- **A 3 x 3 game** is a different machine asset. `MachineView` sizes the cells to the theme's reel area for any
+  reels × rows and the 9-slice frame wraps the result.
+- **A reskin** is a different theme asset.
+- **New gameplay** is a new `ISlotFeature` (hooks: `OnSpinRequested`, `OnOutcome`, `OnPaid`) added to the
+  pipeline in `GameBootstrap`; the engine and flow do not change. `FlowTests.NewFeature_PlugsInWithoutChangingTheFlow`
+  shows a three-line example.
+- **Outcomes are decided before anything moves.** `SpinEngine` picks the stops; `ReelView` only animates to them.
+- **Drag and drop.** `Prefabs/RoyalVaultGame.prefab` is the whole game; drop it in a scene, set its machine and
+  theme, press Play.
+
+### Editor tools
+
+- **Royal Vault > Build Everything**: fonts, generated textures, presets, theme, prefab, Boot and Game scenes.
+- **Machine asset inspector**: validates the machine and simulates 1,000,000 paid spins to report the RTP.
+- **ArtImporter**: sprite settings and 9-slice borders on first import.
+
+## The maths
+
+Reel strips and pays were tuned by simulation and are checked by the tests (1,000,000 paid spins each):
+
+| Machine | RTP | Hit rate | Free spins | Jackpots |
+|---|---|---|---|---|
+| Royal Vault 5 x 3 | about 95.5 % | 27.5 % | 1 in about 470 spins (8 / 12 / 20 at x2) | Minor 3, Major 4, Grand 5 crowns |
+| Classic 3 x 3 | about 96.4 % | 10.9 % | 1 in about 690 spins (6 at x2) | Minor 3 crowns |
+
+## Tests
+
+- EditMode (`Assets/RoyalVault/Tests/EditMode`): engine and win rules, the spin flow and features, saving, a
+  plug-in feature, and the RTP of both machines.
+- PlayMode screenshot run: `ROYALVAULT_SHOTS=/some/folder Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter CaptureScreens`
+  boots the game and captures every screen (the images in `docs/screenshots`).
+
+## Art and fonts
+
+- The Royal Vault art (symbols, frame, logo, buttons, plaques, backgrounds) was generated for this project with
+  Figma AI and finished by hand; the vignette, glow, payline, light rays and console buttons are drawn in code by
+  the builder.
+- Fonts: [Cinzel](https://fonts.google.com/specimen/Cinzel) and
+  [Cormorant Garamond](https://fonts.google.com/specimen/Cormorant+Garamond), SIL Open Font License
+  (`Assets/RoyalVault/Fonts/OFL-*.txt`).
+- The Anubis guardians are licensed art (Retro Style Games, Crowns of Kemet) and are **not** in this repository
+  (`Assets/RoyalVault/Art.Private` is git-ignored). Without them the game runs with empty niches.
+
+## Licence
+
+No licence has been chosen yet, so all rights are reserved: you may read the code here but not reuse it.

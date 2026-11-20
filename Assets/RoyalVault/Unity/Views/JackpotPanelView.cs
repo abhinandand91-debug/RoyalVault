@@ -1,0 +1,73 @@
+using System.Collections;
+using RoyalVault.Core;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace RoyalVault.Unity
+{
+    /// <summary>The jackpot plaques: the top tier in the centre, the next ones left and right, values counting live.</summary>
+    public sealed class JackpotPanelView : MonoBehaviour
+    {
+        [SerializeField, Tooltip("Centre, left, right")] private Image[] plaques = new Image[0];
+        [SerializeField] private TextMeshProUGUI[] names = new TextMeshProUGUI[0];
+        [SerializeField] private CountingText[] values = new CountingText[0];
+
+        private JackpotPool pool;
+        // plaque slot for each tier, -1 when the tier has no plaque
+        private int[] slotOfTier = new int[0];
+
+        public void Setup(Image[] plaqueImages, TextMeshProUGUI[] nameLabels, CountingText[] valueLabels)
+        {
+            plaques = plaqueImages;
+            names = nameLabels;
+            values = valueLabels;
+        }
+
+        public void Bind(JackpotPool jackpots)
+        {
+            pool = jackpots;
+            slotOfTier = new int[pool.Count];
+            for (int slot = 0; slot < plaques.Length; slot++)
+            {
+                int tier = pool.Count - 1 - slot; // the largest tier goes in the centre
+                bool used = tier >= 0;
+                plaques[slot].gameObject.SetActive(used);
+                if (!used) continue;
+                slotOfTier[tier] = slot;
+                names[slot].text = pool.Tier(tier).Name;
+                values[slot].Set(pool.Value(tier));
+            }
+            for (int tier = 0; tier < pool.Count; tier++)
+                if (pool.Count - 1 - tier >= plaques.Length) slotOfTier[tier] = -1;
+            pool.Changed += OnChanged;
+        }
+
+        private void OnDestroy()
+        {
+            if (pool != null) pool.Changed -= OnChanged;
+        }
+
+        private void OnChanged(int tier)
+        {
+            int slot = slotOfTier[tier];
+            if (slot >= 0) values[slot].Set(pool.Value(tier), 0.6f);
+        }
+
+        /// <summary>Flashes the plaque of a tier that was just won.</summary>
+        public void Celebrate(int tier)
+        {
+            if (tier < 0 || tier >= slotOfTier.Length || slotOfTier[tier] < 0) return;
+            StartCoroutine(Flash(plaques[slotOfTier[tier]].rectTransform));
+        }
+
+        private IEnumerator Flash(RectTransform plaque)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                yield return Tween.Run(0.18f, k => plaque.localScale = Vector3.one * (1f + 0.08f * k), Ease.OutCubic);
+                yield return Tween.Run(0.18f, k => plaque.localScale = Vector3.one * (1.08f - 0.08f * k), Ease.InOutSine);
+            }
+        }
+    }
+}
