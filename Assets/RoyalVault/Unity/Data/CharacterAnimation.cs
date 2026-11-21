@@ -24,6 +24,8 @@ namespace RoyalVault.Unity
 
         public float framesPerSecond = 24f;
         [Tooltip("Height the frames are shown at, in canvas pixels")] public float displayHeight = 714f;
+        [Tooltip("Share of a frame the still art covers: below 1 when the frames leave room for light and sparks around it")]
+        public float figureShare = 1f;
         public Clip idle = new Clip();
         public Clip action = new Clip();
 

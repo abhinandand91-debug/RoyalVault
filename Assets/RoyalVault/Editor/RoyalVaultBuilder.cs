@@ -120,7 +120,7 @@ namespace RoyalVault.EditorTools
                 {
                     id = ids[i], sprite = Sprite("Symbols/" + ids[i]), blur = Sprite("Symbols/Blur/" + ids[i]),
                     style = look.style, tint = look.tint,
-                    winAnimation = AssetDatabase.LoadAssetAtPath<CharacterAnimation>(Root + "Art.Private/Symbols/" + ids[i] + ".asset"),
+                    winAnimation = SymbolWinAnimation(ids[i]),
                 };
             }
 

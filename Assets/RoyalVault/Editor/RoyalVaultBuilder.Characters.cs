@@ -29,20 +29,22 @@ namespace RoyalVault.EditorTools
         /// <summary>
         /// Fills a <see cref="CharacterAnimation"/> next to baked character frames (idle_000.png..., action_000.png...
         /// and a track file with the hand path). Returns null when the folder is absent, as in a public checkout.
+        /// The asset is saved beside the folder unless <paramref name="assetPath"/> names another place.
         /// </summary>
-        private static CharacterAnimation CreateCharacterAnimation(string folder)
+        private static CharacterAnimation CreateCharacterAnimation(string folder, string assetPath = null)
         {
             string name = Path.GetFileName(folder).ToLowerInvariant();
             string trackPath = folder + "/" + name + "_track.json";
             if (!File.Exists(trackPath)) return null;
 
             var track = JsonUtility.FromJson<Track>(File.ReadAllText(trackPath));
-            string assetPath = folder + ".asset";
+            assetPath = assetPath ?? folder + ".asset";
             var asset = AssetDatabase.LoadAssetAtPath<CharacterAnimation>(assetPath);
             bool created = asset == null;
             if (created) asset = ScriptableObject.CreateInstance<CharacterAnimation>();
 
             asset.framesPerSecond = track.fps;
+            asset.figureShare = Mathf.Clamp(track.figureShare, 0.1f, 1f);
             asset.displayHeight = Mathf.Round(FigureHeight / Mathf.Max(0.1f, track.figureShare));
             asset.idle = Clip(folder, "idle", track.idle);
             asset.action = Clip(folder, "action", track.action);
@@ -50,6 +52,22 @@ namespace RoyalVault.EditorTools
             if (created) AssetDatabase.CreateAsset(asset, assetPath);
             else EditorUtility.SetDirty(asset);
             return asset;
+        }
+
+        /// <summary>
+        /// A symbol's baked win frames: built from Art.Private/Symbols/&lt;Name&gt;/ (frames and a track file, named
+        /// like the symbol in any case) into Art.Private/Symbols/&lt;id&gt;.asset. Null for symbols without frames, and
+        /// in a public checkout, where they keep the built-in pulse.
+        /// </summary>
+        private static CharacterAnimation SymbolWinAnimation(string id)
+        {
+            string symbols = Root + "Art.Private/Symbols";
+            string assetPath = symbols + "/" + id + ".asset";
+            if (!Directory.Exists(symbols)) return null;
+            foreach (string dir in Directory.GetDirectories(symbols))
+                if (string.Equals(Path.GetFileName(dir), id, System.StringComparison.OrdinalIgnoreCase))
+                    return CreateCharacterAnimation(symbols + "/" + Path.GetFileName(dir), assetPath);
+            return AssetDatabase.LoadAssetAtPath<CharacterAnimation>(assetPath);
         }
 
         private static CharacterAnimation.Clip Clip(string folder, string prefix, TrackClip data)

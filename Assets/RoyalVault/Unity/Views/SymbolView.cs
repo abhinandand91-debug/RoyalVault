@@ -176,11 +176,15 @@ namespace RoyalVault.Unity
             StopCelebrating();
         }
 
-        /// <summary>Baked win frames (from an animation tool): played on a loop for the win, then back to the still art.</summary>
+        /// <summary>
+        /// Baked win frames (from an animation tool): played on a loop for the win, then back to the still art. Frames
+        /// with room around the symbol for its rays and sparks are shown larger, so the symbol keeps its size in the cell.
+        /// </summary>
         private IEnumerator PlayFrames(float seconds)
         {
             CharacterAnimation motion = art.winAnimation;
             CharacterAnimation.Clip clip = motion.action.IsValid ? motion.action : motion.idle;
+            image.rectTransform.localScale = Vector3.one / Mathf.Clamp(motion.figureShare, 0.1f, 1f);
             Color g = GlowColour();
             float t = 0f;
             while (t < seconds)

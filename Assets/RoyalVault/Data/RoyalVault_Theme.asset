@@ -84,7 +84,7 @@ MonoBehaviour:
     blur: {fileID: 21300000, guid: 768d709ad31c345e59169e1a48283d5e, type: 3}
     style: 3
     tint: {r: 0.85, g: 0.95, b: 1, a: 1}
-    winAnimation: {fileID: 0}
+    winAnimation: {fileID: 11400000, guid: 8f50de2f7e8b04866aac668dece8168d, type: 2}
   - id: vault_seal
     sprite: {fileID: 21300000, guid: 67877b7cb60354defbd7a5e5670b6e4a, type: 3}
     blur: {fileID: 21300000, guid: b706ee497d49f4ff28aa4b67538ab135, type: 3}
