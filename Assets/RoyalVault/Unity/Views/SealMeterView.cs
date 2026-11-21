@@ -114,6 +114,7 @@ namespace RoyalVault.Unity
             magicColour = theme.characterMagic;
             breakVfx = theme.sealBreakVfx;
             vfxScale = theme.vfxScale;
+            UiVfx.Prewarm(breakVfx, seal.parent);
 
             flow.SpinStarted += OnSpinStarted;
             machineView.ReelStopped += OnReelStopped;

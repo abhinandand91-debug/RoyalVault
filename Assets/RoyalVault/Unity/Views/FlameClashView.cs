@@ -64,6 +64,8 @@ namespace RoyalVault.Unity
             impactVfx = impact;
             sparksVfx = sparks;
             vfxScale = scale;
+            UiVfx.Prewarm(impact, layer);
+            UiVfx.Prewarm(sparks, layer);
         }
 
         public void Bind(CharacterView[] characters, Color magicColour)

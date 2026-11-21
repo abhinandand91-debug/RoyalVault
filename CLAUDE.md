@@ -154,6 +154,16 @@ The game will keep growing, so every runtime feature is written to scale from th
 - Unsubscribe from events on longer-lived objects in `OnDestroy`.
 - Stop tweens and coroutines that a view owns when it is disabled or destroyed.
 
-### 7. Measure
+### 7. Textures, Audio and Draw Calls
+
+- `TextureBudget` (run by Build Everything) sets every game texture to BC7 on desktop and ASTC on mobile, without mipmaps or readable copies; never leave art uncompressed.
+- Texture sizes must be multiples of 4 so they can compress; pad new art with transparent pixels if needed.
+- Reel symbols are 504 px and packed by `SpriteAtlases` into one atlas for stills and one for motion blur, so the reels batch.
+- Moving or fading parts of the screen live on their own nested `Canvas` (`UiFactory.NestedCanvas`); overlays that fade out use `CanvasAutoHide`.
+- Particles in UI use `UiParticleEmitter`, which draws all particles as one mesh.
+
+### 8. Measure
+
+- Run `PerformanceProbeTests` (set `ROYALVAULT_PERF` to an output file) before and after performance work and compare the numbers.
 
 - Profile with the Unity Profiler before micro-optimising; fix what the profiler shows first.

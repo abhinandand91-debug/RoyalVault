@@ -15,7 +15,8 @@ namespace RoyalVault.Unity
 
         private Image image;
         private Image glow;
-        private Material material;
+        private Material shared;
+        private Material own;
         private ThemeDefinition.SymbolArt art;
         private Coroutine pulse;
         private Tween glint;
@@ -43,22 +44,18 @@ namespace RoyalVault.Unity
             view.glow.color = new Color(1f, 0.85f, 0.45f, 0f);
             view.image = UiFactory.Image("Art", root, null, Vector2.zero, size);
             view.image.preserveAspect = true;
-            if (symbolMaterial != null)
-            {
-                // each symbol has its own copy, so its shine and flash move on their own
-                view.material = new Material(symbolMaterial) { name = symbolMaterial.name + " (symbol)" };
-                view.material.SetFloat(ShinePos, -1f);
-                view.material.SetFloat("_ShineWidth", 0.16f);
-                view.image.material = view.material;
-            }
+            view.image.useSpriteMesh = true;
+            // resting symbols share one material so the reels batch together
+            view.shared = symbolMaterial;
+            view.image.material = symbolMaterial;
             return view;
         }
 
         private void OnDestroy()
         {
-            if (material != null)
+            if (own != null)
             {
-                Destroy(material);
+                Destroy(own);
             }
         }
 
@@ -143,6 +140,7 @@ namespace RoyalVault.Unity
                 return;
             }
 
+            Lit();
             flash = 0.75f;
             landing.Stop();
             var squashed = new Vector3(1.08f, 0.9f, 1f);
@@ -159,9 +157,10 @@ namespace RoyalVault.Unity
                 return;
             }
 
-            if (material != null)
+            Material lit = Lit();
+            if (lit != null)
             {
-                material.SetColor(ShineColor, new Color(1f, 0.96f, 0.85f, 1f));
+                lit.SetColor(ShineColor, new Color(1f, 0.96f, 0.85f, 1f));
             }
 
             glint = Tween.Custom(this, -0.4f, 1.4f, 0.75f, (view, position) => view.Shine(position), Ease.InOutSine)
@@ -170,21 +169,26 @@ namespace RoyalVault.Unity
 
         private void Shine(float position)
         {
-            if (material != null)
+            if (own != null)
             {
-                material.SetFloat(ShinePos, position);
+                own.SetFloat(ShinePos, position);
             }
         }
 
         private void Update()
         {
-            if (material == null)
+            if (own == null || image.material != own)
             {
                 return;
             }
 
             flash = Mathf.MoveTowards(flash, 0f, Time.deltaTime * 2.2f);
-            material.SetFloat(Flash, flash);
+            own.SetFloat(Flash, flash);
+            if (flash <= 0f && pulse == null && !glint.isAlive)
+            {
+                own.SetFloat(ShinePos, -1f);
+                image.material = shared;
+            }
         }
 
         private Color GlowColour()
@@ -197,9 +201,10 @@ namespace RoyalVault.Unity
         {
             SymbolStyle style = Style;
             Color g = GlowColour();
-            if (material != null)
+            Material lit = Lit();
+            if (lit != null)
             {
-                material.SetColor(ShineColor, Color.Lerp(Color.white, new Color(g.r, g.g, g.b, 1f), 0.35f));
+                lit.SetColor(ShineColor, Color.Lerp(Color.white, new Color(g.r, g.g, g.b, 1f), 0.35f));
             }
 
             bool grand = style == SymbolStyle.Wild || style == SymbolStyle.Jackpot || style == SymbolStyle.Scatter;
@@ -260,6 +265,23 @@ namespace RoyalVault.Unity
             }
             pulse = null;
             StopCelebrating();
+        }
+
+        // While it shines or flashes, a symbol draws with its own copy of the material
+        private Material Lit()
+        {
+            if (shared == null)
+            {
+                return null;
+            }
+
+            if (own == null)
+            {
+                own = new Material(shared) { name = shared.name + " (lit)" };
+            }
+
+            image.material = own;
+            return own;
         }
 
         // Landing squash, unless a celebration has taken over the scale

@@ -34,6 +34,26 @@ namespace RoyalVault.Unity
             starsPool = NewPool(() => StarsFx.Create(frontLayer, sparkle, additive));
             sparksPool = NewPool(() => SparksFx.Create(frontLayer, additive));
             ringPool = NewPool(() => RingFx.Create(frontLayer, glow, additive));
+            Prewarm(raysPool, 6);
+            Prewarm(glowPool, 15);
+            Prewarm(starsPool, 15);
+            Prewarm(sparksPool, 15);
+            Prewarm(ringPool, 6);
+        }
+
+        // Builds effects up front, so the first big win does not stall while they are created
+        private static void Prewarm(ObjectPool<SymbolFx> pool, int count)
+        {
+            var built = new SymbolFx[count];
+            for (int i = 0; i < count; i++)
+            {
+                built[i] = pool.Get();
+            }
+
+            foreach (SymbolFx fx in built)
+            {
+                pool.Release(fx);
+            }
         }
 
         // Plays the win effects of art around the cell at centre

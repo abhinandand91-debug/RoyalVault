@@ -20,6 +20,7 @@ namespace RoyalVault.EditorTools
             Backdrop(t, theme, Color.white);
             CharacterView[] guardians = Guardians(t, theme);
             RectTransform machineRect = UiFactory.Stretch("Machine", t);
+            UiFactory.NestedCanvas(machineRect.gameObject, false);
             var machineView = machineRect.gameObject.AddComponent<MachineView>();
             Image logo = UiFactory.Image("Logo", t, theme.logo, new Vector2(0, 455), new Vector2(480, 171));
             logo.preserveAspect = true;
@@ -88,6 +89,7 @@ namespace RoyalVault.EditorTools
             RectTransform holder = UiFactory.Rect(name, parent, new Vector2(x, -380), new Vector2(250, 705));
             holder.pivot = new Vector2(0.5f, 0f);
             holder.anchoredPosition = new Vector2(x, -380);
+            UiFactory.NestedCanvas(holder.gameObject, false);
             Image aura = UiFactory.Image("Aura", holder, theme.glow, new Vector2(0, 40), new Vector2(560, 940));
             aura.material = theme.additive;
             aura.color = new Color(1f, 0.72f, 0.32f, 0.14f);
@@ -111,6 +113,7 @@ namespace RoyalVault.EditorTools
             image.rectTransform.pivot = new Vector2(0.5f, 0f);
             image.rectTransform.anchoredPosition = new Vector2(0, -352.5f);
             image.preserveAspect = true;
+            image.useSpriteMesh = true;
             image.color = Color.white;
             if (mirrored)
             {
@@ -194,6 +197,7 @@ namespace RoyalVault.EditorTools
         private static FlameClashView FlameClash(Transform parent, ThemeDefinition theme, RectTransform machine)
         {
             RectTransform layer = UiFactory.Stretch("Flame Clash", parent);
+            UiFactory.NestedCanvas(layer.gameObject, false);
             var trails = new UiParticleEmitter[2];
             var fireballs = new Image[2];
             var cores = new Image[2];
@@ -374,6 +378,7 @@ namespace RoyalVault.EditorTools
         private static JackpotPanelView Jackpots(Transform parent, ThemeDefinition theme)
         {
             RectTransform panel = UiFactory.Stretch("Jackpots", parent);
+            UiFactory.NestedCanvas(panel.gameObject, false);
             var images = new Image[3];
             var names = new TextMeshProUGUI[3];
             var values = new CountingText[3];
@@ -397,6 +402,7 @@ namespace RoyalVault.EditorTools
         private static ConsoleView Console(Transform parent, ThemeDefinition theme)
         {
             RectTransform console = UiFactory.Stretch("Console", parent);
+            UiFactory.NestedCanvas(console.gameObject, true);
             ConsoleBar(console);
             (CountingText balance, TextMeshProUGUI winLabel, CountingText win) = Readouts(console, theme);
             SpinButtonView spin = SpinButton(console, theme, new Vector2(0, -460));
@@ -503,6 +509,7 @@ namespace RoyalVault.EditorTools
             pill.raycastTarget = false;
             TextMeshProUGUI text = UiFactory.Text("Text", pill.transform, theme.bodyFont, "", 28, theme.ivory, Vector2.zero, new Vector2(680, 60));
             var group = pill.gameObject.AddComponent<CanvasGroup>();
+            UiFactory.NestedCanvas(pill.gameObject, false, true);
             group.blocksRaycasts = false;
             var toast = pill.gameObject.AddComponent<MessageToast>();
             toast.Setup(group, text);
@@ -513,6 +520,7 @@ namespace RoyalVault.EditorTools
         {
             RectTransform overlay = UiFactory.Stretch("Big Win", parent);
             var group = overlay.gameObject.AddComponent<CanvasGroup>();
+            UiFactory.NestedCanvas(overlay.gameObject, true, true);
             Image dim = Stretch("Dim", overlay, theme.white);
             dim.color = new Color(0.02f, 0.02f, 0.03f, 0.8f);
             Button skip = UiFactory.Button(dim);
@@ -527,12 +535,32 @@ namespace RoyalVault.EditorTools
             Image banner = UiFactory.Image("Banner", overlay, theme.bigWinBanner, new Vector2(0, 130), new Vector2(1200, 400));
             banner.preserveAspect = true;
             (TextMeshProUGUI title, TextMeshProUGUI subtitle, CountingText amount) = BigWinText(overlay, theme);
-            RectTransform coins = UiFactory.Rect("Coins", overlay, new Vector2(0, -560), Vector2.one * 10);
+            UiParticleEmitter coins = CoinShower(overlay, theme);
 
             var view = overlay.gameObject.AddComponent<BigWinView>();
-            view.Setup(group, banner, title, subtitle, amount, rays.rectTransform, coins, theme.coin, skip);
+            view.Setup(group, banner, title, subtitle, amount, rays.rectTransform, coins, skip);
             view.SetupHeroes(heroes, motion, home);
             return view;
+        }
+
+        // Gold coins thrown up from the foot of the screen, tumbling as they fall
+        private static UiParticleEmitter CoinShower(RectTransform overlay, ThemeDefinition theme)
+        {
+            UiParticleEmitter coins = Emitter("Coins", overlay, theme, theme.coin, new Vector2(0, -600));
+            coins.Material = null;
+            coins.Fades = false;
+            coins.Rate = 22f;
+            coins.MaxParticles = 70;
+            coins.LifeRange = new Vector2(2.6f, 2.6f);
+            coins.SizeRange = new Vector2(46f, 96f);
+            coins.EndSize = 1f;
+            coins.Area = new Vector2(520f, 0f);
+            coins.VelocityMin = new Vector2(-520f, 900f);
+            coins.VelocityMax = new Vector2(520f, 1500f);
+            coins.Gravity = new Vector2(0f, -1500f);
+            coins.SpinRange = new Vector2(-360f, 360f);
+            coins.FlipRange = new Vector2(4f, 9f);
+            return coins;
         }
 
         // A hero beside the banner, feet at the foot of the screen, sized to its baked frames
@@ -541,6 +569,7 @@ namespace RoyalVault.EditorTools
             const float height = 740f;
             Image hero = UiFactory.Image(name, overlay, null, home, new Vector2(300, height));
             hero.rectTransform.pivot = new Vector2(0.5f, 0f);
+            hero.useSpriteMesh = true;
             hero.color = Color.white;
             if (motion != null && motion.IsValid)
             {
@@ -585,6 +614,7 @@ namespace RoyalVault.EditorTools
         {
             RectTransform root = UiFactory.Stretch("Chapter Card", parent);
             var group = root.gameObject.AddComponent<CanvasGroup>();
+            UiFactory.NestedCanvas(root.gameObject, true, true);
             Image dim = Stretch("Dim", root, theme.white);
             dim.color = new Color(0.01f, 0.01f, 0.02f, 0.78f);
             dim.raycastTarget = true;
@@ -627,6 +657,7 @@ namespace RoyalVault.EditorTools
         {
             RectTransform root = UiFactory.Stretch("Coach Marks", parent);
             var group = root.gameObject.AddComponent<CanvasGroup>();
+            UiFactory.NestedCanvas(root.gameObject, true, true);
             Image tap = Stretch("Tap", root, theme.white);
             tap.color = new Color(0f, 0f, 0f, 0f);
             tap.raycastTarget = true;
@@ -657,6 +688,7 @@ namespace RoyalVault.EditorTools
         {
             RectTransform window = UiFactory.Stretch("Pay Table", parent);
             var group = window.gameObject.AddComponent<CanvasGroup>();
+            UiFactory.NestedCanvas(window.gameObject, true, true);
             Image dim = Stretch("Backdrop", window, theme.white);
             dim.color = new Color(0.02f, 0.02f, 0.03f, 0.78f);
             Button backdrop = UiFactory.Button(dim);

@@ -68,6 +68,7 @@ namespace RoyalVault.EditorTools
         {
             RectTransform root = UiFactory.Stretch("Story Intro", parent);
             var group = root.gameObject.AddComponent<CanvasGroup>();
+            UiFactory.NestedCanvas(root.gameObject, true, true);
             Image tap = Stretch("Tap", root, theme.white);
             tap.color = new Color(0f, 0f, 0f, 1f);
             tap.raycastTarget = true;
@@ -125,6 +126,7 @@ namespace RoyalVault.EditorTools
             RectTransform rect = UiFactory.Stretch(name, parent);
             var group = rect.gameObject.AddComponent<CanvasGroup>();
             group.alpha = 0f;
+            UiFactory.NestedCanvas(rect.gameObject, false, true);
 
             Image art = Stretch("Art", rect, null);
             var fitter = art.gameObject.AddComponent<AspectRatioFitter>();
@@ -171,6 +173,7 @@ namespace RoyalVault.EditorTools
             bool told = theme.story != null && theme.story.At(StoryMoment.Intro).Length > 0;
             StoryCardView[] cards = told ? new[] { StoryCard("Story Card A", t, theme), StoryCard("Story Card B", t, theme) } : new StoryCardView[0];
             RectTransform dust = UiFactory.Stretch("Gold Dust", t);
+            UiFactory.NestedCanvas(dust.gameObject, false);
             CanvasGroup chrome = StoryChrome(t);
             RectTransform logo = Logo(t, theme, told);
             LoadingBar bar = ProgressBar(t, theme, told);

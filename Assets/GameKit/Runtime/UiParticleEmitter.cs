@@ -1,16 +1,16 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Sprites;
 using UnityEngine.UI;
 
 namespace GameKit
 {
-    // Lightweight particles drawn inside a UI canvas
-    public sealed class UiParticleEmitter : MonoBehaviour
+    // Lightweight particles drawn inside a UI canvas as one mesh: one graphic, one draw, no objects per particle
+    [RequireComponent(typeof(CanvasRenderer))]
+    public sealed class UiParticleEmitter : MaskableGraphic
     {
         private struct Particle
         {
-            public RectTransform Rect;
-            public Image Image;
             public Vector2 Position;
             public Vector2 Velocity;
             public float Age;
@@ -18,16 +18,18 @@ namespace GameKit
             public float Size;
             public float Spin;
             public float Seed;
-            public bool Burst;
+            public float Flip;
         }
 
         [Header("Look")]
         public Sprite Sprite;
-        public Material Material;
         public Color StartColor = Color.white;
         public Color EndColor = new Color(1f, 1f, 1f, 0f);
         public Vector2 SizeRange = new Vector2(10f, 20f);
         [Tooltip("Size at the end of a particle's life, as a share of its start size")] public float EndSize = 0.3f;
+        [Tooltip("Fade in at birth and out towards the end of life; off keeps particles solid, like coins")] public bool Fades = true;
+        [Tooltip("Degrees per second each particle turns, picked between these")] public Vector2 SpinRange = new Vector2(-90f, 90f);
+        [Tooltip("Turns per second around the vertical axis, like a tumbling coin (0 = flat)")] public Vector2 FlipRange = Vector2.zero;
 
         [Header("Emission")]
         [Tooltip("Particles per second (0 = bursts only)")] public float Rate = 10f;
@@ -46,17 +48,43 @@ namespace GameKit
         public float Drag;
 
         private readonly List<Particle> live = new List<Particle>();
-        private readonly Stack<Particle> pool = new Stack<Particle>();
         private float pending;
         private float burstSpeed = 1f;
+        private bool drawn;
 
         // Multiplies the continuous rate (a flare: set above 1 for a moment)
         public float Intensity { get; set; } = 1f;
 
+        public Material Material
+        {
+            get
+            {
+                return material;
+            }
+            set
+            {
+                material = value;
+            }
+        }
+
+        public override Texture mainTexture
+        {
+            get
+            {
+                return Sprite != null ? Sprite.texture : s_WhiteTexture;
+            }
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+            raycastTarget = false;
+        }
+
         private void Update()
         {
-            float dt = Time.deltaTime;
-            pending += Rate * Intensity * dt;
+            float deltaTime = Time.deltaTime;
+            pending += Rate * Intensity * deltaTime;
             while (pending >= 1f)
             {
                 pending -= 1f;
@@ -65,33 +93,23 @@ namespace GameKit
 
             for (int i = live.Count - 1; i >= 0; i--)
             {
-                Particle p = live[i];
-                p.Age += dt;
-                if (p.Age >= p.Life)
+                Particle particle = live[i];
+                particle.Age += deltaTime;
+                if (particle.Age >= particle.Life)
                 {
-                    p.Rect.gameObject.SetActive(false);
-                    pool.Push(p);
                     live.RemoveAt(i);
                     continue;
                 }
-                p.Velocity += Gravity * dt;
-                if (Drag > 0f)
-                {
-                    p.Velocity *= Mathf.Max(0f, 1f - Drag * dt);
-                }
 
-                float wobble = Swirl * Mathf.Sin(p.Age * SwirlFrequency + p.Seed * 6.28f);
-                p.Position += (p.Velocity + new Vector2(wobble, 0f)) * dt;
+                Move(ref particle, deltaTime);
+                live[i] = particle;
+            }
 
-                float t = p.Age / p.Life;
-                float fade = Mathf.Min(1f, t * 8f) * (1f - t * t);
-                Color c = Color.Lerp(StartColor, EndColor, t);
-                c.a *= fade;
-                p.Image.color = c;
-                p.Rect.anchoredPosition = p.Position;
-                p.Rect.sizeDelta = Vector2.one * p.Size * Mathf.Lerp(1f, EndSize, t);
-                p.Rect.localRotation = Quaternion.Euler(0f, 0f, p.Spin * p.Age);
-                live[i] = p;
+            // redraw while particles move, and once more after the last one dies
+            if (live.Count > 0 || drawn)
+            {
+                drawn = live.Count > 0;
+                SetVerticesDirty();
             }
         }
 
@@ -110,12 +128,58 @@ namespace GameKit
         // Removes every live particle
         public void Clear()
         {
-            foreach (Particle p in live)
-            {
-                p.Rect.gameObject.SetActive(false);
-                pool.Push(p);
-            }
             live.Clear();
+            pending = 0f;
+            SetVerticesDirty();
+        }
+
+        protected override void OnPopulateMesh(VertexHelper vertices)
+        {
+            vertices.Clear();
+            Vector4 uv = Sprite != null ? DataUtility.GetOuterUV(Sprite) : new Vector4(0f, 0f, 1f, 1f);
+            for (int i = 0; i < live.Count; i++)
+            {
+                AddQuad(vertices, live[i], uv);
+            }
+        }
+
+        private void Move(ref Particle particle, float deltaTime)
+        {
+            particle.Velocity += Gravity * deltaTime;
+            if (Drag > 0f)
+            {
+                particle.Velocity *= Mathf.Max(0f, 1f - Drag * deltaTime);
+            }
+
+            float wobble = Swirl * Mathf.Sin(particle.Age * SwirlFrequency + particle.Seed * 6.28f);
+            particle.Position += (particle.Velocity + new Vector2(wobble, 0f)) * deltaTime;
+        }
+
+        private void AddQuad(VertexHelper vertices, Particle particle, Vector4 uv)
+        {
+            float t = particle.Age / particle.Life;
+            float fade = Fades ? Mathf.Min(1f, t * 8f) * (1f - t * t) : 1f;
+            Color tint = Color.Lerp(StartColor, EndColor, t) * color;
+            tint.a *= fade;
+
+            float half = particle.Size * Mathf.Lerp(1f, EndSize, t) * 0.5f;
+            float angle = particle.Spin * particle.Age * Mathf.Deg2Rad;
+            var right = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * half;
+            var up = new Vector2(-right.y, right.x);
+            if (particle.Flip > 0f)
+            {
+                right *= Mathf.Abs(Mathf.Cos(particle.Age * particle.Flip)) * 0.8f + 0.2f;
+            }
+
+            Vector2 centre = particle.Position;
+
+            int start = vertices.currentVertCount;
+            vertices.AddVert(centre - right - up, tint, new Vector4(uv.x, uv.y));
+            vertices.AddVert(centre - right + up, tint, new Vector4(uv.x, uv.w));
+            vertices.AddVert(centre + right + up, tint, new Vector4(uv.z, uv.w));
+            vertices.AddVert(centre + right - up, tint, new Vector4(uv.z, uv.y));
+            vertices.AddTriangle(start, start + 1, start + 2);
+            vertices.AddTriangle(start + 2, start + 3, start);
         }
 
         private void Spawn(bool burst)
@@ -125,37 +189,30 @@ namespace GameKit
                 return;
             }
 
-            Particle p = pool.Count > 0 ? pool.Pop() : Create();
-            p.Rect.gameObject.SetActive(true);
-            p.Rect.SetAsLastSibling();
-            p.Position = Origin + new Vector2(Random.Range(-0.5f, 0.5f) * Area.x, Random.Range(-0.5f, 0.5f) * Area.y);
-            var v = new Vector2(Random.Range(VelocityMin.x, VelocityMax.x), Random.Range(VelocityMin.y, VelocityMax.y));
-            if (burst)
+            var particle = new Particle
             {
-                // bursts spray in every direction from the centre
-                Vector2 dir = Random.insideUnitCircle.normalized;
-                v = dir * v.magnitude * burstSpeed + new Vector2(0f, Mathf.Abs(v.y) * 0.4f);
-            }
-            p.Velocity = v;
-            p.Age = 0f;
-            p.Life = Random.Range(LifeRange.x, LifeRange.y) * (burst ? 1.2f : 1f);
-            p.Size = Random.Range(SizeRange.x, SizeRange.y);
-            p.Spin = Random.Range(-90f, 90f);
-            p.Seed = Random.value;
-            p.Burst = burst;
-            live.Add(p);
+                Position = Origin + new Vector2(Random.Range(-0.5f, 0.5f) * Area.x, Random.Range(-0.5f, 0.5f) * Area.y),
+                Velocity = StartVelocity(burst),
+                Life = Random.Range(LifeRange.x, LifeRange.y) * (burst ? 1.2f : 1f),
+                Size = Random.Range(SizeRange.x, SizeRange.y),
+                Spin = Random.Range(SpinRange.x, SpinRange.y),
+                Seed = Random.value,
+                Flip = Random.Range(FlipRange.x, FlipRange.y),
+            };
+            live.Add(particle);
         }
 
-        private Particle Create()
+        // Bursts spray in every direction from the centre
+        private Vector2 StartVelocity(bool burst)
         {
-            Image image = UiFactory.Image("Particle", transform, Sprite, Vector2.zero, Vector2.one * SizeRange.y);
-            image.color = Color.clear;
-            if (Material != null)
+            var velocity = new Vector2(Random.Range(VelocityMin.x, VelocityMax.x), Random.Range(VelocityMin.y, VelocityMax.y));
+            if (!burst)
             {
-                image.material = Material;
+                return velocity;
             }
 
-            return new Particle { Rect = image.rectTransform, Image = image };
+            Vector2 direction = Random.insideUnitCircle.normalized;
+            return direction * velocity.magnitude * burstSpeed + new Vector2(0f, Mathf.Abs(velocity.y) * 0.4f);
         }
     }
 }

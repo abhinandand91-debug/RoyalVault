@@ -36,6 +36,7 @@ namespace GameKit
             var image = rect.gameObject.AddComponent<Image>();
             image.sprite = sprite;
             image.raycastTarget = raycast;
+            image.canvasRenderer.cullTransparentMesh = true;
             if (sprite == null)
             {
                 image.color = Color.clear;
@@ -62,7 +63,30 @@ namespace GameKit
             label.characterSpacing = characterSpacing;
             label.textWrappingMode = TextWrappingModes.NoWrap;
             label.raycastTarget = false;
+            label.canvasRenderer.cullTransparentMesh = true;
             return label;
+        }
+
+        // Gives part of the screen its own canvas, so its changes rebuild only that part; clickable parts get a raycaster
+        public static Canvas NestedCanvas(GameObject target, bool clickable, bool hideWhenFaded = false)
+        {
+            Canvas canvas = target.GetComponent<Canvas>();
+            if (canvas == null)
+            {
+                canvas = target.AddComponent<Canvas>();
+            }
+
+            if (clickable && target.GetComponent<GraphicRaycaster>() == null)
+            {
+                target.AddComponent<GraphicRaycaster>();
+            }
+
+            if (hideWhenFaded && target.GetComponent<CanvasAutoHide>() == null)
+            {
+                target.AddComponent<CanvasAutoHide>();
+            }
+
+            return canvas;
         }
 
         public static Button Button(Image graphic)

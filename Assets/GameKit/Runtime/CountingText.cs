@@ -7,7 +7,9 @@ namespace GameKit
     [RequireComponent(typeof(TextMeshProUGUI))]
     public sealed class CountingText : MonoBehaviour
     {
+        private readonly char[] buffer = new char[48];
         private TextMeshProUGUI label;
+        private long written = long.MinValue;
         private double shown;
         private long target;
         private double speed;
@@ -65,9 +67,19 @@ namespace GameKit
             Write();
         }
 
+        // Only touches the text when the shown number changes, and builds it without allocating
         private void Write()
         {
-            label.text = Prefix + NumberFormat.Credits((long)System.Math.Round(shown));
+            long value = (long)System.Math.Round(shown);
+            if (value == written)
+            {
+                return;
+            }
+
+            written = value;
+            Prefix.CopyTo(0, buffer, 0, Prefix.Length);
+            int length = NumberFormat.Credits(value, buffer, Prefix.Length);
+            label.SetCharArray(buffer, 0, length);
         }
     }
 }

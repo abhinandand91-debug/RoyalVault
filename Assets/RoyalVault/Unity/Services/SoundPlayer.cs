@@ -59,6 +59,19 @@ namespace RoyalVault.Unity
             music[1] = NewSource("Music B", true);
         }
 
+        // Fades still running when the scene unloads would call back into destroyed sources
+        private void OnDestroy()
+        {
+            musicFade.Stop();
+            foreach (AudioSource source in loops.Values)
+            {
+                if (source != null)
+                {
+                    Tween.StopAll(source);
+                }
+            }
+        }
+
         private AudioSource NewSource(string name, bool loop)
         {
             var child = new GameObject(name);

@@ -53,15 +53,15 @@ namespace RoyalVault.EditorTools
             // 9-slice borders: left, bottom, right, top (in the art's pixels)
             if (assetPath.EndsWith("Machine/reel_frame.png"))
             {
-                importer.spriteBorder = new Vector4(137, 130, 139, 136);
+                importer.spriteBorder = new Vector4(138, 130, 141, 137);
             }
             else if (assetPath.EndsWith("UI/popup_panel.png"))
             {
-                importer.spriteBorder = new Vector4(170, 170, 170, 170);
+                importer.spriteBorder = new Vector4(171, 170, 171, 170);
             }
             else if (assetPath.EndsWith("UI/level_bar.png"))
             {
-                importer.spriteBorder = new Vector4(65, 0, 65, 0);
+                importer.spriteBorder = new Vector4(65, 0, 65, 1);
             }
             else if (assetPath.EndsWith("Generated/pill.png"))
             {

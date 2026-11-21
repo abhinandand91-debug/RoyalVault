@@ -485,6 +485,7 @@ namespace RoyalVault.Unity
             var group = holder.gameObject.AddComponent<CanvasGroup>();
             group.alpha = 0f;
             group.blocksRaycasts = false;
+            UiFactory.NestedCanvas(holder.gameObject, false, true);
             Image wash = UiFactory.Image("Glow", holder, theme.glow, Vector2.zero, new Vector2(size.x * 1.5f, size.y * 1.15f));
             wash.material = theme.additive;
             wash.color = new Color(1f, 0.82f, 0.45f, 0.45f);

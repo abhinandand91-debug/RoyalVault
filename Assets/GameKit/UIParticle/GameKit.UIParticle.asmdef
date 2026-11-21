@@ -3,7 +3,8 @@
     "rootNamespace": "GameKit",
     "references": [
         "GameKit",
-        "Coffee.UIParticle"
+        "Coffee.UIParticle",
+        "PrimeTween.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

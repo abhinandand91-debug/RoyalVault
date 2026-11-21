@@ -30,6 +30,8 @@ namespace RoyalVault.EditorTools
                 return;
             }
             GenerateTextures();
+            TextureBudget.Apply();
+            SpriteAtlases.Pack();
             ThemeDefinition theme = CreateTheme(CreateFonts());
             MachineDefinitionAsset main = CreateMachine("RoyalVault_5x3", MachinePresets.RoyalVault5x3());
             MachineDefinitionAsset classic = CreateMachine("Classic_3x3", MachinePresets.Classic3x3());
@@ -201,6 +203,7 @@ namespace RoyalVault.EditorTools
         {
             theme.additive = AdditiveMaterial();
             theme.symbolMaterial = SymbolMaterial();
+            RestSymbolMaterial(theme.symbolMaterial);
             // Hovl Studio's Magic Effects FREE, when imported (git-ignored: its licence allows no redistribution)
             theme.clashImpactVfx = StorePrefab("Assets/Hovl Studio", "Electro hit");
             theme.clashSparksVfx = StorePrefab("Assets/Hovl Studio", "Sparks explode blue");
@@ -267,6 +270,15 @@ namespace RoyalVault.EditorTools
             material = new Material(Shader.Find("RoyalVault/UI Symbol")) { name = "UISymbol" };
             AssetDatabase.CreateAsset(material, path);
             return material;
+        }
+
+        // Resting state shared by every reel symbol: no shine band, no flash
+        private static void RestSymbolMaterial(Material material)
+        {
+            material.SetFloat("_ShinePos", -1f);
+            material.SetFloat("_ShineWidth", 0.16f);
+            material.SetFloat("_Flash", 0f);
+            EditorUtility.SetDirty(material);
         }
 
         // The additive UI material glows and particles use (created once)

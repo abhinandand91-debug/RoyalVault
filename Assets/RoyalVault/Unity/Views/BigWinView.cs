@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Collections;
 using GameKit;
 using PrimeTween;
@@ -23,15 +22,13 @@ namespace RoyalVault.Unity
         [SerializeField] private TextMeshProUGUI subtitle;
         [SerializeField] private CountingText amount;
         [SerializeField] private RectTransform rays;
-        [SerializeField] private RectTransform coinLayer;
-        [SerializeField] private Sprite coinSprite;
+        [SerializeField] private UiParticleEmitter coins;
         [SerializeField] private Button skip;
         [Header("Heroes")]
         [SerializeField] private Image[] heroes = new Image[0];
         [SerializeField] private CharacterAnimation[] heroMotion = new CharacterAnimation[0];
         [SerializeField] private Vector2[] heroHome = new Vector2[0];
 
-        private readonly List<RectTransform> coins = new List<RectTransform>();
         private bool skipped;
         private float heroClock;
         private RectTransform popping;
@@ -45,7 +42,7 @@ namespace RoyalVault.Unity
         public event System.Action Closed;
 
         public void Setup(CanvasGroup canvasGroup, Image bannerImage, TextMeshProUGUI titleText, TextMeshProUGUI subtitleText,
-                          CountingText amountText, RectTransform raysRect, RectTransform coins, Sprite coin, Button skipButton)
+                          CountingText amountText, RectTransform raysRect, UiParticleEmitter coinShower, Button skipButton)
         {
             group = canvasGroup;
             banner = bannerImage;
@@ -53,8 +50,7 @@ namespace RoyalVault.Unity
             subtitle = subtitleText;
             amount = amountText;
             rays = raysRect;
-            coinLayer = coins;
-            coinSprite = coin;
+            coins = coinShower;
             skip = skipButton;
         }
 
@@ -92,6 +88,7 @@ namespace RoyalVault.Unity
         private void Awake()
         {
             skip.onClick.AddListener(() => skipped = true);
+            coins.Intensity = 0f;
             // starts hidden, unless the first activation is a celebration
             if (!IsShowing)
             {
@@ -170,7 +167,6 @@ namespace RoyalVault.Unity
         private IEnumerator Hold(float seconds, float coinSeconds)
         {
             const float stride = 0.55f;
-            float spawn = 0f;
             for (float t = 0f; t < seconds && !skipped;)
             {
                 t += Time.deltaTime;
@@ -181,18 +177,11 @@ namespace RoyalVault.Unity
                     rays.localRotation = Quaternion.Euler(0f, 0f, -t * 12f);
                 }
 
-                if (t < coinSeconds)
-                {
-                    spawn += Time.deltaTime * 22f;
-                }
-
-                for (; spawn >= 1f; spawn -= 1f)
-                {
-                    StartCoroutine(Coin());
-                }
-
+                coins.Intensity = t < coinSeconds ? 1f : 0f;
                 yield return null;
             }
+
+            coins.Intensity = 0f;
         }
 
         private void FadeOut(float k)
@@ -204,56 +193,11 @@ namespace RoyalVault.Unity
 
         private void Close()
         {
-            foreach (RectTransform coin in coins)
-            {
-                coin.gameObject.SetActive(false);
-            }
-
+            coins.Intensity = 0f;
+            coins.Clear();
             Hide();
             IsShowing = false;
             Closed?.Invoke();
-        }
-
-        private IEnumerator Coin()
-        {
-            RectTransform coin = null;
-            foreach (RectTransform c in coins)
-            {
-                if (!c.gameObject.activeSelf)
-                {
-                    coin = c;
-                    break;
-                }
-            }
-
-            if (coin == null)
-            {
-                coin = UiFactory.Image("Coin", coinLayer, coinSprite, Vector2.zero, Vector2.one * 70f).rectTransform;
-                coins.Add(coin);
-            }
-            coin.gameObject.SetActive(true);
-            float size = Random.Range(46f, 96f);
-            coin.sizeDelta = Vector2.one * size;
-            var start = new Vector2(Random.Range(-260f, 260f), -40f);
-            var velocity = new Vector2(Random.Range(-520f, 520f), Random.Range(900f, 1500f));
-            float spinSpeed = Random.Range(-360f, 360f);
-            float flip = Random.Range(4f, 9f);
-            float t = 0f;
-            while (t < 2.6f && coin.gameObject.activeSelf)
-            {
-                t += Time.deltaTime;
-                Vector2 p = start + velocity * t + new Vector2(0f, -1500f) * t * t * 0.5f;
-                coin.anchoredPosition = p;
-                coin.localRotation = Quaternion.Euler(0f, 0f, spinSpeed * t);
-                coin.localScale = new Vector3(Mathf.Abs(Mathf.Cos(t * flip)) * 0.8f + 0.2f, 1f, 1f);
-                if (p.y < -700f)
-                {
-                    break;
-                }
-
-                yield return null;
-            }
-            coin.gameObject.SetActive(false);
         }
     }
 }
