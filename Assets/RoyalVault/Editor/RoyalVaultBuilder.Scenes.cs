@@ -40,8 +40,7 @@ namespace RoyalVault.EditorTools
             var gamePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
             MachineDefinitionAsset machineOverride = machinePath != null ? AssetDatabase.LoadAssetAtPath<MachineDefinitionAsset>(machinePath) : null;
             Camera();
-            var events = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
-            _ = events;
+            Events();
             var game = (GameObject)PrefabUtility.InstantiatePrefab(gamePrefab, scene);
             if (machineOverride != null)
             {
@@ -62,6 +61,9 @@ namespace RoyalVault.EditorTools
             camera.backgroundColor = Color.black;
             camera.orthographic = true;
         }
+
+        // Without these, buttons on the scene's canvas never hear a click.
+        private static void Events() => new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
 
         // First-launch intro: its own story cards, letterbox bars, skip, continue and enter.
         private static StoryIntroView StoryIntro(Transform parent, ThemeDefinition theme)
@@ -161,9 +163,11 @@ namespace RoyalVault.EditorTools
         {
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             Camera();
+            Events();
 
             var root = new GameObject("Loading", typeof(RectTransform));
             Canvas canvas = root.AddComponent<Canvas>();
+            root.AddComponent<GraphicRaycaster>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             var scaler = root.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
