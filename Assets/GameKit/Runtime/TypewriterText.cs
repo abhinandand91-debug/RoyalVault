@@ -23,7 +23,11 @@ namespace GameKit
 
         public void Play(string line)
         {
-            if (text == null) Awake();
+            if (text == null)
+            {
+                Awake();
+            }
+
             text.text = line;
             text.maxVisibleCharacters = 0;
             text.ForceMeshUpdate();
@@ -33,30 +37,51 @@ namespace GameKit
 
         public void Complete()
         {
-            if (text == null) return;
+            if (text == null)
+            {
+                return;
+            }
+
             text.maxVisibleCharacters = text.textInfo.characterCount;
             shown = text.maxVisibleCharacters;
         }
 
         public void Clear()
         {
-            if (text != null) text.text = "";
+            if (text != null)
+            {
+                text.text = "";
+            }
         }
 
         private void Update()
         {
-            if (!IsTyping) return;
-            if (pause > 0f) { pause -= Time.deltaTime; return; }
+            if (!IsTyping)
+            {
+                return;
+            }
+
+            if (pause > 0f)
+            {
+                pause -= Time.deltaTime;
+                return;
+            }
             shown += Time.deltaTime * charactersPerSecond;
             int visible = Mathf.Min(Mathf.FloorToInt(shown), text.textInfo.characterCount);
-            if (visible > text.maxVisibleCharacters) Reveal(visible);
+            if (visible > text.maxVisibleCharacters)
+            {
+                Reveal(visible);
+            }
         }
 
         private void Reveal(int visible)
         {
             text.maxVisibleCharacters = visible;
             char last = text.textInfo.characterInfo[visible - 1].character;
-            if (last == '.' || last == ',' || last == ':' || last == '!' || last == '?') pause = punctuationPause;
+            if (last == '.' || last == ',' || last == ':' || last == '!' || last == '?')
+            {
+                pause = punctuationPause;
+            }
         }
     }
 }

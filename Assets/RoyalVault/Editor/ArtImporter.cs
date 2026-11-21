@@ -11,7 +11,11 @@ namespace RoyalVault.EditorTools
         // Licensed audio: music streams from disk, effects load decompressed so they start instantly
         private void OnPreprocessAudio()
         {
-            if (!assetPath.StartsWith(Art + ".Private/Audio") || !assetImporter.importSettingsMissing) return;
+            if (!assetPath.StartsWith(Art + ".Private/Audio") || !assetImporter.importSettingsMissing)
+            {
+                return;
+            }
+
             var importer = (AudioImporter)assetImporter;
             bool music = System.IO.Path.GetFileName(assetPath).StartsWith("Music_", System.StringComparison.OrdinalIgnoreCase);
             AudioImporterSampleSettings settings = importer.defaultSampleSettings;
@@ -25,7 +29,10 @@ namespace RoyalVault.EditorTools
 
         private void OnPreprocessTexture()
         {
-            if (!assetPath.StartsWith(Art) || !assetImporter.importSettingsMissing) return;
+            if (!assetPath.StartsWith(Art) || !assetImporter.importSettingsMissing)
+            {
+                return;
+            }
 
             var importer = (TextureImporter)assetImporter;
             importer.textureType = TextureImporterType.Sprite;
@@ -44,10 +51,22 @@ namespace RoyalVault.EditorTools
             importer.SetTextureSettings(settings);
 
             // 9-slice borders: left, bottom, right, top (in the art's pixels)
-            if (assetPath.EndsWith("Machine/reel_frame.png")) importer.spriteBorder = new Vector4(137, 130, 139, 136);
-            else if (assetPath.EndsWith("UI/popup_panel.png")) importer.spriteBorder = new Vector4(170, 170, 170, 170);
-            else if (assetPath.EndsWith("UI/level_bar.png")) importer.spriteBorder = new Vector4(65, 0, 65, 0);
-            else if (assetPath.EndsWith("Generated/pill.png")) importer.spriteBorder = new Vector4(62, 62, 62, 62);
+            if (assetPath.EndsWith("Machine/reel_frame.png"))
+            {
+                importer.spriteBorder = new Vector4(137, 130, 139, 136);
+            }
+            else if (assetPath.EndsWith("UI/popup_panel.png"))
+            {
+                importer.spriteBorder = new Vector4(170, 170, 170, 170);
+            }
+            else if (assetPath.EndsWith("UI/level_bar.png"))
+            {
+                importer.spriteBorder = new Vector4(65, 0, 65, 0);
+            }
+            else if (assetPath.EndsWith("Generated/pill.png"))
+            {
+                importer.spriteBorder = new Vector4(62, 62, 62, 62);
+            }
         }
     }
 }

@@ -36,31 +36,51 @@ namespace RoyalVault.Unity
                 int tier = pool.Count - 1 - slot; // the largest tier goes in the centre
                 bool used = tier >= 0;
                 plaques[slot].gameObject.SetActive(used);
-                if (!used) continue;
+                if (!used)
+                {
+                    continue;
+                }
+
                 slotOfTier[tier] = slot;
                 names[slot].text = pool.Tier(tier).Name;
                 values[slot].Set(pool.Value(tier));
             }
             for (int tier = 0; tier < pool.Count; tier++)
-                if (pool.Count - 1 - tier >= plaques.Length) slotOfTier[tier] = -1;
+            {
+                if (pool.Count - 1 - tier >= plaques.Length)
+                {
+                    slotOfTier[tier] = -1;
+                }
+            }
+
             pool.Changed += OnChanged;
         }
 
         private void OnDestroy()
         {
-            if (pool != null) pool.Changed -= OnChanged;
+            if (pool != null)
+            {
+                pool.Changed -= OnChanged;
+            }
         }
 
         private void OnChanged(int tier)
         {
             int slot = slotOfTier[tier];
-            if (slot >= 0) values[slot].Set(pool.Value(tier), 0.6f);
+            if (slot >= 0)
+            {
+                values[slot].Set(pool.Value(tier), 0.6f);
+            }
         }
 
         // Flashes the plaque of a tier that was just won
         public void Celebrate(int tier)
         {
-            if (tier < 0 || tier >= slotOfTier.Length || slotOfTier[tier] < 0) return;
+            if (tier < 0 || tier >= slotOfTier.Length || slotOfTier[tier] < 0)
+            {
+                return;
+            }
+
             StartCoroutine(Flash(plaques[slotOfTier[tier]].rectTransform));
         }
 

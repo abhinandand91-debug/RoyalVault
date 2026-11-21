@@ -20,7 +20,8 @@ namespace RoyalVault.Unity
                  "Real outcomes are found by the normal rules; progress is not saved while this is on at start.")]
         [SerializeField] private bool showcaseWins;
         [Tooltip("The results the showcase lands, in order, then from the top again")]
-        [SerializeField] private ShowcaseWin[] showcaseOrder =
+        [SerializeField]
+        private ShowcaseWin[] showcaseOrder =
         {
             ShowcaseWin.LineWin, ShowcaseWin.BigWin, ShowcaseWin.MegaWin, ShowcaseWin.EpicWin, ShowcaseWin.FreeSpins,
             ShowcaseWin.MinorJackpot, ShowcaseWin.MajorJackpot, ShowcaseWin.GrandJackpot,
@@ -49,11 +50,35 @@ namespace RoyalVault.Unity
         public StoryDirector Story { get; private set; }
 
         // Turns the win showcase on or off (it can also be ticked in the Inspector while playing)
-        public bool ShowcaseWins { get => showcaseWins; set { showcaseWins = value; Showcase?.Arm(); } }
-        public ShowcaseWin[] ShowcaseOrder { get => showcaseOrder; set { showcaseOrder = value; Showcase?.Arm(); } }
+        public bool ShowcaseWins
+        {
+            get => showcaseWins; set
+            {
+                showcaseWins = value;
+                Showcase?.Arm();
+            }
+        }
+        public ShowcaseWin[] ShowcaseOrder
+        {
+            get => showcaseOrder; set
+            {
+                showcaseOrder = value;
+                Showcase?.Arm();
+            }
+        }
 
         // The machine to play, set before the object wakes (the boot scene or a test may choose)
-        public MachineDefinitionAsset MachineAsset { get { return machine; } set { machine = value; } }
+        public MachineDefinitionAsset MachineAsset
+        {
+            get
+            {
+                return machine;
+            }
+            set
+            {
+                machine = value;
+            }
+        }
 
         public void Setup(MachineDefinitionAsset machineAsset, ThemeDefinition themeAsset, MachineView machineViewRef, ConsoleView consoleView,
                           JackpotPanelView jackpotView, WinPresenter winPresenter, BigWinView bigWinView, PaytableView paytableView,
@@ -106,14 +131,28 @@ namespace RoyalVault.Unity
             machineView.Build(Machine, theme);
             jackpots.Bind(Session.Jackpots);
             paytable.Build(Machine, theme);
-            foreach (CharacterView c in characters) c.Bind(theme.character, theme.characterEffectAnchor, theme.characterMagic, theme.characterAnimation);
+            foreach (CharacterView c in characters)
+            {
+                c.Bind(theme.character, theme.characterEffectAnchor, theme.characterMagic, theme.characterAnimation);
+            }
+
             if (flameClash != null)
             {
                 flameClash.Bind(characters, theme.characterMagic);
                 flameClash.SetStoreEffects(theme.clashImpactVfx, theme.clashSparksVfx, theme.vfxScale);
             }
-            if (sealMeter != null) sealMeter.Bind(Machine, theme, machineView, Flow, Session);
-            machineView.AnticipationStarted += reel => { foreach (CharacterView c in characters) c.Surge(); };
+            if (sealMeter != null)
+            {
+                sealMeter.Bind(Machine, theme, machineView, Flow, Session);
+            }
+
+            machineView.AnticipationStarted += reel =>
+            {
+                foreach (CharacterView c in characters)
+                {
+                    c.Surge();
+                }
+            };
         }
 
         // Story, presenter, round and sound; sound listens, the views stay silent
@@ -137,16 +176,27 @@ namespace RoyalVault.Unity
             RectTransform[] targets = { console.SpinButtonRect, sealMeter != null ? (RectTransform)sealMeter.transform : null, jackpots.TopPlaque };
             bool[] above = { true, true, false };
             var hints = new StoryDirector.Hint[Mathf.Min(texts.Length, targets.Length)];
-            for (int i = 0; i < hints.Length; i++) hints[i] = new StoryDirector.Hint { target = targets[i], text = texts[i], above = above[i] };
+            for (int i = 0; i < hints.Length; i++)
+            {
+                hints[i] = new StoryDirector.Hint { target = targets[i], text = texts[i], above = above[i] };
+            }
+
             return hints;
         }
 
         // Ticking or unticking the showcase in the Inspector while playing takes effect on the next spin
         private void OnValidate()
         {
-            if (!Application.isPlaying || Showcase == null) return;
+            if (!Application.isPlaying || Showcase == null)
+            {
+                return;
+            }
+
             bool armed = Showcase.Armed != null;
-            if (showcaseWins != armed) Showcase.Arm();
+            if (showcaseWins != armed)
+            {
+                Showcase.Arm();
+            }
         }
 
         // Testing aid: the next spin stops at these reel positions

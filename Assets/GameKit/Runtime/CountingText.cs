@@ -14,12 +14,19 @@ namespace GameKit
 
         public string Prefix = "";
 
-        private void Awake() { label = GetComponent<TextMeshProUGUI>(); }
+        private void Awake()
+        {
+            label = GetComponent<TextMeshProUGUI>();
+        }
 
         // Rolls to value over seconds (0 = at once)
         public void Set(long value, float seconds = 0f)
         {
-            if (label == null) label = GetComponent<TextMeshProUGUI>();
+            if (label == null)
+            {
+                label = GetComponent<TextMeshProUGUI>();
+            }
+
             target = value;
             if (seconds <= 0f)
             {
@@ -38,11 +45,21 @@ namespace GameKit
             Set(to, seconds);
         }
 
-        public bool Done { get { return System.Math.Abs(shown - target) < 0.5; } }
+        public bool Done
+        {
+            get
+            {
+                return System.Math.Abs(shown - target) < 0.5;
+            }
+        }
 
         private void Update()
         {
-            if (Done) return;
+            if (Done)
+            {
+                return;
+            }
+
             double step = speed * Time.deltaTime;
             shown = shown < target ? System.Math.Min(target, shown + step) : System.Math.Max(target, shown - step);
             Write();

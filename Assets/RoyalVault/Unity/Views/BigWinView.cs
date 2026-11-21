@@ -9,7 +9,10 @@ using UnityEngine;
 namespace RoyalVault.Unity
 {
     // Big win, jackpot and free spins celebrations
-    public enum CelebrationKind { BigWin, MegaWin, EpicWin, Jackpot, FreeSpinsAwarded, FreeSpinsTotal, Title }
+    public enum CelebrationKind
+    {
+        BigWin, MegaWin, EpicWin, Jackpot, FreeSpinsAwarded, FreeSpinsTotal, Title
+    }
 
     public sealed class BigWinView : MonoBehaviour
     {
@@ -67,7 +70,11 @@ namespace RoyalVault.Unity
         {
             for (int i = 0; i < heroes.Length; i++)
             {
-                if (!HasHero(i)) { heroes[i].gameObject.SetActive(false); continue; }
+                if (!HasHero(i))
+                {
+                    heroes[i].gameObject.SetActive(false);
+                    continue;
+                }
                 CharacterAnimation motion = heroMotion[i];
                 CharacterAnimation.Clip clip = motion.action.IsValid ? motion.action : motion.idle;
                 heroes[i].gameObject.SetActive(true);
@@ -83,7 +90,10 @@ namespace RoyalVault.Unity
         {
             skip.onClick.AddListener(() => skipped = true);
             // starts hidden, unless the first activation is a celebration
-            if (!IsShowing) Hide();
+            if (!IsShowing)
+            {
+                Hide();
+            }
         }
 
         private void Hide()
@@ -140,7 +150,10 @@ namespace RoyalVault.Unity
             subtitle.gameObject.SetActive(line != null);
             subtitle.text = line ?? "";
             amount.gameObject.SetActive(value > 0);
-            if (value > 0) amount.Roll(0, value, countSeconds);
+            if (value > 0)
+            {
+                amount.Roll(0, value, countSeconds);
+            }
         }
 
         private void PopIn(RectTransform hero, float k)
@@ -159,9 +172,21 @@ namespace RoyalVault.Unity
                 t += Time.deltaTime;
                 heroClock += Time.deltaTime;
                 PoseHeroes(heroClock, Mathf.Clamp01(heroClock / stride));
-                if (rays != null) rays.localRotation = Quaternion.Euler(0f, 0f, -t * 12f);
-                if (t < coinSeconds) spawn += Time.deltaTime * 22f;
-                for (; spawn >= 1f; spawn -= 1f) StartCoroutine(Coin());
+                if (rays != null)
+                {
+                    rays.localRotation = Quaternion.Euler(0f, 0f, -t * 12f);
+                }
+
+                if (t < coinSeconds)
+                {
+                    spawn += Time.deltaTime * 22f;
+                }
+
+                for (; spawn >= 1f; spawn -= 1f)
+                {
+                    StartCoroutine(Coin());
+                }
+
                 yield return null;
             }
         }
@@ -175,7 +200,11 @@ namespace RoyalVault.Unity
 
         private void Close()
         {
-            foreach (RectTransform coin in coins) coin.gameObject.SetActive(false);
+            foreach (RectTransform coin in coins)
+            {
+                coin.gameObject.SetActive(false);
+            }
+
             Hide();
             IsShowing = false;
             Closed?.Invoke();
@@ -185,7 +214,14 @@ namespace RoyalVault.Unity
         {
             RectTransform coin = null;
             foreach (RectTransform c in coins)
-                if (!c.gameObject.activeSelf) { coin = c; break; }
+            {
+                if (!c.gameObject.activeSelf)
+                {
+                    coin = c;
+                    break;
+                }
+            }
+
             if (coin == null)
             {
                 coin = UiFactory.Image("Coin", coinLayer, coinSprite, Vector2.zero, Vector2.one * 70f).rectTransform;
@@ -206,7 +242,11 @@ namespace RoyalVault.Unity
                 coin.anchoredPosition = p;
                 coin.localRotation = Quaternion.Euler(0f, 0f, spinSpeed * t);
                 coin.localScale = new Vector3(Mathf.Abs(Mathf.Cos(t * flip)) * 0.8f + 0.2f, 1f, 1f);
-                if (p.y < -700f) break;
+                if (p.y < -700f)
+                {
+                    break;
+                }
+
                 yield return null;
             }
             coin.gameObject.SetActive(false);

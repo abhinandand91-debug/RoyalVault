@@ -71,13 +71,33 @@ namespace RoyalVault.Unity
 
         private void Start()
         {
-            if (sound != null && sound.Bank != null) sound.PlayMusic(sound.Bank.loadingMusic, 1.5f);
+            if (sound != null && sound.Bank != null)
+            {
+                sound.PlayMusic(sound.Bank.loadingMusic, 1.5f);
+            }
+
             SetProgress(0f);
             SpawnDust();
-            foreach (StoryCardView card in cards) card.Group.alpha = 0f;
+            foreach (StoryCardView card in cards)
+            {
+                card.Group.alpha = 0f;
+            }
+
             var intro = story != null ? story.At(StoryMoment.Intro) : new (StoryDefinition.Scene, int)[0];
-            if (storyChrome != null) storyChrome.alpha = intro.Length > 0 ? 1f : 0f;
-            if (intro.Length == 0 || cards.Length == 0) { if (tips.Length > 0) StartCoroutine(RotateTips()); return; }
+            if (storyChrome != null)
+            {
+                storyChrome.alpha = intro.Length > 0 ? 1f : 0f;
+            }
+
+            if (intro.Length == 0 || cards.Length == 0)
+            {
+                if (tips.Length > 0)
+                {
+                    StartCoroutine(RotateTips());
+                }
+
+                return;
+            }
             StoryDone = false;
             bool firstTime = PlayerPrefs.GetInt(IntroSeenKey, 0) == 0 && introView != null;
             StartCoroutine(firstTime ? TellFirstTime(intro) : ShowLastScene(intro));
@@ -86,7 +106,9 @@ namespace RoyalVault.Unity
         private void SpawnDust()
         {
             for (int i = 0; i < 26; i++)
+            {
                 dust.Add(UiFactory.Image("Dust", dustLayer, dustSprite, RandomDustPosition(true), Vector2.one * Random.Range(10f, 30f)).rectTransform);
+            }
         }
 
         // First launch: the whole intro, paced by the player, while the game loads underneath
@@ -111,7 +133,10 @@ namespace RoyalVault.Unity
 
         private void PlayPageSound()
         {
-            if (sound != null) sound.Play(SoundCue.StoryPage);
+            if (sound != null)
+            {
+                sound.Play(SoundCue.StoryPage);
+            }
         }
 
         // Shows 0..1 of the loading done
@@ -127,14 +152,21 @@ namespace RoyalVault.Unity
 
         public IEnumerator FadeOut()
         {
-            if (sound != null) sound.PlayMusic(null, 0.45f);
+            if (sound != null)
+            {
+                sound.PlayMusic(null, 0.45f);
+            }
+
             yield return Tween.Run(0.45f, k => group.alpha = 1f - k, Ease.InOutSine);
         }
 
         private void Update()
         {
             float time = Time.time;
-            if (!StoryDone && tipText.text.Length > 0) tipText.alpha = 0.45f + 0.35f * Mathf.Sin(time * 2.4f);
+            if (!StoryDone && tipText.text.Length > 0)
+            {
+                tipText.alpha = 0.45f + 0.35f * Mathf.Sin(time * 2.4f);
+            }
             // the logo breathes a little light
             logo.localScale = Vector3.one * (1f + 0.012f * Mathf.Sin(time * 1.6f));
             // a soft light sweeps along the filled gold every two seconds
@@ -148,14 +180,21 @@ namespace RoyalVault.Unity
             foreach (RectTransform mote in dust)
             {
                 Vector2 p = mote.anchoredPosition + new Vector2(Mathf.Sin(time + Phase(mote)) * 6f, 38f) * Time.deltaTime;
-                if (p.y > 560f) p = RandomDustPosition(false);
+                if (p.y > 560f)
+                {
+                    p = RandomDustPosition(false);
+                }
+
                 mote.anchoredPosition = p;
                 var image = mote.GetComponent<Image>();
                 image.color = new Color(1f, 0.86f, 0.55f, 0.15f + 0.35f * (Mathf.Sin(time * 2f + Phase(mote) * 3f) * 0.5f + 0.5f));
             }
         }
 
-        private static float Phase(RectTransform t) { return t.GetInstanceID() * 0.37f; }
+        private static float Phase(RectTransform t)
+        {
+            return t.GetInstanceID() * 0.37f;
+        }
 
         private static Vector2 RandomDustPosition(bool anywhere)
         {

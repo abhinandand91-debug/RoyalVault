@@ -11,14 +11,23 @@ namespace RoyalVault.Core
             string[] ids = { "card_10", "card_J", "card_Q", "card_K", "card_A", "emerald", "sapphire", "ruby", "ankh", "gold_bars", "vault_key", "wild" };
             var symbols = new SymbolDefinition[14];
             for (int i = 0; i < ids.Length; i++)
+            {
                 symbols[i] = new SymbolDefinition(ids[i], i == 11 ? SymbolKind.Wild : SymbolKind.Regular, pays[i]);
+            }
+
             symbols[12] = new SymbolDefinition("vault_seal", SymbolKind.Scatter);
             symbols[13] = new SymbolDefinition("crown", SymbolKind.Jackpot);
             return symbols;
         }
 
-        private static int[] Pay5(int three, int four, int five) { return new[] { 0, 0, 0, three, four, five }; }
-        private static int[] Pay3(int three) { return new[] { 0, 0, 0, three }; }
+        private static int[] Pay5(int three, int four, int five)
+        {
+            return new[] { 0, 0, 0, three, four, five };
+        }
+        private static int[] Pay3(int three)
+        {
+            return new[] { 0, 0, 0, three };
+        }
 
         // 5 x 3, 20 lines, free spins and three progressive jackpots
         public static MachineDefinition RoyalVault5x3()

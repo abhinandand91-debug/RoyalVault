@@ -60,8 +60,19 @@ namespace RoyalVault.Unity
         {
             get
             {
-                if (reels == null) return false;
-                foreach (ReelView reel in reels) if (reel.IsSpinning) return true;
+                if (reels == null)
+                {
+                    return false;
+                }
+
+                foreach (ReelView reel in reels)
+                {
+                    if (reel.IsSpinning)
+                    {
+                        return true;
+                    }
+                }
+
                 return false;
             }
         }
@@ -77,7 +88,10 @@ namespace RoyalVault.Unity
         {
             machine = definition;
             theme = themeDefinition;
-            for (int i = transform.childCount - 1; i >= 0; i--) Destroy(transform.GetChild(i).gameObject);
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                Destroy(transform.GetChild(i).gameObject);
+            }
 
             Vector2 windowSize = FitWindow();
             BuildCells(windowSize);
@@ -110,8 +124,12 @@ namespace RoyalVault.Unity
         {
             RectTransform cells = UiFactory.Rect("Cells", transform, windowCentre, windowSize);
             for (int r = 0; r < machine.Reels; r++)
+            {
                 for (int row = 0; row < machine.Rows; row++)
+                {
                     UiFactory.Image("Cell", cells, theme.reelCell, CellCentre(r, row) - windowCentre, cell);
+                }
+            }
         }
 
         private void BuildReels(Vector2 windowSize)
@@ -133,7 +151,11 @@ namespace RoyalVault.Unity
             Image frame = UiFactory.Image("Frame", transform, theme.reelFrame, windowCentre, windowSize);
             frame.type = Image.Type.Sliced;
             frame.pixelsPerUnitMultiplier = 1f / theme.frameBorderScale;
-            if (theme.reelFrame == null) return;
+            if (theme.reelFrame == null)
+            {
+                return;
+            }
+
             Vector4 b = theme.reelFrame.border * theme.frameBorderScale; // left, bottom, right, top
             frame.rectTransform.sizeDelta = windowSize + new Vector2(b.x + b.z, b.y + b.w);
             frame.rectTransform.anchoredPosition = windowCentre + new Vector2((b.z - b.x) * 0.5f, (b.w - b.y) * 0.5f);
@@ -175,13 +197,20 @@ namespace RoyalVault.Unity
         private int[] Ranks(ReelOrder order)
         {
             var ranks = new int[reels.Length];
-            for (int r = 0; r < ranks.Length; r++) ranks[r] = order == ReelOrder.AllAtOnce ? 0 : r;
+            for (int r = 0; r < ranks.Length; r++)
+            {
+                ranks[r] = order == ReelOrder.AllAtOnce ? 0 : r;
+            }
+
             if (order == ReelOrder.Random)
+            {
                 for (int i = ranks.Length - 1; i > 0; i--)
                 {
                     int j = UnityEngine.Random.Range(0, i + 1);
                     (ranks[i], ranks[j]) = (ranks[j], ranks[i]);
                 }
+            }
+
             return ranks;
         }
 
@@ -209,8 +238,15 @@ namespace RoyalVault.Unity
                     ReelStopped?.Invoke(reel);
                     stopped++;
                     AnticipateNext(reel);
-                    if (stopped == reels.Length) AllReelsStopped?.Invoke();
-                    if (stopped == reels.Length) onAllStopped?.Invoke();
+                    if (stopped == reels.Length)
+                    {
+                        AllReelsStopped?.Invoke();
+                    }
+
+                    if (stopped == reels.Length)
+                    {
+                        onAllStopped?.Invoke();
+                    }
                 });
             }
         }
@@ -218,7 +254,10 @@ namespace RoyalVault.Unity
         // Lands all reels quickly
         public void Hurry()
         {
-            foreach (ReelView reel in reels) reel.Hurry();
+            foreach (ReelView reel in reels)
+            {
+                reel.Hurry();
+            }
         }
 
         public SymbolView SymbolAt(GridPosition position)
@@ -238,42 +277,67 @@ namespace RoyalVault.Unity
                 {
                     view.Celebrate(seconds);
                     celebrating.Add(view);
-                    if (fx != null) fx.Play(CellCentre(position.Reel, position.Row), cell, view.Art, seconds);
+                    if (fx != null)
+                    {
+                        fx.Play(CellCentre(position.Reel, position.Row), cell, view.Art, seconds);
+                    }
                 }
             }
             for (int r = 0; r < reels.Length; r++)
+            {
                 for (int row = 0; row < machine.Rows; row++)
                 {
                     SymbolView view = reels[r].ViewAt(row);
                     view.SetDimmed(lit.Count > 0 && !lit.Contains(view));
                 }
+            }
         }
 
         // Draws payline line across the whole window, with an amount badge
         public void ShowLine(int line, long amount, int slot)
         {
-            while (paylines.Count <= slot) paylines.Add(PaylineView.Create(paylineLayer, theme));
+            while (paylines.Count <= slot)
+            {
+                paylines.Add(PaylineView.Create(paylineLayer, theme));
+            }
+
             int[] rows = machine.Paylines[line];
             var points = new List<Vector2>(rows.Length + 2);
             Vector2 first = CellCentre(0, rows[0]);
             points.Add(first - new Vector2(cell.x * 0.5f, 0f));
-            for (int r = 0; r < rows.Length; r++) points.Add(CellCentre(r, rows[r]));
+            for (int r = 0; r < rows.Length; r++)
+            {
+                points.Add(CellCentre(r, rows[r]));
+            }
+
             points.Add(CellCentre(rows.Length - 1, rows[rows.Length - 1]) + new Vector2(cell.x * 0.5f, 0f));
             paylines[slot].Show(points, amount, theme.paleGold);
         }
 
         public void HideLines()
         {
-            foreach (PaylineView line in paylines) line.Hide();
+            foreach (PaylineView line in paylines)
+            {
+                line.Hide();
+            }
         }
 
         public void ClearWins()
         {
             HideLines();
             StopCelebrating();
-            if (reels == null) return;
+            if (reels == null)
+            {
+                return;
+            }
+
             foreach (ReelView reel in reels)
-                for (int row = 0; row < machine.Rows; row++) reel.ViewAt(row).SetDimmed(false);
+            {
+                for (int row = 0; row < machine.Rows; row++)
+                {
+                    reel.ViewAt(row).SetDimmed(false);
+                }
+            }
         }
 
         private int[] landingOrder = new int[0];
@@ -290,15 +354,28 @@ namespace RoyalVault.Unity
             anticipated.Clear();
             awaited = -1;
             landingOrder = new int[n];
-            for (int r = 0; r < n; r++) landingOrder[r] = r;
+            for (int r = 0; r < n; r++)
+            {
+                landingOrder[r] = r;
+            }
+
             System.Array.Sort(landingOrder, (a, b) => stopRanks[a] != stopRanks[b] ? stopRanks[a].CompareTo(stopRanks[b]) : a.CompareTo(b));
-            if (!anticipation || stopOrder == ReelOrder.AllAtOnce) return extra;
+            if (!anticipation || stopOrder == ReelOrder.AllAtOnce)
+            {
+                return extra;
+            }
 
             int scatter = machine.FirstIndexOfKind(SymbolKind.Scatter);
             int crown = machine.FirstIndexOfKind(SymbolKind.Jackpot);
             int scatterNeed = int.MaxValue;
             foreach (ScatterAward award in machine.ScatterAwards)
-                if (award.FreeSpins > 0) scatterNeed = Mathf.Min(scatterNeed, award.Count);
+            {
+                if (award.FreeSpins > 0)
+                {
+                    scatterNeed = Mathf.Min(scatterNeed, award.Count);
+                }
+            }
+
             int crownNeed = machine.JackpotTiers.Length > 0 ? machine.JackpotTiers[0].SymbolCount : int.MaxValue;
 
             int seals = 0, crowns = 0;
@@ -307,17 +384,31 @@ namespace RoyalVault.Unity
             float step = fast ? fastAnticipationSeconds : anticipationSeconds;
             foreach (int r in landingOrder)
             {
-                if (on) { added += step; anticipating[r] = true; }
+                if (on)
+                {
+                    added += step;
+                    anticipating[r] = true;
+                }
                 extra[r] = added;
                 for (int row = 0; row < machine.Rows; row++)
                 {
                     int symbol = outcome.Grid[r, row];
-                    if (symbol == scatter) seals++;
-                    if (symbol == crown) crowns++;
+                    if (symbol == scatter)
+                    {
+                        seals++;
+                    }
+
+                    if (symbol == crown)
+                    {
+                        crowns++;
+                    }
                 }
                 bool sealsClose = scatter >= 0 && scatterNeed != int.MaxValue && scatterNeed > 1 && seals >= scatterNeed - 1;
                 bool crownsClose = crown >= 0 && crownNeed != int.MaxValue && crownNeed > 1 && crowns >= crownNeed - 1;
-                if (sealsClose || crownsClose) on = true;
+                if (sealsClose || crownsClose)
+                {
+                    on = true;
+                }
             }
             return extra;
         }
@@ -325,25 +416,51 @@ namespace RoyalVault.Unity
         // After a landing: the light leaves that reel and moves to the next reel still being waited for
         private void AnticipateNext(int landedReel)
         {
-            if (landedThisSpin.Length != reels.Length) return;
+            if (landedThisSpin.Length != reels.Length)
+            {
+                return;
+            }
+
             landedThisSpin[landedReel] = true;
-            if (anticipating[landedReel]) anticipated.Add(landedReel);
+            if (anticipating[landedReel])
+            {
+                anticipated.Add(landedReel);
+            }
+
             int next = -1;
             foreach (int r in landingOrder)
-                if (!landedThisSpin[r]) { next = r; break; }
+            {
+                if (!landedThisSpin[r])
+                {
+                    next = r;
+                    break;
+                }
+            }
+
             bool wasOn = awaited >= 0;
             if (next >= 0 && anticipating[next])
             {
                 awaited = next;
                 awaitedSince = Time.time;
-                for (int r = 0; r < columnSparks.Length; r++) columnSparks[r].Intensity = r == next ? 1f : 0f;
+                for (int r = 0; r < columnSparks.Length; r++)
+                {
+                    columnSparks[r].Intensity = r == next ? 1f : 0f;
+                }
+
                 AnticipationStarted?.Invoke(next);
             }
             else
             {
                 awaited = -1;
-                foreach (UiParticleEmitter sparks in columnSparks) sparks.Intensity = 0f;
-                if (wasOn) AnticipationEnded?.Invoke();
+                foreach (UiParticleEmitter sparks in columnSparks)
+                {
+                    sparks.Intensity = 0f;
+                }
+
+                if (wasOn)
+                {
+                    AnticipationEnded?.Invoke();
+                }
             }
         }
 
@@ -421,9 +538,16 @@ namespace RoyalVault.Unity
             {
                 SymbolView view = reels[reel].ViewAt(row);
                 SymbolStyle style = view.Style;
-                if (view.Art == null || (style != SymbolStyle.Wild && style != SymbolStyle.Scatter && style != SymbolStyle.Jackpot)) continue;
+                if (view.Art == null || (style != SymbolStyle.Wild && style != SymbolStyle.Scatter && style != SymbolStyle.Jackpot))
+                {
+                    continue;
+                }
+
                 view.Land();
-                if (fx != null) fx.Land(CellCentre(reel, row), cell, view.Art);
+                if (fx != null)
+                {
+                    fx.Land(CellCentre(reel, row), cell, view.Art);
+                }
             }
         }
 
@@ -442,23 +566,48 @@ namespace RoyalVault.Unity
                 columns[r].alpha = Mathf.MoveTowards(columns[r].alpha, target, Time.deltaTime * 4f);
             }
 
-            if (reels == null || Time.time < nextGlint) return;
+            if (reels == null || Time.time < nextGlint)
+            {
+                return;
+            }
+
             nextGlint = Time.time + UnityEngine.Random.Range(2.2f, 4.2f);
-            if (IsSpinning || celebrating.Count > 0) return;
+            if (IsSpinning || celebrating.Count > 0)
+            {
+                return;
+            }
+
             var candidates = new List<SymbolView>();
             foreach (ReelView reel in reels)
+            {
                 for (int row = 0; row < machine.Rows; row++)
                 {
                     SymbolView view = reel.ViewAt(row);
-                    if (view.Art != null && view.Style != SymbolStyle.Card) candidates.Add(view);
+                    if (view.Art != null && view.Style != SymbolStyle.Card)
+                    {
+                        candidates.Add(view);
+                    }
                 }
-            if (candidates.Count > 0) candidates[UnityEngine.Random.Range(0, candidates.Count)].Glint();
+            }
+
+            if (candidates.Count > 0)
+            {
+                candidates[UnityEngine.Random.Range(0, candidates.Count)].Glint();
+            }
         }
 
         private void StopCelebrating()
         {
-            if (fx != null) fx.StopAll();
-            foreach (SymbolView view in celebrating) view.StopCelebrating();
+            if (fx != null)
+            {
+                fx.StopAll();
+            }
+
+            foreach (SymbolView view in celebrating)
+            {
+                view.StopCelebrating();
+            }
+
             celebrating.Clear();
         }
     }

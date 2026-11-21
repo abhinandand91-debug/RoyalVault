@@ -57,8 +57,19 @@ namespace RoyalVault.Unity
             {
                 get
                 {
-                    if (clips == null) return false;
-                    foreach (AudioClip clip in clips) if (clip != null) return true;
+                    if (clips == null)
+                    {
+                        return false;
+                    }
+
+                    foreach (AudioClip clip in clips)
+                    {
+                        if (clip != null)
+                        {
+                            return true;
+                        }
+                    }
+
                     return false;
                 }
             }
@@ -66,9 +77,17 @@ namespace RoyalVault.Unity
             // A random clip of the ones that are there, or null
             public AudioClip Pick()
             {
-                if (!HasClips) return null;
+                if (!HasClips)
+                {
+                    return null;
+                }
+
                 AudioClip clip;
-                do clip = clips[UnityEngine.Random.Range(0, clips.Length)]; while (clip == null);
+                do
+                {
+                    clip = clips[UnityEngine.Random.Range(0, clips.Length)];
+                }
+                while (clip == null);
                 return clip;
             }
         }
@@ -87,9 +106,19 @@ namespace RoyalVault.Unity
         // The entry for cue, or null when the bank has none
         public Sound Find(SoundCue cue)
         {
-            if (sounds == null) return null;
+            if (sounds == null)
+            {
+                return null;
+            }
+
             foreach (Sound s in sounds)
-                if (s != null && s.cue == cue) return s;
+            {
+                if (s != null && s.cue == cue)
+                {
+                    return s;
+                }
+            }
+
             return null;
         }
 

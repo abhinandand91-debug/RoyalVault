@@ -15,7 +15,11 @@ namespace RoyalVault.Tests
         private static IEnumerator WaitFor(System.Func<bool> condition, float timeout = 30f)
         {
             float t = 0f;
-            while (!condition() && t < timeout) { t += Time.deltaTime; yield return null; }
+            while (!condition() && t < timeout)
+            {
+                t += Time.deltaTime;
+                yield return null;
+            }
             Assert.IsTrue(condition(), "timed out");
         }
 

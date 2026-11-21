@@ -42,7 +42,11 @@ namespace RoyalVault.Unity
         // Stops showing the previous win
         public void Cancel()
         {
-            if (routine != null) StopCoroutine(routine);
+            if (routine != null)
+            {
+                StopCoroutine(routine);
+            }
+
             routine = null;
             machine.ClearWins();
         }
@@ -57,20 +61,39 @@ namespace RoyalVault.Unity
                 yield break;
             }
             yield return ShowAllWins(outcome, quick ? 0.9f : 1.6f);
-            if (outcome.JackpotTier >= 0 || outcome.Tier >= WinTier.Big) yield return Celebrate(context, quick);
+            if (outcome.JackpotTier >= 0 || outcome.Tier >= WinTier.Big)
+            {
+                yield return Celebrate(context, quick);
+            }
+
             onShown();
-            if (outcome.LineWins.Count > 0) yield return CycleLines(outcome);
+            if (outcome.LineWins.Count > 0)
+            {
+                yield return CycleLines(outcome);
+            }
         }
 
         // Everything that won, together
         private IEnumerator ShowAllWins(SpinOutcome outcome, float seconds)
         {
             var cells = new List<GridPosition>();
-            foreach (LineWin line in outcome.LineWins) cells.AddRange(line.Positions);
-            if (outcome.Scatter != null) cells.AddRange(outcome.Scatter.Positions);
+            foreach (LineWin line in outcome.LineWins)
+            {
+                cells.AddRange(line.Positions);
+            }
+
+            if (outcome.Scatter != null)
+            {
+                cells.AddRange(outcome.Scatter.Positions);
+            }
+
             cells.AddRange(outcome.JackpotPositions);
             machine.HighlightCells(cells, seconds);
-            for (int i = 0; i < outcome.LineWins.Count; i++) machine.ShowLine(outcome.LineWins[i].Line, 0, i);
+            for (int i = 0; i < outcome.LineWins.Count; i++)
+            {
+                machine.ShowLine(outcome.LineWins[i].Line, 0, i);
+            }
+
             console.ShowWin(outcome.TotalWin, Mathf.Clamp(outcome.TotalWin / (float)Math.Max(1, outcome.TotalBet) * 0.25f, 0.4f, 2.5f));
             yield return new WaitForSeconds(seconds);
             machine.HideLines();
@@ -80,18 +103,34 @@ namespace RoyalVault.Unity
         private IEnumerator Celebrate(SpinContext context, bool quick)
         {
             SpinOutcome outcome = context.Outcome;
-            if (clash != null && clash.PlayOnBigWins && !quick) yield return clash.Play();
-            foreach (CharacterView character in characters) character.Celebrate();
-            if (outcome.JackpotTier >= 0) jackpots.Celebrate(outcome.JackpotTier);
+            if (clash != null && clash.PlayOnBigWins && !quick)
+            {
+                yield return clash.Play();
+            }
+
+            foreach (CharacterView character in characters)
+            {
+                character.Celebrate();
+            }
+
+            if (outcome.JackpotTier >= 0)
+            {
+                jackpots.Celebrate(outcome.JackpotTier);
+            }
+
             string jackpotName = outcome.JackpotTier >= 0 ? context.Session.Machine.JackpotTiers[outcome.JackpotTier].Name : null;
             yield return bigWin.ShowWin(outcome.Tier, outcome.TotalWin, jackpotName);
-            if (story != null && outcome.JackpotTier >= 1) yield return story.TellOnce(JackpotMoment(outcome.JackpotTier));
+            if (story != null && outcome.JackpotTier >= 1)
+            {
+                yield return story.TellOnce(JackpotMoment(outcome.JackpotTier));
+            }
         }
 
         // Each line in turn until the next spin
         private IEnumerator CycleLines(SpinOutcome outcome)
         {
             while (true)
+            {
                 foreach (LineWin line in outcome.LineWins)
                 {
                     machine.HideLines();
@@ -99,6 +138,7 @@ namespace RoyalVault.Unity
                     machine.ShowLine(line.Line, line.Amount * outcome.Multiplier, 0);
                     yield return new WaitForSeconds(1.5f);
                 }
+            }
         }
     }
 }

@@ -112,35 +112,63 @@ namespace RoyalVault.EditorTools
             image.rectTransform.anchoredPosition = new Vector2(0, -352.5f);
             image.preserveAspect = true;
             image.color = Color.white;
-            if (mirrored) image.rectTransform.localScale = new Vector3(-1f, 1f, 1f);
+            if (mirrored)
+            {
+                image.rectTransform.localScale = new Vector3(-1f, 1f, 1f);
+            }
+
             return image;
         }
 
         private static UiParticleEmitter FigureDust(RectTransform holder, ThemeDefinition theme)
         {
             UiParticleEmitter dust = Emitter("Gold Dust", holder, theme, theme.glow, Vector2.zero);
-            dust.Rate = 2.5f; dust.LifeRange = new Vector2(3f, 5f); dust.SizeRange = new Vector2(5f, 12f); dust.EndSize = 0.6f;
-            dust.Area = new Vector2(260f, 640f); dust.VelocityMin = new Vector2(-8f, 12f); dust.VelocityMax = new Vector2(8f, 34f);
-            dust.Swirl = 10f; dust.SwirlFrequency = 1.5f; dust.MaxParticles = 30;
-            dust.StartColor = new Color(1f, 0.85f, 0.5f, 0.6f); dust.EndColor = new Color(1f, 0.8f, 0.4f, 0f);
+            dust.Rate = 2.5f;
+            dust.LifeRange = new Vector2(3f, 5f);
+            dust.SizeRange = new Vector2(5f, 12f);
+            dust.EndSize = 0.6f;
+            dust.Area = new Vector2(260f, 640f);
+            dust.VelocityMin = new Vector2(-8f, 12f);
+            dust.VelocityMax = new Vector2(8f, 34f);
+            dust.Swirl = 10f;
+            dust.SwirlFrequency = 1.5f;
+            dust.MaxParticles = 30;
+            dust.StartColor = new Color(1f, 0.85f, 0.5f, 0.6f);
+            dust.EndColor = new Color(1f, 0.8f, 0.4f, 0f);
             return dust;
         }
 
         private static UiParticleEmitter HandFlame(RectTransform hand, ThemeDefinition theme)
         {
             UiParticleEmitter flame = Emitter("Flame", hand, theme, theme.glow, Vector2.zero);
-            flame.Rate = 42f; flame.LifeRange = new Vector2(0.45f, 0.95f); flame.SizeRange = new Vector2(22f, 46f); flame.EndSize = 0.15f;
-            flame.Area = new Vector2(18f, 10f); flame.VelocityMin = new Vector2(-25f, 70f); flame.VelocityMax = new Vector2(25f, 150f);
-            flame.Gravity = new Vector2(0f, 60f); flame.Swirl = 40f; flame.SwirlFrequency = 9f; flame.MaxParticles = 110;
+            flame.Rate = 42f;
+            flame.LifeRange = new Vector2(0.45f, 0.95f);
+            flame.SizeRange = new Vector2(22f, 46f);
+            flame.EndSize = 0.15f;
+            flame.Area = new Vector2(18f, 10f);
+            flame.VelocityMin = new Vector2(-25f, 70f);
+            flame.VelocityMax = new Vector2(25f, 150f);
+            flame.Gravity = new Vector2(0f, 60f);
+            flame.Swirl = 40f;
+            flame.SwirlFrequency = 9f;
+            flame.MaxParticles = 110;
             return flame;
         }
 
         private static UiParticleEmitter HandEmbers(RectTransform hand, ThemeDefinition theme)
         {
             UiParticleEmitter embers = Emitter("Embers", hand, theme, theme.glow, Vector2.zero);
-            embers.Rate = 7f; embers.LifeRange = new Vector2(1.2f, 2.2f); embers.SizeRange = new Vector2(5f, 10f); embers.EndSize = 0.5f;
-            embers.Area = new Vector2(30f, 20f); embers.VelocityMin = new Vector2(-50f, 60f); embers.VelocityMax = new Vector2(50f, 140f);
-            embers.Gravity = new Vector2(0f, -15f); embers.Swirl = 25f; embers.SwirlFrequency = 4f; embers.MaxParticles = 70;
+            embers.Rate = 7f;
+            embers.LifeRange = new Vector2(1.2f, 2.2f);
+            embers.SizeRange = new Vector2(5f, 10f);
+            embers.EndSize = 0.5f;
+            embers.Area = new Vector2(30f, 20f);
+            embers.VelocityMin = new Vector2(-50f, 60f);
+            embers.VelocityMax = new Vector2(50f, 140f);
+            embers.Gravity = new Vector2(0f, -15f);
+            embers.Swirl = 25f;
+            embers.SwirlFrequency = 4f;
+            embers.MaxParticles = 70;
             return embers;
         }
 
@@ -148,10 +176,17 @@ namespace RoyalVault.EditorTools
         private static UiParticleEmitter HandSparks(RectTransform hand, ThemeDefinition theme)
         {
             UiParticleEmitter sparks = Emitter("Sparks", hand, theme, theme.sparkle, Vector2.zero);
-            sparks.Rate = 0f; sparks.LifeRange = new Vector2(0.8f, 1.4f); sparks.SizeRange = new Vector2(14f, 30f); sparks.EndSize = 0.2f;
-            sparks.VelocityMin = new Vector2(-80f, 280f); sparks.VelocityMax = new Vector2(80f, 520f);
-            sparks.Gravity = new Vector2(0f, -700f); sparks.Drag = 0.6f; sparks.MaxParticles = 120;
-            sparks.StartColor = new Color(1f, 0.9f, 0.6f, 1f); sparks.EndColor = new Color(1f, 0.6f, 0.2f, 0f);
+            sparks.Rate = 0f;
+            sparks.LifeRange = new Vector2(0.8f, 1.4f);
+            sparks.SizeRange = new Vector2(14f, 30f);
+            sparks.EndSize = 0.2f;
+            sparks.VelocityMin = new Vector2(-80f, 280f);
+            sparks.VelocityMax = new Vector2(80f, 520f);
+            sparks.Gravity = new Vector2(0f, -700f);
+            sparks.Drag = 0.6f;
+            sparks.MaxParticles = 120;
+            sparks.StartColor = new Color(1f, 0.9f, 0.6f, 1f);
+            sparks.EndColor = new Color(1f, 0.6f, 0.2f, 0f);
             return sparks;
         }
 
@@ -184,9 +219,17 @@ namespace RoyalVault.EditorTools
         private static UiParticleEmitter FireTrail(RectTransform layer, ThemeDefinition theme, int i)
         {
             UiParticleEmitter trail = Emitter("Trail " + (i + 1), layer, theme, theme.glow, Vector2.zero);
-            trail.Rate = 150f; trail.LifeRange = new Vector2(0.25f, 0.55f); trail.SizeRange = new Vector2(26f, 54f); trail.EndSize = 0.1f;
-            trail.Area = new Vector2(16f, 16f); trail.VelocityMin = new Vector2(-30f, -30f); trail.VelocityMax = new Vector2(30f, 30f);
-            trail.Swirl = 30f; trail.SwirlFrequency = 12f; trail.MaxParticles = 140; trail.Intensity = 0f;
+            trail.Rate = 150f;
+            trail.LifeRange = new Vector2(0.25f, 0.55f);
+            trail.SizeRange = new Vector2(26f, 54f);
+            trail.EndSize = 0.1f;
+            trail.Area = new Vector2(16f, 16f);
+            trail.VelocityMin = new Vector2(-30f, -30f);
+            trail.VelocityMax = new Vector2(30f, 30f);
+            trail.Swirl = 30f;
+            trail.SwirlFrequency = 12f;
+            trail.MaxParticles = 140;
+            trail.Intensity = 0f;
             return trail;
         }
 
@@ -205,14 +248,27 @@ namespace RoyalVault.EditorTools
         private static (UiParticleEmitter, UiParticleEmitter) ClashBursts(RectTransform layer, ThemeDefinition theme)
         {
             UiParticleEmitter burst = Emitter("Clash Burst", layer, theme, theme.sparkle, Vector2.zero);
-            burst.Rate = 0f; burst.LifeRange = new Vector2(0.6f, 1.3f); burst.SizeRange = new Vector2(16f, 40f); burst.EndSize = 0.15f;
-            burst.VelocityMin = new Vector2(-300f, 200f); burst.VelocityMax = new Vector2(300f, 700f);
-            burst.Gravity = new Vector2(0f, -500f); burst.Drag = 0.5f; burst.MaxParticles = 160;
+            burst.Rate = 0f;
+            burst.LifeRange = new Vector2(0.6f, 1.3f);
+            burst.SizeRange = new Vector2(16f, 40f);
+            burst.EndSize = 0.15f;
+            burst.VelocityMin = new Vector2(-300f, 200f);
+            burst.VelocityMax = new Vector2(300f, 700f);
+            burst.Gravity = new Vector2(0f, -500f);
+            burst.Drag = 0.5f;
+            burst.MaxParticles = 160;
             UiParticleEmitter gold = Emitter("Clash Gold", layer, theme, theme.glow, Vector2.zero);
-            gold.Rate = 0f; gold.LifeRange = new Vector2(0.7f, 1.5f); gold.SizeRange = new Vector2(10f, 22f); gold.EndSize = 0.2f;
-            gold.VelocityMin = new Vector2(-200f, 150f); gold.VelocityMax = new Vector2(200f, 520f);
-            gold.Gravity = new Vector2(0f, -650f); gold.Drag = 0.4f; gold.MaxParticles = 90;
-            gold.StartColor = new Color(1f, 0.88f, 0.55f, 1f); gold.EndColor = new Color(1f, 0.6f, 0.2f, 0f);
+            gold.Rate = 0f;
+            gold.LifeRange = new Vector2(0.7f, 1.5f);
+            gold.SizeRange = new Vector2(10f, 22f);
+            gold.EndSize = 0.2f;
+            gold.VelocityMin = new Vector2(-200f, 150f);
+            gold.VelocityMax = new Vector2(200f, 520f);
+            gold.Gravity = new Vector2(0f, -650f);
+            gold.Drag = 0.4f;
+            gold.MaxParticles = 90;
+            gold.StartColor = new Color(1f, 0.88f, 0.55f, 1f);
+            gold.EndColor = new Color(1f, 0.6f, 0.2f, 0f);
             return (burst, gold);
         }
 
@@ -267,9 +323,16 @@ namespace RoyalVault.EditorTools
         private static UiParticleEmitter SealSparks(RectTransform seal, ThemeDefinition theme)
         {
             UiParticleEmitter sparks = Emitter("Seal Sparks", seal, theme, theme.sparkle, Vector2.zero);
-            sparks.Rate = 0f; sparks.LifeRange = new Vector2(0.5f, 1.1f); sparks.SizeRange = new Vector2(10f, 22f); sparks.EndSize = 0.2f;
-            sparks.Area = new Vector2(40f, 40f); sparks.VelocityMin = new Vector2(-220f, 60f); sparks.VelocityMax = new Vector2(220f, 380f);
-            sparks.Gravity = new Vector2(0f, -600f); sparks.Drag = 0.8f; sparks.MaxParticles = 120;
+            sparks.Rate = 0f;
+            sparks.LifeRange = new Vector2(0.5f, 1.1f);
+            sparks.SizeRange = new Vector2(10f, 22f);
+            sparks.EndSize = 0.2f;
+            sparks.Area = new Vector2(40f, 40f);
+            sparks.VelocityMin = new Vector2(-220f, 60f);
+            sparks.VelocityMax = new Vector2(220f, 380f);
+            sparks.Gravity = new Vector2(0f, -600f);
+            sparks.Drag = 0.8f;
+            sparks.MaxParticles = 120;
             sparks.EndColor = new Color(1f, 0.6f, 0.2f, 0f);
             return sparks;
         }
@@ -484,7 +547,11 @@ namespace RoyalVault.EditorTools
                 Sprite first = motion.idle.frames[0];
                 hero.rectTransform.sizeDelta = new Vector2(height * first.rect.width / first.rect.height, height);
             }
-            if (mirrored) hero.rectTransform.localScale = new Vector3(-1f, 1f, 1f);
+            if (mirrored)
+            {
+                hero.rectTransform.localScale = new Vector3(-1f, 1f, 1f);
+            }
+
             hero.gameObject.SetActive(false);
             return hero;
         }

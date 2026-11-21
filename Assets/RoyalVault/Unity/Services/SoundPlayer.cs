@@ -50,7 +50,11 @@ namespace RoyalVault.Unity
         private void Awake()
         {
             AudioListener.volume = Muted ? 0f : 1f;
-            for (int i = 0; i < Channels; i++) effects.Add(NewSource("Effect " + (i + 1), false));
+            for (int i = 0; i < Channels; i++)
+            {
+                effects.Add(NewSource("Effect " + (i + 1), false));
+            }
+
             music[0] = NewSource("Music A", true);
             music[1] = NewSource("Music B", true);
         }
@@ -71,7 +75,11 @@ namespace RoyalVault.Unity
         {
             Remember(cue);
             SoundBank.Sound sound = bank != null ? bank.Find(cue) : null;
-            if (sound == null || !sound.HasClips || effects.Count == 0) return;
+            if (sound == null || !sound.HasClips || effects.Count == 0)
+            {
+                return;
+            }
+
             AudioSource source = effects[next];
             next = (next + 1) % effects.Count;
             source.clip = sound.Pick();
@@ -83,10 +91,18 @@ namespace RoyalVault.Unity
         // Starts a looping cue (reels spinning, coins pouring); calling it again while it plays does nothing
         public void StartLoop(SoundCue cue)
         {
-            if (loops.TryGetValue(cue, out AudioSource playing) && playing != null && playing.isPlaying) return;
+            if (loops.TryGetValue(cue, out AudioSource playing) && playing != null && playing.isPlaying)
+            {
+                return;
+            }
+
             Remember(cue);
             SoundBank.Sound sound = bank != null ? bank.Find(cue) : null;
-            if (sound == null || !sound.HasClips) return;
+            if (sound == null || !sound.HasClips)
+            {
+                return;
+            }
+
             if (!loops.TryGetValue(cue, out AudioSource source) || source == null)
             {
                 source = NewSource(cue + " Loop", true);
@@ -101,7 +117,11 @@ namespace RoyalVault.Unity
         // Stops a looping cue, fading it out over seconds
         public void StopLoop(SoundCue cue, float seconds = 0.15f)
         {
-            if (!loops.TryGetValue(cue, out AudioSource source) || source == null || !source.isPlaying) return;
+            if (!loops.TryGetValue(cue, out AudioSource source) || source == null || !source.isPlaying)
+            {
+                return;
+            }
+
             StartCoroutine(FadeOut(source, seconds));
         }
 
@@ -120,11 +140,27 @@ namespace RoyalVault.Unity
         // Cross-fades to clip (null fades the music out)
         public void PlayMusic(AudioClip clip, float seconds = -1f)
         {
-            if (bank == null) return;
-            if (seconds < 0f) seconds = bank.musicFade;
-            if (clip == currentMusic) return;
+            if (bank == null)
+            {
+                return;
+            }
+
+            if (seconds < 0f)
+            {
+                seconds = bank.musicFade;
+            }
+
+            if (clip == currentMusic)
+            {
+                return;
+            }
+
             currentMusic = clip;
-            if (fade != null) StopCoroutine(fade);
+            if (fade != null)
+            {
+                StopCoroutine(fade);
+            }
+
             fade = StartCoroutine(CrossFade(clip, seconds));
         }
 
@@ -145,18 +181,29 @@ namespace RoyalVault.Unity
             {
                 float k = t / Mathf.Max(0.01f, seconds);
                 outgoing.volume = outFrom * (1f - k);
-                if (clip != null) incoming.volume = target * k;
+                if (clip != null)
+                {
+                    incoming.volume = target * k;
+                }
+
                 yield return null;
             }
             outgoing.Stop();
-            if (clip != null) incoming.volume = target;
+            if (clip != null)
+            {
+                incoming.volume = target;
+            }
+
             fade = null;
         }
 
         private void Remember(SoundCue cue)
         {
             history.Add(cue);
-            if (history.Count > HistoryLength) history.RemoveAt(0);
+            if (history.Count > HistoryLength)
+            {
+                history.RemoveAt(0);
+            }
         }
     }
 }

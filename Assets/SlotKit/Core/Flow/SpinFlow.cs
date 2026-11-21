@@ -21,8 +21,20 @@ namespace SlotKit
         private SpinContext current;
 
         public SpinState State { get; private set; } = SpinState.Idle;
-        public SpinContext Current { get { return current; } }
-        public FeaturePipeline Features { get { return features; } }
+        public SpinContext Current
+        {
+            get
+            {
+                return current;
+            }
+        }
+        public FeaturePipeline Features
+        {
+            get
+            {
+                return features;
+            }
+        }
 
         // The outcome is decided and the reels should start
         public event Action<SpinContext> SpinStarted;
@@ -43,12 +55,18 @@ namespace SlotKit
         // Starts a spin if the machine is idle and the features and wallet allow it
         public bool RequestSpin()
         {
-            if (State != SpinState.Idle) return false;
+            if (State != SpinState.Idle)
+            {
+                return false;
+            }
 
             var context = new SpinContext(session, session.Bet.TotalBet);
             features.SpinRequested(context);
             if (!context.Rejected && !context.IsFreeSpin && !session.Wallet.TryDebit(context.Cost))
+            {
                 context.Rejection = "Not enough credits for this bet.";
+            }
+
             if (context.Rejected)
             {
                 SpinRejected?.Invoke(context);
@@ -67,7 +85,11 @@ namespace SlotKit
         // Called by the presentation when every reel has landed: pays the win
         public void ReelsStopped()
         {
-            if (State != SpinState.Spinning) return;
+            if (State != SpinState.Spinning)
+            {
+                return;
+            }
+
             session.Wallet.Credit(current.Outcome.TotalWin);
             features.Paid(current);
             State = SpinState.Presenting;
@@ -78,7 +100,11 @@ namespace SlotKit
         // Called by the presentation when the win has been shown: the machine is idle again
         public void PresentationDone()
         {
-            if (State != SpinState.Presenting) return;
+            if (State != SpinState.Presenting)
+            {
+                return;
+            }
+
             State = SpinState.Idle;
             SpinContext finished = current;
             current = null;

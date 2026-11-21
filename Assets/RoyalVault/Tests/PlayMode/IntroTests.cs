@@ -17,7 +17,11 @@ namespace RoyalVault.Tests
         private static IEnumerator WaitFor(System.Func<bool> condition, float timeout = 30f)
         {
             float t = 0f;
-            while (!condition() && t < timeout) { t += Time.deltaTime; yield return null; }
+            while (!condition() && t < timeout)
+            {
+                t += Time.deltaTime;
+                yield return null;
+            }
             Assert.IsTrue(condition(), "timed out");
         }
 
@@ -44,7 +48,11 @@ namespace RoyalVault.Tests
             yield return SceneManager.LoadSceneAsync("Boot");
             var intro = Object.FindFirstObjectByType<StoryIntroView>();
             yield return WaitFor(() => intro.IsPlaying);
-            for (int i = 0; i < 40 && !intro.ShowsEnter; i++) { intro.Advance(); yield return new WaitForSeconds(0.3f); }
+            for (int i = 0; i < 40 && !intro.ShowsEnter; i++)
+            {
+                intro.Advance();
+                yield return new WaitForSeconds(0.3f);
+            }
             Assert.IsTrue(intro.ShowsEnter, "the story never reached its last page");
 
             yield return new WaitForSeconds(0.5f);

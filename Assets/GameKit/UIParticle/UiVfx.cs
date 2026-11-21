@@ -8,7 +8,11 @@ namespace GameKit
     {
         public static GameObject Play(GameObject prefab, Transform parent, Vector2 position, float scale, float seconds)
         {
-            if (prefab == null || parent == null) return null;
+            if (prefab == null || parent == null)
+            {
+                return null;
+            }
+
             var holder = new GameObject(prefab.name + " (UI)", typeof(RectTransform));
             var rect = (RectTransform)holder.transform;
             rect.SetParent(parent, false);

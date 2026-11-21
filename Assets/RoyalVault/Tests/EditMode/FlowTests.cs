@@ -20,7 +20,10 @@ namespace RoyalVault.Tests
         {
             SpinContext played = null;
             flow.SpinPaid += Capture;
-            void Capture(SpinContext c) { played = c; }
+            void Capture(SpinContext c)
+            {
+                played = c;
+            }
             flow.RequestSpin();
             flow.ReelsStopped();
             flow.PresentationDone();
@@ -90,7 +93,11 @@ namespace RoyalVault.Tests
         public void ThreeCrowns_PayTheMinorJackpotAndResetIt()
         {
             var (session, flow, engine) = Create();
-            for (int i = 0; i < 20; i++) session.Jackpots.Contribute(1000);
+            for (int i = 0; i < 20; i++)
+            {
+                session.Jackpots.Contribute(1000);
+            }
+
             long minor = session.Jackpots.Value(0);
             Assert.Greater(minor, 500);
             engine.ForcedStops = new[] { 12, 27, 3, 7, 46 }; // three crowns
@@ -155,8 +162,17 @@ namespace RoyalVault.Tests
         // An example feature: every win pays three times
         private sealed class TripleEveryWin : SlotFeature
         {
-            public override int Order { get { return 20; } }
-            public override void OnOutcome(SpinContext context) { context.Outcome.Multiplier *= 3; }
+            public override int Order
+            {
+                get
+                {
+                    return 20;
+                }
+            }
+            public override void OnOutcome(SpinContext context)
+            {
+                context.Outcome.Multiplier *= 3;
+            }
         }
     }
 }

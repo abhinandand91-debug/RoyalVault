@@ -25,7 +25,13 @@ namespace RoyalVault.Unity
         private bool hurry;
         private Coroutine spin;
 
-        public bool IsSpinning { get { return spin != null; } }
+        public bool IsSpinning
+        {
+            get
+            {
+                return spin != null;
+            }
+        }
 
         public void Build(int[] reelStrip, int visibleRows, Vector2 cell, float gap, float symbolScale, Sprite glow,
                           Func<int, ThemeDefinition.SymbolArt> symbolArt, int startTop, Material symbolMaterial = null)
@@ -43,33 +49,62 @@ namespace RoyalVault.Unity
             // one view above and one below the window, so symbols scroll in and out smoothly
             views = new SymbolView[rows + 2];
             Vector2 symbolSize = Vector2.one * cell.y * symbolScale;
-            for (int k = 0; k < views.Length; k++) views[k] = SymbolView.Create(transform, symbolSize, glow, symbolMaterial);
+            for (int k = 0; k < views.Length; k++)
+            {
+                views[k] = SymbolView.Create(transform, symbolSize, glow, symbolMaterial);
+            }
+
             position = startTop;
             Layout(false);
         }
 
         // The symbol view showing row (0 = top) while the reel is at rest
-        public SymbolView ViewAt(int row) { return views[row + 1]; }
+        public SymbolView ViewAt(int row)
+        {
+            return views[row + 1];
+        }
 
         public void Spin(int targetTop, float delay, float runSeconds, Action onStopped)
         {
-            if (spin != null) StopCoroutine(spin);
+            if (spin != null)
+            {
+                StopCoroutine(spin);
+            }
+
             hurry = false;
             spin = StartCoroutine(SpinRoutine(targetTop, delay, runSeconds, onStopped));
         }
 
         // Lands the reel as soon as possible (the player pressed spin again)
-        public void Hurry() { hurry = true; }
+        public void Hurry()
+        {
+            hurry = true;
+        }
 
         private IEnumerator SpinRoutine(int target, float delay, float runSeconds, Action onStopped)
         {
-            for (float t = 0f; t < delay && !hurry; t += Time.deltaTime) yield return null;
+            for (float t = 0f; t < delay && !hurry; t += Time.deltaTime)
+            {
+                yield return null;
+            }
+
             float start = position;
-            if (!hurry) yield return Tween.Run(0.12f, k => { position = start + WindUp * k; Layout(false); }, Ease.OutCubic);
+            if (!hurry)
+            {
+                yield return Tween.Run(0.12f, k =>
+                {
+                    position = start + WindUp * k;
+                    Layout(false);
+                }, Ease.OutCubic);
+            }
 
             float end = StopBefore(target, Speed * runSeconds);
             yield return Run(end, runSeconds);
-            yield return Tween.Run(0.2f, k => { position = end + Overshoot * k; Layout(false); }, Ease.OutCubic);
+            yield return Tween.Run(0.2f, k =>
+            {
+                position = end + Overshoot * k;
+                Layout(false);
+            }, Ease.OutCubic);
             position = target;
             Layout(false);
             spin = null;
@@ -81,7 +116,11 @@ namespace RoyalVault.Unity
         {
             int length = strip.Length;
             float landing = target + length * Mathf.Round((position - planned - target) / length);
-            if (position - (landing - Overshoot) < Mathf.Max(3f, planned * 0.25f)) landing -= length;
+            if (position - (landing - Overshoot) < Mathf.Max(3f, planned * 0.25f))
+            {
+                landing -= length;
+            }
+
             return landing - Overshoot;
         }
 
@@ -95,7 +134,11 @@ namespace RoyalVault.Unity
             bool jumped = false;
             for (float t = 0f; t < duration; t += Time.deltaTime)
             {
-                if (hurry && duration - t > 0.15f) { yield return FinishQuickly(end); yield break; }
+                if (hurry && duration - t > 0.15f)
+                {
+                    yield return FinishQuickly(end);
+                    yield break;
+                }
                 float u = t / duration;
                 bool blurred = u > Acceleration * 0.4f && u < 0.98f;
                 jumped |= blurred;
@@ -112,7 +155,11 @@ namespace RoyalVault.Unity
         private IEnumerator FinishQuickly(float end)
         {
             float remaining = Mathf.Min(1.5f, position - end);
-            yield return Tween.Run(0.1f, k => { position = end + remaining * (1f - k); Layout(true); }, Ease.Linear);
+            yield return Tween.Run(0.1f, k =>
+            {
+                position = end + remaining * (1f - k);
+                Layout(true);
+            }, Ease.Linear);
         }
 
         // Places the symbol views for the current position and gives them the right art

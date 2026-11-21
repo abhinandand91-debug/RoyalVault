@@ -48,7 +48,10 @@ namespace RoyalVault.EditorTools
         // Batch mode, first run only: imports the TextMesh Pro essentials (shaders and settings)
         public static void ImportTmpEssentialsBatch()
         {
-            if (!AssetDatabase.IsValidFolder("Assets/TextMesh Pro")) AssetDatabase.ImportPackage(TmpEssentials, false);
+            if (!AssetDatabase.IsValidFolder("Assets/TextMesh Pro"))
+            {
+                AssetDatabase.ImportPackage(TmpEssentials, false);
+            }
         }
 
         #region machines and theme
@@ -57,7 +60,11 @@ namespace RoyalVault.EditorTools
             EnsureFolder(DataPath);
             string path = DataPath + name + ".asset";
             var asset = AssetDatabase.LoadAssetAtPath<MachineDefinitionAsset>(path);
-            if (asset != null) return asset; // keep Inspector edits
+            if (asset != null)
+            {
+                return asset; // keep Inspector edits
+            }
+
             asset = ScriptableObject.CreateInstance<MachineDefinitionAsset>();
             asset.CopyFrom(preset);
             AssetDatabase.CreateAsset(asset, path);
@@ -85,7 +92,11 @@ namespace RoyalVault.EditorTools
         {
             string path = FontPath + name + " SDF.asset";
             var existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(path);
-            if (existing != null) return existing;
+            if (existing != null)
+            {
+                return existing;
+            }
+
             var font = AssetDatabase.LoadAssetAtPath<Font>(FontPath + name + ".ttf");
             TMP_FontAsset asset = TMP_FontAsset.CreateFontAsset(font, 90, 9, GlyphRenderMode.SDFAA, 1024, 1024, AtlasPopulationMode.Dynamic, true);
             asset.name = name + " SDF";
@@ -106,7 +117,11 @@ namespace RoyalVault.EditorTools
             string path = DataPath + "RoyalVault_Theme.asset";
             var theme = AssetDatabase.LoadAssetAtPath<ThemeDefinition>(path);
             bool created = theme == null;
-            if (created) theme = ScriptableObject.CreateInstance<ThemeDefinition>();
+            if (created)
+            {
+                theme = ScriptableObject.CreateInstance<ThemeDefinition>();
+            }
+
             theme.symbols = SymbolArts();
             SetInterfaceArt(theme);
             SetCharacters(theme);
@@ -115,7 +130,11 @@ namespace RoyalVault.EditorTools
             theme.headingFont = fonts.Heading;
             theme.labelFont = fonts.Label;
             theme.bodyFont = fonts.Body;
-            if (created) AssetDatabase.CreateAsset(theme, path);
+            if (created)
+            {
+                AssetDatabase.CreateAsset(theme, path);
+            }
+
             EditorUtility.SetDirty(theme);
             return theme;
         }
@@ -128,8 +147,12 @@ namespace RoyalVault.EditorTools
                 (SymbolStyle style, Color tint) = SymbolLook(id);
                 return new ThemeDefinition.SymbolArt
                 {
-                    id = id, sprite = Sprite("Symbols/" + id), blur = Sprite("Symbols/Blur/" + id),
-                    style = style, tint = tint, winAnimation = SymbolWinAnimation(id),
+                    id = id,
+                    sprite = Sprite("Symbols/" + id),
+                    blur = Sprite("Symbols/Blur/" + id),
+                    style = style,
+                    tint = tint,
+                    winAnimation = SymbolWinAnimation(id),
                 };
             }).ToArray();
         }
@@ -188,11 +211,18 @@ namespace RoyalVault.EditorTools
         // A prefab by exact name anywhere under folder, or null when the pack is absent
         private static GameObject StorePrefab(string folder, string name)
         {
-            if (!AssetDatabase.IsValidFolder(folder)) return null;
+            if (!AssetDatabase.IsValidFolder(folder))
+            {
+                return null;
+            }
+
             foreach (string guid in AssetDatabase.FindAssets(name + " t:Prefab", new[] { folder }))
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
-                if (Path.GetFileNameWithoutExtension(path) == name) return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                if (Path.GetFileNameWithoutExtension(path) == name)
+                {
+                    return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                }
             }
             Debug.LogWarning("Royal Vault: store effect not found: " + folder + " / " + name);
             return null;
@@ -203,16 +233,24 @@ namespace RoyalVault.EditorTools
         {
             switch (id)
             {
-                case "emerald": return (SymbolStyle.Gem, new Color(0.35f, 1f, 0.55f, 1f));
-                case "sapphire": return (SymbolStyle.Gem, new Color(0.4f, 0.6f, 1f, 1f));
-                case "ruby": return (SymbolStyle.Gem, new Color(1f, 0.3f, 0.35f, 1f));
+                case "emerald":
+                    return (SymbolStyle.Gem, new Color(0.35f, 1f, 0.55f, 1f));
+                case "sapphire":
+                    return (SymbolStyle.Gem, new Color(0.4f, 0.6f, 1f, 1f));
+                case "ruby":
+                    return (SymbolStyle.Gem, new Color(1f, 0.3f, 0.35f, 1f));
                 case "ankh":
                 case "gold_bars":
-                case "vault_key": return (SymbolStyle.Treasure, new Color(1f, 0.8f, 0.4f, 1f));
-                case "wild": return (SymbolStyle.Wild, new Color(0.85f, 0.95f, 1f, 1f));
-                case "vault_seal": return (SymbolStyle.Scatter, new Color(0.4f, 0.75f, 1f, 1f));
-                case "crown": return (SymbolStyle.Jackpot, new Color(1f, 0.82f, 0.4f, 1f));
-                default: return (SymbolStyle.Card, new Color(1f, 0.85f, 0.5f, 1f));
+                case "vault_key":
+                    return (SymbolStyle.Treasure, new Color(1f, 0.8f, 0.4f, 1f));
+                case "wild":
+                    return (SymbolStyle.Wild, new Color(0.85f, 0.95f, 1f, 1f));
+                case "vault_seal":
+                    return (SymbolStyle.Scatter, new Color(0.4f, 0.75f, 1f, 1f));
+                case "crown":
+                    return (SymbolStyle.Jackpot, new Color(1f, 0.82f, 0.4f, 1f));
+                default:
+                    return (SymbolStyle.Card, new Color(1f, 0.85f, 0.5f, 1f));
             }
         }
 
@@ -221,7 +259,11 @@ namespace RoyalVault.EditorTools
         {
             string path = Generated + "UISymbol.mat";
             var material = AssetDatabase.LoadAssetAtPath<Material>(path);
-            if (material != null) return material;
+            if (material != null)
+            {
+                return material;
+            }
+
             material = new Material(Shader.Find("RoyalVault/UI Symbol")) { name = "UISymbol" };
             AssetDatabase.CreateAsset(material, path);
             return material;
@@ -232,7 +274,11 @@ namespace RoyalVault.EditorTools
         {
             string path = Generated + "UIAdditive.mat";
             var material = AssetDatabase.LoadAssetAtPath<Material>(path);
-            if (material != null) return material;
+            if (material != null)
+            {
+                return material;
+            }
+
             material = new Material(Shader.Find("RoyalVault/UI Additive")) { name = "UIAdditive" };
             AssetDatabase.CreateAsset(material, path);
             return material;
@@ -241,7 +287,11 @@ namespace RoyalVault.EditorTools
         private static Sprite Sprite(string relative, string extension = ".png")
         {
             var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(ArtPath + relative + extension);
-            if (sprite == null) Debug.LogWarning("Royal Vault: missing art " + ArtPath + relative + extension);
+            if (sprite == null)
+            {
+                Debug.LogWarning("Royal Vault: missing art " + ArtPath + relative + extension);
+            }
+
             return sprite;
         }
         #endregion machines and theme
@@ -256,7 +306,10 @@ namespace RoyalVault.EditorTools
             Write("line", 64, 24, LinePixel);
             Write("vignette", 512, 288, VignettePixel);
             Write("rays", 1024, 1024, RaysPixel);
-            for (int stage = 1; stage <= 3; stage++) WriteCrack(stage);
+            for (int stage = 1; stage <= 3; stage++)
+            {
+                WriteCrack(stage);
+            }
             // dark at the foot of the screen, clear from 70% up: lays text over a painting
             Write("fade", 4, 256, (x, y) => new Color(0f, 0f, 0f, Mathf.Pow(Mathf.Clamp01(1f - y / 180f), 1.4f)));
             Write("bar", 4, 256, (x, y) => Color.Lerp(new Color32(6, 6, 8, 255), new Color32(23, 21, 28, 255), y / 255f));
@@ -315,7 +368,10 @@ namespace RoyalVault.EditorTools
             const float radius = 122f;
             float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(160f, 160f));
             if (d > radius + 1f)
+            {
                 return d < radius + 36f ? new Color(0.91f, 0.78f, 0.48f, Mathf.Pow(Mathf.Clamp01(1f - (d - radius) / 36f), 2f) * 0.28f) : Color.clear;
+            }
+
             float top = Mathf.Clamp01((y - 40f) / 240f);
             Color ring = Color.Lerp(new Color(0.48f, 0.33f, 0.09f, 0.25f), new Color(1f, 0.945f, 0.757f, 1f), top);
             Color c = d > radius - 2.5f ? ring : (Color)new Color32(10, 9, 13, 255);
@@ -329,7 +385,11 @@ namespace RoyalVault.EditorTools
             float px = x + 0.5f, py = y + 0.5f;
             float cx = Mathf.Clamp(px, radius, w - radius), cy = Mathf.Clamp(py, radius, h - radius);
             float d = radius - Vector2.Distance(new Vector2(px, py), new Vector2(cx, cy)); // distance inside the edge
-            if (d < 0f) return Color.clear;
+            if (d < 0f)
+            {
+                return Color.clear;
+            }
+
             float edge = Mathf.Clamp01(d);
             Color c = d < strokeWidth ? stroke : Color.Lerp(stroke, fill, Mathf.Clamp01(d - strokeWidth));
             c.a *= edge;
@@ -378,7 +438,13 @@ namespace RoyalVault.EditorTools
         {
             var texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
             for (int y = 0; y < height; y++)
-                for (int x = 0; x < width; x++) texture.SetPixel(x, y, pixel(x, y));
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    texture.SetPixel(x, y, pixel(x, y));
+                }
+            }
+
             texture.Apply();
             File.WriteAllBytes(Generated + name + ".png", texture.EncodeToPNG());
             Object.DestroyImmediate(texture);
@@ -388,7 +454,11 @@ namespace RoyalVault.EditorTools
         private static void EnsureFolder(string path)
         {
             path = path.TrimEnd('/');
-            if (AssetDatabase.IsValidFolder(path)) return;
+            if (AssetDatabase.IsValidFolder(path))
+            {
+                return;
+            }
+
             string parent = Path.GetDirectoryName(path).Replace('\\', '/');
             EnsureFolder(parent);
             AssetDatabase.CreateFolder(parent, Path.GetFileName(path));

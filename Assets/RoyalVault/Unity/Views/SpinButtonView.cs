@@ -46,12 +46,19 @@ namespace RoyalVault.Unity
 
         private void OnDestroy()
         {
-            if (shine != null) Destroy(shine);
+            if (shine != null)
+            {
+                Destroy(shine);
+            }
         }
 
         private void CopyShineMaterial()
         {
-            if (medallion == null || medallion.material == null || !medallion.material.HasProperty(ShinePos)) return;
+            if (medallion == null || medallion.material == null || !medallion.material.HasProperty(ShinePos))
+            {
+                return;
+            }
+
             shine = new Material(medallion.material);
             medallion.material = shine;
         }
@@ -66,13 +73,19 @@ namespace RoyalVault.Unity
         public void SetSpinning(bool value)
         {
             spinning = value;
-            if (label != null) label.text = value ? spinningText : idleText;
+            if (label != null)
+            {
+                label.text = value ? spinningText : idleText;
+            }
         }
 
         public void SetInteractable(bool value)
         {
             button.interactable = value;
-            if (medallion != null) medallion.color = value ? Color.white : new Color(0.6f, 0.6f, 0.62f, 1f);
+            if (medallion != null)
+            {
+                medallion.color = value ? Color.white : new Color(0.6f, 0.6f, 0.62f, 1f);
+            }
         }
 
         private void Update()
@@ -91,7 +104,11 @@ namespace RoyalVault.Unity
 
         private void UpdateRays()
         {
-            if (rays == null) return;
+            if (rays == null)
+            {
+                return;
+            }
+
             float target = spinning ? spinningRaySpeed : idleRaySpeed;
             raySpeed = Mathf.MoveTowards(raySpeed, target, Time.deltaTime * 260f);
             rays.rectTransform.Rotate(0f, 0f, -raySpeed * Time.deltaTime);
@@ -100,7 +117,11 @@ namespace RoyalVault.Unity
 
         private void UpdateGlow()
         {
-            if (glow == null) return;
+            if (glow == null)
+            {
+                return;
+            }
+
             float target = spinning ? 0.15f : 0.35f + 0.3f * (Mathf.Sin(Time.time * 2.2f) * 0.5f + 0.5f);
             glow.color = WithAlpha(glow.color, Mathf.MoveTowards(glow.color.a, target, Time.deltaTime * 2f));
         }
@@ -108,7 +129,11 @@ namespace RoyalVault.Unity
         // A band of light crosses the gold every few seconds
         private void UpdateShine()
         {
-            if (shine == null) return;
+            if (shine == null)
+            {
+                return;
+            }
+
             float t = Mathf.Repeat(Time.time, shineEvery) / 0.9f;
             shine.SetFloat(ShinePos, t <= 1f ? Mathf.Lerp(-0.4f, 1.4f, t) : -1f);
         }

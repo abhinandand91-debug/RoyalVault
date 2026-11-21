@@ -24,7 +24,11 @@ namespace RoyalVault.Tests
             camera.targetTexture = target;
             foreach (Canvas canvas in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
             {
-                if (!canvas.isRootCanvas) continue;
+                if (!canvas.isRootCanvas)
+                {
+                    continue;
+                }
+
                 canvas.renderMode = RenderMode.ScreenSpaceCamera;
                 canvas.worldCamera = camera;
                 canvas.planeDistance = 5f;
@@ -50,13 +54,21 @@ namespace RoyalVault.Tests
         private static IEnumerator WaitFor(System.Func<bool> condition, float timeout = 20f)
         {
             float t = 0f;
-            while (!condition() && t < timeout) { t += Time.deltaTime; yield return null; }
+            while (!condition() && t < timeout)
+            {
+                t += Time.deltaTime;
+                yield return null;
+            }
         }
 
         // Taps through the story until the condition holds
         private static IEnumerator AdvanceUntil(StoryIntroView intro, System.Func<bool> condition)
         {
-            for (int i = 0; i < 40 && !condition(); i++) { intro.Advance(); yield return new WaitForSeconds(0.35f); }
+            for (int i = 0; i < 40 && !condition(); i++)
+            {
+                intro.Advance();
+                yield return new WaitForSeconds(0.35f);
+            }
             Assert.IsTrue(condition(), "story did not advance");
         }
 
@@ -121,7 +133,11 @@ namespace RoyalVault.Tests
             yield return new WaitForSeconds(2.6f);
             yield return Shot("25_chapter_card");
             var coach = Object.FindFirstObjectByType<CoachMarkView>();
-            for (int i = 0; i < 12 && !coach.IsShowing; i++) { chapter.Advance(); yield return new WaitForSeconds(0.3f); }
+            for (int i = 0; i < 12 && !coach.IsShowing; i++)
+            {
+                chapter.Advance();
+                yield return new WaitForSeconds(0.3f);
+            }
             yield return new WaitForSeconds(0.5f);
             yield return Shot("26_coach_mark");
             game.Story.Mute();
@@ -164,7 +180,11 @@ namespace RoyalVault.Tests
         // Spins to stops (unless already spun), shoots the celebration and waits for the machine to settle
         private static IEnumerator Celebration(int[] stops, string shot, float delay)
         {
-            if (stops != null) yield return SpinTo(game, stops);
+            if (stops != null)
+            {
+                yield return SpinTo(game, stops);
+            }
+
             yield return WaitFor(Celebrating);
             yield return new WaitForSeconds(delay);
             yield return Shot(shot);
@@ -184,7 +204,11 @@ namespace RoyalVault.Tests
             yield return ShotWhen(Celebrating, 0.9f, "09_free_spins_awarded");
             yield return WaitFor(() => game.Session.FreeSpins.Played > 0, 30f);
             yield return ShotWhen(() => game.Flow.State != SpinState.Spinning, 0.4f, "10_free_spin");
-            while (game.Session.FreeSpins.Remaining > 0 || game.Flow.State != SpinState.Idle || Celebrating()) yield return null;
+            while (game.Session.FreeSpins.Remaining > 0 || game.Flow.State != SpinState.Idle || Celebrating())
+            {
+                yield return null;
+            }
+
             yield return new WaitForSeconds(0.5f);
         }
 
@@ -208,7 +232,11 @@ namespace RoyalVault.Tests
         // The guardians' celebration on its own, then every symbol celebrating at once
         private static IEnumerator GuardiansAndSymbols()
         {
-            foreach (CharacterView guardian in Object.FindObjectsByType<CharacterView>(FindObjectsSortMode.None)) guardian.Celebrate();
+            foreach (CharacterView guardian in Object.FindObjectsByType<CharacterView>(FindObjectsSortMode.None))
+            {
+                guardian.Celebrate();
+            }
+
             yield return new WaitForSeconds(0.45f);
             yield return Shot("15_guardians_act");
             yield return new WaitForSeconds(0.6f);
@@ -220,7 +248,13 @@ namespace RoyalVault.Tests
             var machineView = Object.FindFirstObjectByType<MachineView>();
             var all = new System.Collections.Generic.List<GridPosition>();
             for (int r = 0; r < game.Machine.Reels; r++)
-                for (int row = 0; row < game.Machine.Rows; row++) all.Add(new GridPosition(r, row));
+            {
+                for (int row = 0; row < game.Machine.Rows; row++)
+                {
+                    all.Add(new GridPosition(r, row));
+                }
+            }
+
             machineView.HighlightCells(all, 6f);
             yield return new WaitForSeconds(0.5f);
             yield return Shot("17_symbols_celebrate");

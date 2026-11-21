@@ -26,9 +26,15 @@ namespace SlotKit
     {
         public SaveData Data;
 
-        public SaveData Load() { return Data; }
+        public SaveData Load()
+        {
+            return Data;
+        }
 
-        public void Save(SaveData data) { Data = data; }
+        public void Save(SaveData data)
+        {
+            Data = data;
+        }
     }
 
     // One player's state on one machine: credits, bet, jackpots and free spins

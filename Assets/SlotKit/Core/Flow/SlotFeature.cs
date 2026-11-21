@@ -21,7 +21,13 @@ namespace SlotKit
             Cost = cost;
         }
 
-        public bool Rejected { get { return Rejection != null; } }
+        public bool Rejected
+        {
+            get
+            {
+                return Rejection != null;
+            }
+        }
     }
 
     // A plug-in that joins the spin flow
@@ -42,10 +48,22 @@ namespace SlotKit
     // Convenience base: override only the hooks a feature needs
     public abstract class SlotFeature : ISlotFeature
     {
-        public virtual int Order { get { return 0; } }
-        public virtual void OnSpinRequested(SpinContext context) { }
-        public virtual void OnOutcome(SpinContext context) { }
-        public virtual void OnPaid(SpinContext context) { }
+        public virtual int Order
+        {
+            get
+            {
+                return 0;
+            }
+        }
+        public virtual void OnSpinRequested(SpinContext context)
+        {
+        }
+        public virtual void OnOutcome(SpinContext context)
+        {
+        }
+        public virtual void OnPaid(SpinContext context)
+        {
+        }
     }
 
     // Runs the registered features in order at each hook
@@ -53,11 +71,23 @@ namespace SlotKit
     {
         private readonly List<ISlotFeature> features = new List<ISlotFeature>();
 
-        public IReadOnlyList<ISlotFeature> Features { get { return features; } }
+        public IReadOnlyList<ISlotFeature> Features
+        {
+            get
+            {
+                return features;
+            }
+        }
 
         public FeaturePipeline(IEnumerable<ISlotFeature> features = null)
         {
-            if (features != null) foreach (ISlotFeature feature in features) Add(feature);
+            if (features != null)
+            {
+                foreach (ISlotFeature feature in features)
+                {
+                    Add(feature);
+                }
+            }
         }
 
         public void Add(ISlotFeature feature)
@@ -69,7 +99,13 @@ namespace SlotKit
         public T Get<T>() where T : class, ISlotFeature
         {
             foreach (ISlotFeature feature in features)
-                if (feature is T match) return match;
+            {
+                if (feature is T match)
+                {
+                    return match;
+                }
+            }
+
             return null;
         }
 
@@ -78,18 +114,27 @@ namespace SlotKit
             foreach (ISlotFeature feature in features)
             {
                 feature.OnSpinRequested(context);
-                if (context.Rejected) return;
+                if (context.Rejected)
+                {
+                    return;
+                }
             }
         }
 
         public void Outcome(SpinContext context)
         {
-            foreach (ISlotFeature feature in features) feature.OnOutcome(context);
+            foreach (ISlotFeature feature in features)
+            {
+                feature.OnOutcome(context);
+            }
         }
 
         public void Paid(SpinContext context)
         {
-            foreach (ISlotFeature feature in features) feature.OnPaid(context);
+            foreach (ISlotFeature feature in features)
+            {
+                feature.OnPaid(context);
+            }
         }
     }
 }

@@ -8,18 +8,37 @@ namespace SlotKit
         public int Remaining { get; private set; }
         // Spins played in the current round, including the one showing
         public int Played { get; private set; }
-        public int Total { get { return Remaining + Played; } }
+        public int Total
+        {
+            get
+            {
+                return Remaining + Played;
+            }
+        }
         public long RoundWin { get; private set; }
-        public bool Active { get { return Remaining > 0 || Played > 0; } }
+        public bool Active
+        {
+            get
+            {
+                return Remaining > 0 || Played > 0;
+            }
+        }
 
         // Raised after any change
         public event Action<FreeSpinState> Changed;
 
-        public FreeSpinState(int remaining = 0) { Remaining = Math.Max(0, remaining); }
+        public FreeSpinState(int remaining = 0)
+        {
+            Remaining = Math.Max(0, remaining);
+        }
 
         public void Add(int spins)
         {
-            if (spins <= 0) return;
+            if (spins <= 0)
+            {
+                return;
+            }
+
             Remaining += spins;
             Changed?.Invoke(this);
         }
@@ -27,7 +46,11 @@ namespace SlotKit
         // Uses one spin; false when none are left
         public bool TryConsume()
         {
-            if (Remaining <= 0) return false;
+            if (Remaining <= 0)
+            {
+                return false;
+            }
+
             Remaining--;
             Played++;
             Changed?.Invoke(this);
@@ -36,7 +59,11 @@ namespace SlotKit
 
         public void AddWin(long amount)
         {
-            if (amount <= 0) return;
+            if (amount <= 0)
+            {
+                return;
+            }
+
             RoundWin += amount;
             Changed?.Invoke(this);
         }

@@ -58,20 +58,35 @@ namespace RoyalVault.Unity
         public void Arm()
         {
             // only clear stops the showcase set itself (tests force their own)
-            if (Armed != null) engine.ForcedStops = null;
+            if (Armed != null)
+            {
+                engine.ForcedStops = null;
+            }
+
             Armed = null;
             ShowcaseWin[] list = order();
-            if (!enabled() || list == null || list.Length == 0 || session.FreeSpins.Remaining > 0) return;
+            if (!enabled() || list == null || list.Length == 0 || session.FreeSpins.Remaining > 0)
+            {
+                return;
+            }
 
             for (int attempt = 0; attempt < list.Length; attempt++)
             {
                 ShowcaseWin kind = list[next % list.Length];
                 next++;
                 int[] stops = StopsFor(kind);
-                if (stops == null) continue;
+                if (stops == null)
+                {
+                    continue;
+                }
+
                 engine.ForcedStops = (int[])stops.Clone();
                 Armed = kind;
-                if (toast != null) toast.Show("SHOWCASE · NEXT: " + Label(kind), 2.5f);
+                if (toast != null)
+                {
+                    toast.Show("SHOWCASE · NEXT: " + Label(kind), 2.5f);
+                }
+
                 return;
             }
         }
@@ -79,14 +94,25 @@ namespace RoyalVault.Unity
         // Reel stops that really produce kind, or null when the machine cannot
         public int[] StopsFor(ShowcaseWin kind)
         {
-            if (found.TryGetValue(kind, out int[] cached)) return cached;
+            if (found.TryGetValue(kind, out int[] cached))
+            {
+                return cached;
+            }
+
             MachineDefinition machine = engine.Machine;
             int[] stops = new int[machine.Reels];
             int[] result = null;
             for (int i = 0; i < SearchTries && result == null; i++)
             {
-                for (int r = 0; r < stops.Length; r++) stops[r] = random.Next(machine.Strips[r].Length);
-                if (Matches(kind, engine.Evaluate(stops, 1), machine)) result = (int[])stops.Clone();
+                for (int r = 0; r < stops.Length; r++)
+                {
+                    stops[r] = random.Next(machine.Strips[r].Length);
+                }
+
+                if (Matches(kind, engine.Evaluate(stops, 1), machine))
+                {
+                    result = (int[])stops.Clone();
+                }
             }
             found[kind] = result;
             return result;
@@ -107,16 +133,26 @@ namespace RoyalVault.Unity
 
             switch (kind)
             {
-                case ShowcaseWin.NoWin: return plain && win == 0;
-                case ShowcaseWin.LineWin: return plain && outcome.Scatter == null && win > 0 && win < big;
-                case ShowcaseWin.BigWin: return plain && win >= big && win < mega;
-                case ShowcaseWin.MegaWin: return plain && win >= mega && win < epic;
-                case ShowcaseWin.EpicWin: return plain && win >= epic;
-                case ShowcaseWin.MinorJackpot: return !freeSpins && jackpot == 0;
-                case ShowcaseWin.MajorJackpot: return !freeSpins && jackpot == 1 && machine.JackpotTiers.Length > 1;
-                case ShowcaseWin.GrandJackpot: return !freeSpins && jackpot == 2 && machine.JackpotTiers.Length > 2;
-                case ShowcaseWin.FreeSpins: return freeSpins && jackpot < 0;
-                default: return false;
+                case ShowcaseWin.NoWin:
+                    return plain && win == 0;
+                case ShowcaseWin.LineWin:
+                    return plain && outcome.Scatter == null && win > 0 && win < big;
+                case ShowcaseWin.BigWin:
+                    return plain && win >= big && win < mega;
+                case ShowcaseWin.MegaWin:
+                    return plain && win >= mega && win < epic;
+                case ShowcaseWin.EpicWin:
+                    return plain && win >= epic;
+                case ShowcaseWin.MinorJackpot:
+                    return !freeSpins && jackpot == 0;
+                case ShowcaseWin.MajorJackpot:
+                    return !freeSpins && jackpot == 1 && machine.JackpotTiers.Length > 1;
+                case ShowcaseWin.GrandJackpot:
+                    return !freeSpins && jackpot == 2 && machine.JackpotTiers.Length > 2;
+                case ShowcaseWin.FreeSpins:
+                    return freeSpins && jackpot < 0;
+                default:
+                    return false;
             }
         }
 
@@ -125,15 +161,24 @@ namespace RoyalVault.Unity
             JackpotTierDefinition[] tiers = engine.Machine.JackpotTiers;
             switch (kind)
             {
-                case ShowcaseWin.LineWin: return "LINE WIN";
-                case ShowcaseWin.BigWin: return "BIG WIN";
-                case ShowcaseWin.MegaWin: return "MEGA WIN";
-                case ShowcaseWin.EpicWin: return "EPIC WIN";
-                case ShowcaseWin.MinorJackpot: return (tiers.Length > 0 ? tiers[0].Name : "MINOR") + " JACKPOT";
-                case ShowcaseWin.MajorJackpot: return (tiers.Length > 1 ? tiers[1].Name : "MAJOR") + " JACKPOT";
-                case ShowcaseWin.GrandJackpot: return (tiers.Length > 2 ? tiers[2].Name : "GRAND") + " JACKPOT";
-                case ShowcaseWin.FreeSpins: return "FREE SPINS";
-                default: return "NO WIN";
+                case ShowcaseWin.LineWin:
+                    return "LINE WIN";
+                case ShowcaseWin.BigWin:
+                    return "BIG WIN";
+                case ShowcaseWin.MegaWin:
+                    return "MEGA WIN";
+                case ShowcaseWin.EpicWin:
+                    return "EPIC WIN";
+                case ShowcaseWin.MinorJackpot:
+                    return (tiers.Length > 0 ? tiers[0].Name : "MINOR") + " JACKPOT";
+                case ShowcaseWin.MajorJackpot:
+                    return (tiers.Length > 1 ? tiers[1].Name : "MAJOR") + " JACKPOT";
+                case ShowcaseWin.GrandJackpot:
+                    return (tiers.Length > 2 ? tiers[2].Name : "GRAND") + " JACKPOT";
+                case ShowcaseWin.FreeSpins:
+                    return "FREE SPINS";
+                default:
+                    return "NO WIN";
             }
         }
     }

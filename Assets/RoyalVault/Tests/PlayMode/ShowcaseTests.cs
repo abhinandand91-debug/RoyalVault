@@ -16,7 +16,11 @@ namespace RoyalVault.Tests
         private static IEnumerator WaitFor(System.Func<bool> condition, float timeout = 60f)
         {
             float t = 0f;
-            while (!condition() && t < timeout) { t += Time.deltaTime; yield return null; }
+            while (!condition() && t < timeout)
+            {
+                t += Time.deltaTime;
+                yield return null;
+            }
             Assert.IsTrue(condition(), "timed out");
         }
 
@@ -34,7 +38,13 @@ namespace RoyalVault.Tests
             yield return LoadGame();
             var game = Object.FindFirstObjectByType<GameBootstrap>();
             SpinOutcome paid = null;
-            game.Flow.SpinPaid += context => { if (!context.IsFreeSpin) paid = context.Outcome; };
+            game.Flow.SpinPaid += context =>
+            {
+                if (!context.IsFreeSpin)
+                {
+                    paid = context.Outcome;
+                }
+            };
 
             ShowcaseWin[] order = game.ShowcaseOrder;
             game.ShowcaseWins = true;
@@ -71,6 +81,7 @@ namespace RoyalVault.Tests
             machine.AllReelsStopped += () => finished++;
 
             foreach (ReelOrder start in new[] { ReelOrder.Sequential, ReelOrder.Random, ReelOrder.AllAtOnce })
+            {
                 foreach (ReelOrder stop in new[] { ReelOrder.Sequential, ReelOrder.Random, ReelOrder.AllAtOnce })
                 {
                     machine.StartOrder = start;
@@ -83,13 +94,22 @@ namespace RoyalVault.Tests
                     yield return WaitFor(() => finished == 1, 20f);
                     Assert.AreEqual(game.Machine.Reels, landed.Count, start + "/" + stop + " landings");
                     CollectionAssert.AreEquivalent(new[] { 0, 1, 2, 3, 4 }, landed, "every reel lands once");
-                    if (stop == ReelOrder.Sequential) CollectionAssert.AreEqual(new[] { 0, 1, 2, 3, 4 }, landed, "left to right");
+                    if (stop == ReelOrder.Sequential)
+                    {
+                        CollectionAssert.AreEqual(new[] { 0, 1, 2, 3, 4 }, landed, "left to right");
+                    }
                     // the reels show exactly what the engine decided, whatever the order
                     for (int r = 0; r < game.Machine.Reels; r++)
+                    {
                         for (int row = 0; row < game.Machine.Rows; row++)
+                        {
                             Assert.AreEqual(decided.Grid[r, row], machine.SymbolAt(new GridPosition(r, row)).SymbolIndex,
                                             start + "/" + stop + " cell " + r + "," + row);
+                        }
+                    }
                 }
+            }
+
             machine.StartOrder = ReelOrder.Sequential;
             machine.StopOrder = ReelOrder.Sequential;
             PlayerPrefs.DeleteAll();
@@ -117,7 +137,11 @@ namespace RoyalVault.Tests
             int second = SecondSealReel(game);
             List<int> expected = Enumerable.Range(second + 1, game.Machine.Reels - second - 1).ToList();
             CollectionAssert.AreEqual(expected, machine.AnticipatedReels, "anticipated after reel " + second);
-            foreach (int r in expected) Assert.Greater(landedAt[r] - landedAt[r - 1], 1.0f, "reel " + r + " is held back");
+            foreach (int r in expected)
+            {
+                Assert.Greater(landedAt[r] - landedAt[r - 1], 1.0f, "reel " + r + " is held back");
+            }
+
             CollectionAssert.Contains(sound.History, SoundCue.AnticipationLoop);
             CollectionAssert.Contains(sound.History, SoundCue.AnticipationEnd);
             yield return WaitFor(() => game.Session.FreeSpins.Remaining == 0 && game.Flow.State == SpinState.Idle, 120f);
@@ -135,8 +159,16 @@ namespace RoyalVault.Tests
             SpinOutcome outcome = game.Engine.Evaluate(ThreeSeals, 1);
             int seals = 0;
             for (int r = 0; r < game.Machine.Reels; r++)
+            {
                 for (int row = 0; row < game.Machine.Rows; row++)
-                    if (outcome.Grid[r, row] == scatter && ++seals == 2) return r;
+                {
+                    if (outcome.Grid[r, row] == scatter && ++seals == 2)
+                    {
+                        return r;
+                    }
+                }
+            }
+
             return -1;
         }
 

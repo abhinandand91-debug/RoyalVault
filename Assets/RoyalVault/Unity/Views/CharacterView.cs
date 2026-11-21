@@ -68,7 +68,10 @@ namespace RoyalVault.Unity
             image.sprite = sprite;
             gameObject.SetActive(sprite != null);
             staticAnchor = effectAnchor;
-            if (sprite == null || hand == null) return;
+            if (sprite == null || hand == null)
+            {
+                return;
+            }
 
             PlaceHand(effectAnchor);
             handGlow.color = new Color(magic.r, magic.g, magic.b, 0.6f);
@@ -88,8 +91,16 @@ namespace RoyalVault.Unity
         // Leans towards the reels and calls up the flame
         public void WindUp()
         {
-            if (!isActiveAndEnabled) return;
-            if (throwing != null) StopCoroutine(throwing);
+            if (!isActiveAndEnabled)
+            {
+                return;
+            }
+
+            if (throwing != null)
+            {
+                StopCoroutine(throwing);
+            }
+
             throwing = StartCoroutine(WindUpRoutine());
         }
 
@@ -97,15 +108,27 @@ namespace RoyalVault.Unity
         public void Release()
         {
             ReadyToThrow = false;
-            if (!isActiveAndEnabled) return;
-            if (throwing != null) StopCoroutine(throwing);
+            if (!isActiveAndEnabled)
+            {
+                return;
+            }
+
+            if (throwing != null)
+            {
+                StopCoroutine(throwing);
+            }
+
             throwing = StartCoroutine(ReleaseRoutine());
         }
 
         private IEnumerator WindUpRoutine()
         {
             ReadyToThrow = false;
-            if (motion != null && !IsActing) Act();
+            if (motion != null && !IsActing)
+            {
+                Act();
+            }
+
             float t = 0f;
             // lean in, then hold until the flame is up
             while (true)
@@ -114,7 +137,11 @@ namespace RoyalVault.Unity
                 lunge = Ease.OutCubic(Mathf.Clamp01(t / 0.35f));
                 surge = Mathf.Max(surge, 0.6f);
                 bool flameUp = motion == null ? t >= 0.4f : flameWeight > 0.6f && t >= 0.35f;
-                if (flameUp || t > 1.6f) break;
+                if (flameUp || t > 1.6f)
+                {
+                    break;
+                }
+
                 yield return null;
             }
             ReadyToThrow = true;
@@ -123,7 +150,11 @@ namespace RoyalVault.Unity
 
         private IEnumerator ReleaseRoutine()
         {
-            if (flame != null) { flame.Burst(30, 3f); sparks.Burst(20, 1.2f); }
+            if (flame != null)
+            {
+                flame.Burst(30, 3f);
+                sparks.Burst(20, 1.2f);
+            }
             yield return Tween.Run(0.12f, k => lunge = 1f + 0.35f * k, Ease.OutCubic);
             yield return Tween.Run(0.6f, k => lunge = 1.35f * (1f - k), Ease.InOutSine);
             lunge = 0f;
@@ -133,7 +164,11 @@ namespace RoyalVault.Unity
         // The hand's flame flares up and throws embers (the guardians watch the reels being anticipated)
         public void Surge()
         {
-            if (!isActiveAndEnabled || hand == null) return;
+            if (!isActiveAndEnabled || hand == null)
+            {
+                return;
+            }
+
             surge = 1f;
             embers.Burst(10, 1.6f);
         }
@@ -144,7 +179,11 @@ namespace RoyalVault.Unity
         // Plays the action once (the guardian calls up its flame), then returns to the idle loop
         public void Act()
         {
-            if (motion == null || !motion.action.IsValid) return;
+            if (motion == null || !motion.action.IsValid)
+            {
+                return;
+            }
+
             clip = motion.action;
             clipTime = 0f;
             nextAction = Time.time + Random.Range(12f, 20f);
@@ -169,12 +208,24 @@ namespace RoyalVault.Unity
                 clipTime = 0f;
                 frame = 0;
             }
-            if (clip == motion.idle && Time.time >= nextAction) { Act(); frame = 0; }
+            if (clip == motion.idle && Time.time >= nextAction)
+            {
+                Act();
+                frame = 0;
+            }
             frame %= clip.frames.Length;
 
             image.sprite = clip.frames[frame];
-            if (hand == null) return;
-            if (frame < clip.hand.Length) PlaceHand(clip.hand[frame]);
+            if (hand == null)
+            {
+                return;
+            }
+
+            if (frame < clip.hand.Length)
+            {
+                PlaceHand(clip.hand[frame]);
+            }
+
             float target = frame < clip.flame.Length ? clip.flame[frame] : 1f;
             flameWeight = Mathf.MoveTowards(flameWeight, target, Time.deltaTime * 6f);
         }
@@ -184,7 +235,11 @@ namespace RoyalVault.Unity
             float time = Time.time + phase;
             float breath = Mathf.Sin(time * 1.4f) * 0.5f + 0.5f;
             Pose(time, breath);
-            if (hand == null) return;
+            if (hand == null)
+            {
+                return;
+            }
+
             FlareNow();
             Burn(time, breath);
         }
@@ -194,7 +249,11 @@ namespace RoyalVault.Unity
         {
             RectTransform r = image.rectTransform;
             float sign = Mathf.Sign(r.localScale.x);
-            if (!homeKnown) { figureHome = r.anchoredPosition; homeKnown = true; }
+            if (!homeKnown)
+            {
+                figureHome = r.anchoredPosition;
+                homeKnown = true;
+            }
             r.anchoredPosition = figureHome + new Vector2(sign * 34f * lunge, 6f * lunge);
             float lean = -sign * 6f * lunge;
             if (motion != null)
@@ -236,8 +295,16 @@ namespace RoyalVault.Unity
 
         public void Celebrate()
         {
-            if (!isActiveAndEnabled) return;
-            if (celebrate != null) StopCoroutine(celebrate);
+            if (!isActiveAndEnabled)
+            {
+                return;
+            }
+
+            if (celebrate != null)
+            {
+                StopCoroutine(celebrate);
+            }
+
             celebrate = StartCoroutine(CelebrateRoutine());
         }
 
@@ -247,7 +314,10 @@ namespace RoyalVault.Unity
             {
                 // the guardian calls up its flame; the eruption comes as the flame appears in its hand
                 Act();
-                while (IsActing && flameWeight < 0.5f) yield return null;
+                while (IsActing && flameWeight < 0.5f)
+                {
+                    yield return null;
+                }
             }
             if (flame != null)
             {
@@ -256,7 +326,11 @@ namespace RoyalVault.Unity
                 embers.Burst(20, 2f);
             }
             yield return Tween.Run(0.25f, k => { lift = k; image.color = Color.Lerp(Color.white, new Color(1.4f, 1.25f, 0.9f), k); }, Ease.OutCubic);
-            if (sparks != null) sparks.Burst(24, 0.8f);
+            if (sparks != null)
+            {
+                sparks.Burst(24, 0.8f);
+            }
+
             yield return new WaitForSeconds(0.7f);
             yield return Tween.Run(0.6f, k => { lift = 1f - k; image.color = Color.Lerp(new Color(1.4f, 1.25f, 0.9f), Color.white, k); }, Ease.InOutSine);
             celebrate = null;

@@ -55,16 +55,34 @@ namespace RoyalVault.Unity
             telling = typewriter != null;
             beats = scene.Beats;
             beat = 0;
-            if (telling) typewriter.Play(beats[0]);
-            else caption.text = string.Join(" ", beats);
+            if (telling)
+            {
+                typewriter.Play(beats[0]);
+            }
+            else
+            {
+                caption.text = string.Join(" ", beats);
+            }
         }
 
         // Finishes the line being typed, or starts the next; false when the scene has been told
         public bool NextBeat()
         {
-            if (!telling) return false;
-            if (typewriter.IsTyping) { typewriter.Complete(); return true; }
-            if (beat + 1 >= beats.Length) return false;
+            if (!telling)
+            {
+                return false;
+            }
+
+            if (typewriter.IsTyping)
+            {
+                typewriter.Complete();
+                return true;
+            }
+            if (beat + 1 >= beats.Length)
+            {
+                return false;
+            }
+
             typewriter.Play(beats[++beat]);
             return true;
         }
@@ -92,7 +110,11 @@ namespace RoyalVault.Unity
                 StoryDefinition.Figure figure = i < cast.Length ? cast[i] : null;
                 bool show = figure != null && figure.sprite != null;
                 figures[i].gameObject.SetActive(show);
-                if (show) PlaceFigure(figures[i], figure);
+                if (show)
+                {
+                    PlaceFigure(figures[i], figure);
+                }
+
                 figureHome[i] = show ? figure.position : Vector2.zero;
             }
         }
@@ -127,7 +149,11 @@ namespace RoyalVault.Unity
             float enter = Ease.OutCubic(Mathf.Clamp01((t - 0.2f) / 0.9f));
             for (int i = 0; i < figures.Length && i < figureHome.Length; i++)
             {
-                if (!figures[i].gameObject.activeSelf) continue;
+                if (!figures[i].gameObject.activeSelf)
+                {
+                    continue;
+                }
+
                 Vector2 home = figureHome[i];
                 float side = Mathf.Sign(home.x);
                 figures[i].rectTransform.anchoredPosition = home + new Vector2(side * figureEntrance * (1f - enter), 6f * Mathf.Sin(t * 0.8f + i));

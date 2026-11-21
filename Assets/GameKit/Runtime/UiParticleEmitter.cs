@@ -57,7 +57,11 @@ namespace GameKit
         {
             float dt = Time.deltaTime;
             pending += Rate * Intensity * dt;
-            while (pending >= 1f) { pending -= 1f; Spawn(false); }
+            while (pending >= 1f)
+            {
+                pending -= 1f;
+                Spawn(false);
+            }
 
             for (int i = live.Count - 1; i >= 0; i--)
             {
@@ -71,7 +75,11 @@ namespace GameKit
                     continue;
                 }
                 p.Velocity += Gravity * dt;
-                if (Drag > 0f) p.Velocity *= Mathf.Max(0f, 1f - Drag * dt);
+                if (Drag > 0f)
+                {
+                    p.Velocity *= Mathf.Max(0f, 1f - Drag * dt);
+                }
+
                 float wobble = Swirl * Mathf.Sin(p.Age * SwirlFrequency + p.Seed * 6.28f);
                 p.Position += (p.Velocity + new Vector2(wobble, 0f)) * dt;
 
@@ -91,20 +99,32 @@ namespace GameKit
         public void Burst(int count, float speed = 2.5f)
         {
             burstSpeed = speed;
-            for (int i = 0; i < count; i++) Spawn(true);
+            for (int i = 0; i < count; i++)
+            {
+                Spawn(true);
+            }
+
             burstSpeed = 1f;
         }
 
         // Removes every live particle
         public void Clear()
         {
-            foreach (Particle p in live) { p.Rect.gameObject.SetActive(false); pool.Push(p); }
+            foreach (Particle p in live)
+            {
+                p.Rect.gameObject.SetActive(false);
+                pool.Push(p);
+            }
             live.Clear();
         }
 
         private void Spawn(bool burst)
         {
-            if (live.Count >= MaxParticles) return;
+            if (live.Count >= MaxParticles)
+            {
+                return;
+            }
+
             Particle p = pool.Count > 0 ? pool.Pop() : Create();
             p.Rect.gameObject.SetActive(true);
             p.Rect.SetAsLastSibling();
@@ -130,7 +150,11 @@ namespace GameKit
         {
             Image image = UiFactory.Image("Particle", transform, Sprite, Vector2.zero, Vector2.one * SizeRange.y);
             image.color = Color.clear;
-            if (Material != null) image.material = Material;
+            if (Material != null)
+            {
+                image.material = Material;
+            }
+
             return new Particle { Rect = image.rectTransform, Image = image };
         }
     }

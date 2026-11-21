@@ -62,14 +62,26 @@ namespace SlotKit
         public int SymbolIndex(string id)
         {
             for (int i = 0; i < Symbols.Length; i++)
-                if (Symbols[i].Id == id) return i;
+            {
+                if (Symbols[i].Id == id)
+                {
+                    return i;
+                }
+            }
+
             return -1;
         }
 
         public int FirstIndexOfKind(SymbolKind kind)
         {
             for (int i = 0; i < Symbols.Length; i++)
-                if (Symbols[i].Kind == kind) return i;
+            {
+                if (Symbols[i].Kind == kind)
+                {
+                    return i;
+                }
+            }
+
             return -1;
         }
 
@@ -77,22 +89,57 @@ namespace SlotKit
         public List<string> Validate()
         {
             var errors = new List<string>();
-            if (Reels < 1 || Rows < 1) errors.Add("The grid needs at least one reel and one row.");
-            if (Strips.Length != Reels) errors.Add($"There are {Strips.Length} reel strips for {Reels} reels.");
+            if (Reels < 1 || Rows < 1)
+            {
+                errors.Add("The grid needs at least one reel and one row.");
+            }
+
+            if (Strips.Length != Reels)
+            {
+                errors.Add($"There are {Strips.Length} reel strips for {Reels} reels.");
+            }
+
             for (int r = 0; r < Strips.Length; r++)
             {
-                if (Strips[r] == null || Strips[r].Length < Rows) { errors.Add($"Reel {r + 1} has fewer symbols than rows."); continue; }
+                if (Strips[r] == null || Strips[r].Length < Rows)
+                {
+                    errors.Add($"Reel {r + 1} has fewer symbols than rows.");
+                    continue;
+                }
                 foreach (int id in Strips[r])
-                    if (id < 0 || id >= Symbols.Length) { errors.Add($"Reel {r + 1} uses unknown symbol index {id}."); break; }
+                {
+                    if (id < 0 || id >= Symbols.Length)
+                    {
+                        errors.Add($"Reel {r + 1} uses unknown symbol index {id}.");
+                        break;
+                    }
+                }
             }
             for (int l = 0; l < Paylines.Length; l++)
             {
-                if (Paylines[l] == null || Paylines[l].Length != Reels) { errors.Add($"Payline {l + 1} does not cross every reel."); continue; }
+                if (Paylines[l] == null || Paylines[l].Length != Reels)
+                {
+                    errors.Add($"Payline {l + 1} does not cross every reel.");
+                    continue;
+                }
                 foreach (int row in Paylines[l])
-                    if (row < 0 || row >= Rows) { errors.Add($"Payline {l + 1} uses row {row}, outside the grid."); break; }
+                {
+                    if (row < 0 || row >= Rows)
+                    {
+                        errors.Add($"Payline {l + 1} uses row {row}, outside the grid.");
+                        break;
+                    }
+                }
             }
-            if (LineBets.Length == 0) errors.Add("There are no line bets.");
-            else if (DefaultLineBetIndex < 0 || DefaultLineBetIndex >= LineBets.Length) errors.Add("The default line bet is out of range.");
+            if (LineBets.Length == 0)
+            {
+                errors.Add("There are no line bets.");
+            }
+            else if (DefaultLineBetIndex < 0 || DefaultLineBetIndex >= LineBets.Length)
+            {
+                errors.Add("The default line bet is out of range.");
+            }
+
             return errors;
         }
     }

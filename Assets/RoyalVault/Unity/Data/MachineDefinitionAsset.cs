@@ -81,9 +81,15 @@ namespace RoyalVault.Unity
                 WinTierMultipliers = (int[])winTierMultipliers.Clone(),
             };
             for (int i = 0; i < symbols.Length; i++)
+            {
                 definition.Symbols[i] = new SymbolDefinition(symbols[i].id, symbols[i].kind, (int[])symbols[i].pays.Clone());
+            }
+
             for (int i = 0; i < scatterAwards.Length; i++)
+            {
                 definition.ScatterAwards[i] = new ScatterAward(scatterAwards[i].count, scatterAwards[i].totalBetMultiplier, scatterAwards[i].freeSpins);
+            }
+
             for (int i = 0; i < jackpotTiers.Length; i++)
             {
                 JackpotEntry j = jackpotTiers[i];
@@ -126,19 +132,30 @@ namespace RoyalVault.Unity
         }
 
         // Problems with this machine; empty when it is ready to play
-        public List<string> Validate() { return ToDefinition().Validate(); }
+        public List<string> Validate()
+        {
+            return ToDefinition().Validate();
+        }
 
         private static int[][] Rows(IntRow[] rowsIn)
         {
             var result = new int[rowsIn.Length][];
-            for (int i = 0; i < rowsIn.Length; i++) result[i] = (int[])(rowsIn[i]?.values ?? new int[0]).Clone();
+            for (int i = 0; i < rowsIn.Length; i++)
+            {
+                result[i] = (int[])(rowsIn[i]?.values ?? new int[0]).Clone();
+            }
+
             return result;
         }
 
         private static IntRow[] Entries(int[][] rowsIn)
         {
             var result = new IntRow[rowsIn.Length];
-            for (int i = 0; i < rowsIn.Length; i++) result[i] = new IntRow { values = (int[])rowsIn[i].Clone() };
+            for (int i = 0; i < rowsIn.Length; i++)
+            {
+                result[i] = new IntRow { values = (int[])rowsIn[i].Clone() };
+            }
+
             return result;
         }
     }

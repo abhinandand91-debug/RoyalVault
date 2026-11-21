@@ -11,8 +11,20 @@ namespace SlotKit
         public long Jackpots;
 
         // Return to player, in percent of everything wagered
-        public double Rtp { get { return Wagered == 0 ? 0 : 100.0 * Returned / Wagered; } }
-        public double HitRate { get { return Spins == 0 ? 0 : 100.0 * Hits / Spins; } }
+        public double Rtp
+        {
+            get
+            {
+                return Wagered == 0 ? 0 : 100.0 * Returned / Wagered;
+            }
+        }
+        public double HitRate
+        {
+            get
+            {
+                return Spins == 0 ? 0 : 100.0 * Hits / Spins;
+            }
+        }
 
         public override string ToString()
         {
@@ -34,7 +46,11 @@ namespace SlotKit
             bool free = false;
             flow.SpinStarted += context =>
             {
-                if (context.IsFreeSpin) return;
+                if (context.IsFreeSpin)
+                {
+                    return;
+                }
+
                 report.Spins++;
                 report.Wagered += context.Cost;
             };
@@ -42,9 +58,20 @@ namespace SlotKit
             {
                 SpinOutcome outcome = context.Outcome;
                 report.Returned += outcome.TotalWin;
-                if (!context.IsFreeSpin && outcome.TotalWin > 0) report.Hits++;
-                if (outcome.FreeSpinsAwarded > 0 && !context.IsFreeSpin) report.FreeSpinRounds++;
-                if (outcome.JackpotTier >= 0) report.Jackpots++;
+                if (!context.IsFreeSpin && outcome.TotalWin > 0)
+                {
+                    report.Hits++;
+                }
+
+                if (outcome.FreeSpinsAwarded > 0 && !context.IsFreeSpin)
+                {
+                    report.FreeSpinRounds++;
+                }
+
+                if (outcome.JackpotTier >= 0)
+                {
+                    report.Jackpots++;
+                }
             };
             flow.SpinFinished += context => free = context.ContinueAutomatically;
 

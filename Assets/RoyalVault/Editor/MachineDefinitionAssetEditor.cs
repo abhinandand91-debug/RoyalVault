@@ -17,20 +17,30 @@ namespace RoyalVault.EditorTools
             var machine = (MachineDefinitionAsset)target;
             List<string> errors = machine.Validate();
             if (errors.Count == 0)
+            {
                 EditorGUILayout.HelpBox($"{machine.reels} x {machine.rows} machine, {machine.paylines.Length} paylines, {machine.symbols.Length} symbols. Ready to play.", MessageType.Info);
+            }
             else
+            {
                 EditorGUILayout.HelpBox(string.Join("\n", errors), MessageType.Error);
+            }
 
             using (new EditorGUI.DisabledScope(errors.Count > 0))
             {
                 if (GUILayout.Button("Simulate 1,000,000 spins (RTP)"))
                 {
                     EditorUtility.DisplayProgressBar("Royal Vault", "Simulating 1,000,000 paid spins...", 0.5f);
-                    try { report = RtpSimulator.Run(machine.ToDefinition(), 1000000).ToString(); }
+                    try
+                    {
+                        report = RtpSimulator.Run(machine.ToDefinition(), 1000000).ToString();
+                    }
                     finally { EditorUtility.ClearProgressBar(); }
                 }
             }
-            if (!string.IsNullOrEmpty(report)) EditorGUILayout.HelpBox(report, MessageType.None);
+            if (!string.IsNullOrEmpty(report))
+            {
+                EditorGUILayout.HelpBox(report, MessageType.None);
+            }
 
             EditorGUILayout.Space();
             DrawDefaultInspector();

@@ -36,7 +36,11 @@ namespace GameKit
             var image = rect.gameObject.AddComponent<Image>();
             image.sprite = sprite;
             image.raycastTarget = raycast;
-            if (sprite == null) image.color = Color.clear;
+            if (sprite == null)
+            {
+                image.color = Color.clear;
+            }
+
             return image;
         }
 
@@ -46,7 +50,11 @@ namespace GameKit
         {
             RectTransform rect = Rect(name, parent, position, boxSize);
             var label = rect.gameObject.AddComponent<TextMeshProUGUI>();
-            if (font != null) label.font = font;
+            if (font != null)
+            {
+                label.font = font;
+            }
+
             label.text = text;
             label.fontSize = size;
             label.color = color;

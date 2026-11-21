@@ -38,18 +38,44 @@ namespace RoyalVault.Unity
             toast = messageToast;
 
             console.SpinPressed += OnSpinPressed;
-            console.BetUpPressed += () => { if (flow.State == SpinState.Idle) session.Bet.Increase(); };
-            console.BetDownPressed += () => { if (flow.State == SpinState.Idle) session.Bet.Decrease(); };
+            console.BetUpPressed += () =>
+            {
+                if (flow.State == SpinState.Idle)
+                {
+                    session.Bet.Increase();
+                }
+            };
+            console.BetDownPressed += () =>
+            {
+                if (flow.State == SpinState.Idle)
+                {
+                    session.Bet.Decrease();
+                }
+            };
             console.AutoPressed += OnAutoPressed;
-            console.MenuPressed += () => { if (flow.State == SpinState.Idle) paytable.Open(); };
+            console.MenuPressed += () =>
+            {
+                if (flow.State == SpinState.Idle)
+                {
+                    paytable.Open();
+                }
+            };
 
             session.Wallet.Changed += value => console.SetBalance(value, 0.6f);
-            session.Bet.Changed += bet => { console.SetBet(bet); session.Save(); };
+            session.Bet.Changed += bet =>
+            {
+                console.SetBet(bet);
+                session.Save();
+            };
             session.FreeSpins.Changed += state => console.SetFreeSpins(state, session.Machine.FreeSpinMultiplier);
             autoPlay.Changed += a => console.SetAuto(a.Active, a.Remaining);
 
             flow.SpinStarted += OnSpinStarted;
-            flow.SpinRejected += context => { autoPlay.Stop(); toast.Show(context.Rejection); };
+            flow.SpinRejected += context =>
+            {
+                autoPlay.Stop();
+                toast.Show(context.Rejection);
+            };
             flow.SpinPaid += OnSpinPaid;
             flow.SpinFinished += OnSpinFinished;
 
@@ -59,30 +85,59 @@ namespace RoyalVault.Unity
             console.SetAuto(false, 0);
             console.ClearWin();
             // a saved free spin round carries on
-            if (session.FreeSpins.Remaining > 0) StartCoroutine(After(1.2f, () => flow.RequestSpin()));
-            else if (story != null) StartCoroutine(story.Welcome());
+            if (session.FreeSpins.Remaining > 0)
+            {
+                StartCoroutine(After(1.2f, () => flow.RequestSpin()));
+            }
+            else if (story != null)
+            {
+                StartCoroutine(story.Welcome());
+            }
         }
 
         private void OnSpinPressed()
         {
-            if (paytable.IsOpen || bigWin.IsShowing || (story != null && story.IsTelling)) return;
-            if (flow.State == SpinState.Spinning) { machine.Hurry(); return; }
-            if (flow.State == SpinState.Presenting) return;
+            if (paytable.IsOpen || bigWin.IsShowing || (story != null && story.IsTelling))
+            {
+                return;
+            }
+
+            if (flow.State == SpinState.Spinning)
+            {
+                machine.Hurry();
+                return;
+            }
+            if (flow.State == SpinState.Presenting)
+            {
+                return;
+            }
+
             flow.RequestSpin();
         }
 
         private void OnAutoPressed()
         {
-            if (autoPlay.Active) { autoPlay.Stop(); return; }
+            if (autoPlay.Active)
+            {
+                autoPlay.Stop();
+                return;
+            }
             autoPlay.Start(AutoPlaySpins);
-            if (flow.State == SpinState.Idle) flow.RequestSpin();
+            if (flow.State == SpinState.Idle)
+            {
+                flow.RequestSpin();
+            }
         }
 
         private void OnSpinStarted(SpinContext context)
         {
             presenter.Cancel();
             console.SetControls(false, true, session.Bet);
-            if (!context.IsFreeSpin) console.ClearWin();
+            if (!context.IsFreeSpin)
+            {
+                console.ClearWin();
+            }
+
             bool fast = autoPlay.Active || context.IsFreeSpin;
             machine.Spin(context.Outcome, fast, flow.ReelsStopped);
         }
@@ -90,7 +145,11 @@ namespace RoyalVault.Unity
         private void OnSpinPaid(SpinContext context)
         {
             console.SetControls(false, false, session.Bet);
-            if (context.IsFreeSpin) freeSpinRoundWin += context.Outcome.TotalWin;
+            if (context.IsFreeSpin)
+            {
+                freeSpinRoundWin += context.Outcome.TotalWin;
+            }
+
             presenter.Present(context, autoPlay.Active || context.IsFreeSpin, flow.PresentationDone);
         }
 
@@ -105,7 +164,11 @@ namespace RoyalVault.Unity
             // free spins awarded from a paid spin: announce the round
             if (!context.IsFreeSpin && outcome.FreeSpinsAwarded > 0)
             {
-                if (story != null) yield return story.TellOnce(StoryMoment.FreeSpins);
+                if (story != null)
+                {
+                    yield return story.TellOnce(StoryMoment.FreeSpins);
+                }
+
                 freeSpinRoundWin = 0;
                 yield return bigWin.ShowTitle(outcome.FreeSpinsAwarded + " FREE SPINS", "EVERY WIN x" + session.Machine.FreeSpinMultiplier, 0, 2.2f,
                                              CelebrationKind.FreeSpinsAwarded);

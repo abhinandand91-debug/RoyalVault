@@ -32,7 +32,11 @@ namespace RoyalVault.Unity
         // Plays the win effects of art around the cell at centre
         public void Play(Vector2 centre, Vector2 cell, ThemeDefinition.SymbolArt art, float seconds)
         {
-            if (art == null || back == null) return;
+            if (art == null || back == null)
+            {
+                return;
+            }
+
             Color tint = art.tint;
             switch (art.style)
             {
@@ -66,7 +70,11 @@ namespace RoyalVault.Unity
         // A ring of light opens from a special symbol as it lands
         public void Land(Vector2 centre, Vector2 cell, ThemeDefinition.SymbolArt art)
         {
-            if (art == null || back == null) return;
+            if (art == null || back == null)
+            {
+                return;
+            }
+
             Color c = art.style == SymbolStyle.Scatter ? magic : art.tint;
             Image ring = Light("Land Ring", front, glow, centre, cell * 0.6f, c);
             Track(ring.gameObject);
@@ -79,7 +87,14 @@ namespace RoyalVault.Unity
 
         public void StopAll()
         {
-            foreach (GameObject g in live) if (g != null) Destroy(g);
+            foreach (GameObject g in live)
+            {
+                if (g != null)
+                {
+                    Destroy(g);
+                }
+            }
+
             live.Clear();
         }
 
@@ -148,7 +163,11 @@ namespace RoyalVault.Unity
                 {
                     float cycle = t * 1.25f + phase[i];
                     float local = Mathf.Repeat(cycle, 1f);
-                    if (local < Time.deltaTime * 1.25f + 0.001f) stars[i].rectTransform.anchoredPosition = RandomSpot(cell);
+                    if (local < Time.deltaTime * 1.25f + 0.001f)
+                    {
+                        stars[i].rectTransform.anchoredPosition = RandomSpot(cell);
+                    }
+
                     float a = Mathf.Pow(Mathf.Sin(local * Mathf.PI), 3f) * Envelope(t, seconds);
                     Color s = colours[i];
                     stars[i].color = new Color(s.r, s.g, s.b, a);
@@ -199,13 +218,24 @@ namespace RoyalVault.Unity
             float t = 0f;
             while (t < seconds)
             {
-                if (target == null) yield break;
+                if (target == null)
+                {
+                    yield break;
+                }
+
                 step(t / seconds);
                 t += Time.deltaTime;
                 yield return null;
             }
-            if (linger > 0f) yield return new WaitForSeconds(linger);
-            if (target != null) Destroy(target);
+            if (linger > 0f)
+            {
+                yield return new WaitForSeconds(linger);
+            }
+
+            if (target != null)
+            {
+                Destroy(target);
+            }
         }
     }
 }

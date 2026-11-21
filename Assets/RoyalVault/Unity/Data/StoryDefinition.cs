@@ -65,11 +65,24 @@ namespace RoyalVault.Unity
         public (Scene scene, int number)[] At(StoryMoment moment)
         {
             int count = 0;
-            foreach (Scene s in scenes) if (s.moment == moment) count++;
+            foreach (Scene s in scenes)
+            {
+                if (s.moment == moment)
+                {
+                    count++;
+                }
+            }
+
             var result = new (Scene, int)[count];
             int k = 0;
             for (int i = 0; i < scenes.Length; i++)
-                if (scenes[i].moment == moment) result[k++] = (scenes[i], i + 1);
+            {
+                if (scenes[i].moment == moment)
+                {
+                    result[k++] = (scenes[i], i + 1);
+                }
+            }
+
             return result;
         }
     }

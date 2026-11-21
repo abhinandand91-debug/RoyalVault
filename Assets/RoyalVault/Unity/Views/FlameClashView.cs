@@ -74,10 +74,25 @@ namespace RoyalVault.Unity
 
         private void HideAll()
         {
-            foreach (Image f in fireballs) f.gameObject.SetActive(false);
-            if (flash != null) flash.color = new Color(1f, 1f, 1f, 0f);
-            foreach (Image r in rings) r.gameObject.SetActive(false);
-            foreach (UiParticleEmitter t in trails) t.Intensity = 0f;
+            foreach (Image f in fireballs)
+            {
+                f.gameObject.SetActive(false);
+            }
+
+            if (flash != null)
+            {
+                flash.color = new Color(1f, 1f, 1f, 0f);
+            }
+
+            foreach (Image r in rings)
+            {
+                r.gameObject.SetActive(false);
+            }
+
+            foreach (UiParticleEmitter t in trails)
+            {
+                t.Intensity = 0f;
+            }
         }
 
         // The whole clash: wind-up, throw, flight and the burst where the flames meet
@@ -85,7 +100,11 @@ namespace RoyalVault.Unity
         {
             IsPlaying = true;
             List<CharacterView> active = guardians.Where(g => g != null && g.isActiveAndEnabled).ToList();
-            if (lifted != null) Restore(lifted);
+            if (lifted != null)
+            {
+                Restore(lifted);
+            }
+
             lifted = RaiseAboveMachine(active);
 
             yield return WindUp(active);
@@ -100,8 +119,15 @@ namespace RoyalVault.Unity
 
         private static IEnumerator WindUp(List<CharacterView> active)
         {
-            foreach (CharacterView g in active) g.WindUp();
-            for (float t = 0f; t < 1.8f && active.Exists(g => !g.ReadyToThrow); t += Time.deltaTime) yield return null;
+            foreach (CharacterView g in active)
+            {
+                g.WindUp();
+            }
+
+            for (float t = 0f; t < 1.8f && active.Exists(g => !g.ReadyToThrow); t += Time.deltaTime)
+            {
+                yield return null;
+            }
         }
 
         // Releases the flames and returns where each ball starts, left one first
@@ -112,22 +138,37 @@ namespace RoyalVault.Unity
             for (int i = 0; i < count; i++)
             {
                 starts[i] = i < active.Count ? (Vector2)layer.InverseTransformPoint(active[i].HandPosition) : fallbackStarts[i];
-                if (i < active.Count) active[i].Release();
+                if (i < active.Count)
+                {
+                    active[i].Release();
+                }
             }
-            if (count == 2 && starts[0].x > starts[1].x) (starts[0], starts[1]) = (starts[1], starts[0]);
+            if (count == 2 && starts[0].x > starts[1].x)
+            {
+                (starts[0], starts[1]) = (starts[1], starts[0]);
+            }
+
             Thrown?.Invoke();
             return starts;
         }
 
         private IEnumerator Fly(Vector2[] starts)
         {
-            for (int i = 0; i < starts.Length; i++) Light(i);
+            for (int i = 0; i < starts.Length; i++)
+            {
+                Light(i);
+            }
+
             for (float t = 0f; t < flightSeconds;)
             {
                 t += Time.deltaTime;
                 float k = Mathf.Clamp01(t / flightSeconds);
                 float e = k * k * (1.6f - 0.6f * k); // slow off the hand, fast into the clash
-                for (int i = 0; i < starts.Length; i++) PlaceBall(i, starts[i], e, t);
+                for (int i = 0; i < starts.Length; i++)
+                {
+                    PlaceBall(i, starts[i], e, t);
+                }
+
                 yield return null;
             }
         }
@@ -155,7 +196,11 @@ namespace RoyalVault.Unity
 
         private IEnumerator Clash(int count)
         {
-            for (int i = 0; i < count; i++) { fireballs[i].gameObject.SetActive(false); trails[i].Intensity = 0f; }
+            for (int i = 0; i < count; i++)
+            {
+                fireballs[i].gameObject.SetActive(false);
+                trails[i].Intensity = 0f;
+            }
             Clashed?.Invoke();
             UiVfx.Play(impactVfx, layer, meetingPoint, vfxScale, 3f);
             UiVfx.Play(sparksVfx, layer, meetingPoint, vfxScale, 3f);
@@ -184,22 +229,37 @@ namespace RoyalVault.Unity
         private List<(Transform guardian, int index)> RaiseAboveMachine(List<CharacterView> active)
         {
             var lifted = new List<(Transform, int)>();
-            if (shakeTarget == null) return lifted;
+            if (shakeTarget == null)
+            {
+                return lifted;
+            }
+
             Transform machine = shakeTarget;
             foreach (CharacterView g in active)
             {
                 Transform t = g.transform;
-                if (t.parent != machine.parent || t.GetSiblingIndex() > machine.GetSiblingIndex()) continue;
+                if (t.parent != machine.parent || t.GetSiblingIndex() > machine.GetSiblingIndex())
+                {
+                    continue;
+                }
+
                 lifted.Add((t, t.GetSiblingIndex()));
             }
             // move the later ones first so the remembered indices stay right
-            for (int i = lifted.Count - 1; i >= 0; i--) lifted[i].Item1.SetSiblingIndex(machine.GetSiblingIndex());
+            for (int i = lifted.Count - 1; i >= 0; i--)
+            {
+                lifted[i].Item1.SetSiblingIndex(machine.GetSiblingIndex());
+            }
+
             return lifted;
         }
 
         private static void Restore(List<(Transform guardian, int index)> lifted)
         {
-            foreach ((Transform guardian, int index) in lifted) guardian.SetSiblingIndex(index);
+            foreach ((Transform guardian, int index) in lifted)
+            {
+                guardian.SetSiblingIndex(index);
+            }
         }
 
         private IEnumerator Rings()
@@ -222,7 +282,11 @@ namespace RoyalVault.Unity
 
         private IEnumerator Shake(float seconds, float strength)
         {
-            if (shakeTarget == null) yield break;
+            if (shakeTarget == null)
+            {
+                yield break;
+            }
+
             Vector2 home = shakeTarget.anchoredPosition;
             for (float t = 0f; t < seconds; t += Time.deltaTime)
             {

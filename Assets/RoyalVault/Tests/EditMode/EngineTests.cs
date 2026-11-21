@@ -12,7 +12,11 @@ namespace RoyalVault.Tests
         private static MachineDefinition Tiny(int reels = 5)
         {
             var strips = new int[reels][];
-            for (int r = 0; r < reels; r++) strips[r] = new[] { 0, 0, 0, 1, 1, 1, 2, 3, 4, 0 };
+            for (int r = 0; r < reels; r++)
+            {
+                strips[r] = new[] { 0, 0, 0, 1, 1, 1, 2, 3, 4, 0 };
+            }
+
             var lines = new List<int[]> { Filled(reels, 1), Filled(reels, 0), Filled(reels, 2) };
             return new MachineDefinition
             {
@@ -38,7 +42,11 @@ namespace RoyalVault.Tests
         private static int[] Filled(int length, int value)
         {
             var a = new int[length];
-            for (int i = 0; i < length; i++) a[i] = value;
+            for (int i = 0; i < length; i++)
+            {
+                a[i] = value;
+            }
+
             return a;
         }
 
@@ -131,7 +139,10 @@ namespace RoyalVault.Tests
             MachineDefinition m = MachinePresets.RoyalVault5x3();
             var a = new SpinEngine(m, new SeededRandom(42));
             var b = new SpinEngine(m, new SeededRandom(42));
-            for (int i = 0; i < 50; i++) CollectionAssert.AreEqual(a.Spin(1).Stops, b.Spin(1).Stops);
+            for (int i = 0; i < 50; i++)
+            {
+                CollectionAssert.AreEqual(a.Spin(1).Stops, b.Spin(1).Stops);
+            }
         }
 
         [Test]

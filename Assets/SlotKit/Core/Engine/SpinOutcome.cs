@@ -3,7 +3,10 @@ using System.Collections.Generic;
 namespace SlotKit
 {
     // How a win compares to the bet; the presentation celebrates each tier differently
-    public enum WinTier { None, Normal, Big, Mega, Epic }
+    public enum WinTier
+    {
+        None, Normal, Big, Mega, Epic
+    }
 
     // A winning payline
     public sealed class LineWin
@@ -76,19 +79,38 @@ namespace SlotKit
             get
             {
                 long sum = 0;
-                foreach (LineWin win in LineWins) sum += win.Amount;
+                foreach (LineWin win in LineWins)
+                {
+                    sum += win.Amount;
+                }
+
                 return sum;
             }
         }
 
-        public int FreeSpinsAwarded { get { return Scatter != null ? Scatter.FreeSpins : 0; } }
+        public int FreeSpinsAwarded
+        {
+            get
+            {
+                return Scatter != null ? Scatter.FreeSpins : 0;
+            }
+        }
 
         // Credits this spin pays: line and scatter wins times the multiplier, plus any jackpot
         public long TotalWin
         {
-            get { return (LineAmount + (Scatter != null ? Scatter.Amount : 0)) * Multiplier + JackpotAmount; }
+            get
+            {
+                return (LineAmount + (Scatter != null ? Scatter.Amount : 0)) * Multiplier + JackpotAmount;
+            }
         }
 
-        public bool IsWin { get { return TotalWin > 0 || FreeSpinsAwarded > 0; } }
+        public bool IsWin
+        {
+            get
+            {
+                return TotalWin > 0 || FreeSpinsAwarded > 0;
+            }
+        }
     }
 }

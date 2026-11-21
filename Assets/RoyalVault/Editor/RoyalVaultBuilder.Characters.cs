@@ -31,13 +31,19 @@ namespace RoyalVault.EditorTools
         {
             string name = Path.GetFileName(folder).ToLowerInvariant();
             string trackPath = folder + "/" + name + "_track.json";
-            if (!File.Exists(trackPath)) return null;
+            if (!File.Exists(trackPath))
+            {
+                return null;
+            }
 
             var track = JsonUtility.FromJson<Track>(File.ReadAllText(trackPath));
             assetPath = assetPath ?? folder + ".asset";
             var asset = AssetDatabase.LoadAssetAtPath<CharacterAnimation>(assetPath);
             bool created = asset == null;
-            if (created) asset = ScriptableObject.CreateInstance<CharacterAnimation>();
+            if (created)
+            {
+                asset = ScriptableObject.CreateInstance<CharacterAnimation>();
+            }
 
             asset.framesPerSecond = track.fps;
             asset.figureShare = Mathf.Clamp(track.figureShare, 0.1f, 1f);
@@ -45,8 +51,15 @@ namespace RoyalVault.EditorTools
             asset.idle = Clip(folder, "idle", track.idle);
             asset.action = Clip(folder, "action", track.action);
 
-            if (created) AssetDatabase.CreateAsset(asset, assetPath);
-            else EditorUtility.SetDirty(asset);
+            if (created)
+            {
+                AssetDatabase.CreateAsset(asset, assetPath);
+            }
+            else
+            {
+                EditorUtility.SetDirty(asset);
+            }
+
             return asset;
         }
 
@@ -55,17 +68,30 @@ namespace RoyalVault.EditorTools
         {
             string symbols = Root + "Art.Private/Symbols";
             string assetPath = symbols + "/" + id + ".asset";
-            if (!Directory.Exists(symbols)) return null;
+            if (!Directory.Exists(symbols))
+            {
+                return null;
+            }
+
             foreach (string dir in Directory.GetDirectories(symbols))
+            {
                 if (string.Equals(Path.GetFileName(dir), id, System.StringComparison.OrdinalIgnoreCase))
+                {
                     return CreateCharacterAnimation(symbols + "/" + Path.GetFileName(dir), assetPath);
+                }
+            }
+
             return AssetDatabase.LoadAssetAtPath<CharacterAnimation>(assetPath);
         }
 
         private static CharacterAnimation.Clip Clip(string folder, string prefix, TrackClip data)
         {
             var clip = new CharacterAnimation.Clip();
-            if (data == null) return clip;
+            if (data == null)
+            {
+                return clip;
+            }
+
             int count = data.flame.Length;
             clip.frames = new Sprite[count];
             clip.hand = new Vector2[count];
@@ -103,7 +129,11 @@ namespace RoyalVault.EditorTools
                         "Ruby's grandfather made it this far.",
                         "The guardians bow. The worthy may leave with the gold." },
             };
-            for (int i = 0; i < story.scenes.Length && i < beats.Length; i++) story.scenes[i].lines = beats[i];
+            for (int i = 0; i < story.scenes.Length && i < beats.Length; i++)
+            {
+                story.scenes[i].lines = beats[i];
+            }
+
             story.controlHints = new[]
             {
                 "Spin to dig. Every spin brings you closer to the buried door.",
@@ -117,12 +147,20 @@ namespace RoyalVault.EditorTools
             string path = DataPath + "RoyalVault_Story.asset";
             var story = AssetDatabase.LoadAssetAtPath<StoryDefinition>(path);
             bool created = story == null;
-            if (created) story = ScriptableObject.CreateInstance<StoryDefinition>();
+            if (created)
+            {
+                story = ScriptableObject.CreateInstance<StoryDefinition>();
+            }
+
             story.chapterLabel = "Chapter";
             story.secondsPerScene = 5f;
             story.scenes = StoryScenes();
             SetBeats(story);
-            if (created) AssetDatabase.CreateAsset(story, path);
+            if (created)
+            {
+                AssetDatabase.CreateAsset(story, path);
+            }
+
             EditorUtility.SetDirty(story);
             return story;
         }
@@ -159,7 +197,13 @@ namespace RoyalVault.EditorTools
 
         // A figure without its (licensed) sprite is left out
         private static StoryDefinition.Scene StoryScene(int n, string title, string caption, StoryMoment moment, params StoryDefinition.Figure[] figures) =>
-            new StoryDefinition.Scene { title = title, caption = caption, art = Sprite("Story/scene_" + n, ".jpg"), moment = moment,
-                                        figures = System.Array.FindAll(figures, f => f.sprite != null) };
+            new StoryDefinition.Scene
+            {
+                title = title,
+                caption = caption,
+                art = Sprite("Story/scene_" + n, ".jpg"),
+                moment = moment,
+                figures = System.Array.FindAll(figures, f => f.sprite != null)
+            };
     }
 }

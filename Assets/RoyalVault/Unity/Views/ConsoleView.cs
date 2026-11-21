@@ -60,12 +60,21 @@ namespace RoyalVault.Unity
             sound.onClick.AddListener(() => SoundPressed?.Invoke());
         }
 
-        public void SetBalance(long value, float seconds = 0f) { balance.Set(value, seconds); }
+        public void SetBalance(long value, float seconds = 0f)
+        {
+            balance.Set(value, seconds);
+        }
 
         // Rolls the win readout up from 0
-        public void ShowWin(long value, float seconds) { win.Roll(0, value, seconds); }
+        public void ShowWin(long value, float seconds)
+        {
+            win.Roll(0, value, seconds);
+        }
 
-        public void ClearWin() { win.Set(0); }
+        public void ClearWin()
+        {
+            win.Set(0);
+        }
 
         public void SetBet(BetModel bet)
         {
@@ -96,7 +105,10 @@ namespace RoyalVault.Unity
 
         public void SetSoundOn(bool on)
         {
-            if (soundIcon != null) soundIcon.color = new Color(1f, 1f, 1f, on ? 1f : 0.35f);
+            if (soundIcon != null)
+            {
+                soundIcon.color = new Color(1f, 1f, 1f, on ? 1f : 0.35f);
+            }
         }
     }
 }

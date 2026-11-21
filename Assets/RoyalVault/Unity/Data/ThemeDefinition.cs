@@ -112,7 +112,13 @@ namespace RoyalVault.Unity
         public SymbolArt Symbol(string id)
         {
             foreach (SymbolArt art in symbols)
-                if (art.id == id) return art;
+            {
+                if (art.id == id)
+                {
+                    return art;
+                }
+            }
+
             return null;
         }
     }

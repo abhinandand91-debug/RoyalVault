@@ -47,7 +47,10 @@ namespace RoyalVault.Unity
                 segment.color = color;
                 segment.gameObject.SetActive(true);
             }
-            for (int i = points.Count - 1; i < segments.Count; i++) segments[i].gameObject.SetActive(false);
+            for (int i = points.Count - 1; i < segments.Count; i++)
+            {
+                segments[i].gameObject.SetActive(false);
+            }
 
             badge.gameObject.SetActive(win > 0);
             if (win > 0)

@@ -17,13 +17,22 @@ namespace SlotKit
             this.evaluator = evaluator ?? WinEvaluator.Standard();
         }
 
-        public MachineDefinition Machine { get { return machine; } }
+        public MachineDefinition Machine
+        {
+            get
+            {
+                return machine;
+            }
+        }
 
         public SpinOutcome Spin(long lineBet)
         {
             int[] stops = new int[machine.Reels];
             for (int reel = 0; reel < machine.Reels; reel++)
+            {
                 stops[reel] = ForcedStops != null ? ForcedStops[reel] % machine.Strips[reel].Length : random.Next(machine.Strips[reel].Length);
+            }
+
             ForcedStops = null;
             return Evaluate(stops, lineBet);
         }

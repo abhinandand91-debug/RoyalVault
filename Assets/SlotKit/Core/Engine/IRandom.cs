@@ -12,10 +12,19 @@ namespace SlotKit
     {
         private readonly System.Random random;
 
-        public SeededRandom(int seed) { random = new System.Random(seed); }
+        public SeededRandom(int seed)
+        {
+            random = new System.Random(seed);
+        }
 
-        public SeededRandom() { random = new System.Random(); }
+        public SeededRandom()
+        {
+            random = new System.Random();
+        }
 
-        public int Next(int maxExclusive) { return random.Next(maxExclusive); }
+        public int Next(int maxExclusive)
+        {
+            return random.Next(maxExclusive);
+        }
     }
 }

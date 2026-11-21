@@ -31,7 +31,10 @@ namespace RoyalVault.Unity
         {
             close.onClick.AddListener(Close);
             backdrop.onClick.AddListener(Close);
-            if (!IsOpen) SetVisible(false);
+            if (!IsOpen)
+            {
+                SetVisible(false);
+            }
         }
 
         private const int Columns = 3;
@@ -40,9 +43,16 @@ namespace RoyalVault.Unity
         // Writes one row per paying symbol, then the scatter, wild, free spin and jackpot rules
         public void Build(MachineDefinition machine, ThemeDefinition theme)
         {
-            for (int i = content.childCount - 1; i >= 0; i--) Destroy(content.GetChild(i).gameObject);
+            for (int i = content.childCount - 1; i >= 0; i--)
+            {
+                Destroy(content.GetChild(i).gameObject);
+            }
+
             List<int> paying = PayingSymbols(machine);
-            for (int n = 0; n < paying.Count; n++) PayRow(machine.Symbols[paying[n]], n, theme);
+            for (int n = 0; n < paying.Count; n++)
+            {
+                PayRow(machine.Symbols[paying[n]], n, theme);
+            }
 
             float rulesY = FirstRow - Mathf.CeilToInt(paying.Count / (float)Columns) * CellHeight - 22f;
             TextMeshProUGUI rules = UiFactory.Text("Rules", content, theme.bodyFont, string.Join("\n", Rules(machine)), 22f, theme.dimGold,
@@ -59,7 +69,10 @@ namespace RoyalVault.Unity
             {
                 SymbolKind kind = machine.Symbols[i].Kind;
                 bool pays = kind == SymbolKind.Regular || kind == SymbolKind.Wild;
-                if (pays && machine.Strips.Any(strip => System.Array.IndexOf(strip, i) >= 0)) paying.Add(i);
+                if (pays && machine.Strips.Any(strip => System.Array.IndexOf(strip, i) >= 0))
+                {
+                    paying.Add(i);
+                }
             }
             paying.Reverse();
             return paying;
@@ -72,7 +85,13 @@ namespace RoyalVault.Unity
             icon.preserveAspect = true;
             var lines = new List<string>();
             for (int count = symbol.Pays.Length - 1; count >= 0; count--)
-                if (symbol.Pays[count] > 0) lines.Add($"<color=#B39A66>{count}</color>  {symbol.Pays[count]}");
+            {
+                if (symbol.Pays[count] > 0)
+                {
+                    lines.Add($"<color=#B39A66>{count}</color>  {symbol.Pays[count]}");
+                }
+            }
+
             TextMeshProUGUI pays = UiFactory.Text("Pays", content, theme.headingFont, string.Join("\n", lines), 21f, theme.ivory,
                                                   origin + new Vector2(70f, 0f), new Vector2(180f, CellHeight), TextAlignmentOptions.Left);
             pays.lineSpacing = -16f;
@@ -87,7 +106,10 @@ namespace RoyalVault.Unity
                 rules.Add($"{Join(a, x => x.Count)} SCATTERS pay {Join(a, x => x.TotalBetMultiplier + "x")} the bet with {Join(a, x => x.FreeSpins)} free spins, every win x{machine.FreeSpinMultiplier}.");
             }
             if (machine.JackpotTiers.Length > 0)
+            {
                 rules.Add($"{Join(machine.JackpotTiers, t => t.SymbolCount)} CROWNS anywhere win the {Join(machine.JackpotTiers, t => t.Name)} jackpot.");
+            }
+
             return rules;
         }
 
@@ -95,7 +117,11 @@ namespace RoyalVault.Unity
 
         public void Open()
         {
-            if (IsOpen) return;
+            if (IsOpen)
+            {
+                return;
+            }
+
             IsOpen = true;
             gameObject.SetActive(true);
             transform.SetAsLastSibling();
@@ -105,7 +131,11 @@ namespace RoyalVault.Unity
 
         public void Close()
         {
-            if (!IsOpen) return;
+            if (!IsOpen)
+            {
+                return;
+            }
+
             IsOpen = false;
             StopAllCoroutines();
             StartCoroutine(Fade(0f));
@@ -116,7 +146,10 @@ namespace RoyalVault.Unity
             group.blocksRaycasts = to > 0f;
             float from = group.alpha;
             yield return Tween.Run(0.22f, k => group.alpha = Mathf.Lerp(from, to, k), Ease.OutCubic);
-            if (to <= 0f) SetVisible(false);
+            if (to <= 0f)
+            {
+                SetVisible(false);
+            }
         }
 
         private void SetVisible(bool visible)

@@ -38,18 +38,35 @@ namespace RoyalVault.Unity
         public void Mute()
         {
             muted = true;
-            if (card != null) card.CloseNow();
-            if (coach != null) coach.CloseNow();
+            if (card != null)
+            {
+                card.CloseNow();
+            }
+
+            if (coach != null)
+            {
+                coach.CloseNow();
+            }
         }
 
         // The first visit: the base game's chapter, then the controls
         public IEnumerator Welcome()
         {
             yield return TellOnce(StoryMoment.BaseGame);
-            if (Seen("hints") || muted || coach == null) yield break;
+            if (Seen("hints") || muted || coach == null)
+            {
+                yield break;
+            }
+
             IsTelling = true;
             foreach (Hint hint in hints)
-                if (!muted && hint.target != null) yield return coach.Show(hint.target, hint.text, hint.above);
+            {
+                if (!muted && hint.target != null)
+                {
+                    yield return coach.Show(hint.target, hint.text, hint.above);
+                }
+            }
+
             MarkSeen("hints");
             IsTelling = false;
         }
@@ -57,10 +74,18 @@ namespace RoyalVault.Unity
         // Tells the chapters of a moment that this player has not seen yet
         public IEnumerator TellOnce(StoryMoment moment)
         {
-            if (story == null || card == null || muted) yield break;
+            if (story == null || card == null || muted)
+            {
+                yield break;
+            }
+
             foreach ((StoryDefinition.Scene scene, int number) in story.At(moment))
             {
-                if (Seen("chapter." + number) || muted) continue;
+                if (Seen("chapter." + number) || muted)
+                {
+                    continue;
+                }
+
                 IsTelling = true;
                 yield return card.Tell(scene, number, story.chapterLabel);
                 MarkSeen("chapter." + number);

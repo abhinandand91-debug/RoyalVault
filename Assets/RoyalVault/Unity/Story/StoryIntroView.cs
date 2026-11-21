@@ -57,7 +57,10 @@ namespace RoyalVault.Unity
         {
             yield return Open();
             for (int i = 0; i < scenes.Length && !skipped; i++, Page = i)
+            {
                 yield return TellScene(story, scenes[i], cards[i % cards.Length], i == scenes.Length - 1);
+            }
+
             yield return Close();
         }
 
@@ -68,8 +71,16 @@ namespace RoyalVault.Unity
             PageTurned?.Invoke();
             while (!skipped)
             {
-                if (last && card.IsLastBeat) { yield return WaitForEnter(); yield break; }
-                if (TakeAdvance() && !card.NextBeat()) yield break;
+                if (last && card.IsLastBeat)
+                {
+                    yield return WaitForEnter();
+                    yield break;
+                }
+                if (TakeAdvance() && !card.NextBeat())
+                {
+                    yield break;
+                }
+
                 yield return null;
             }
         }
@@ -79,7 +90,10 @@ namespace RoyalVault.Unity
             enterButton.gameObject.SetActive(true);
             continuePrompt.alpha = 0f;
             StartCoroutine(Tween.Run(0.4f, k => enterButton.transform.localScale = Vector3.one * Ease.OutBack(k), Ease.Linear));
-            while (!entered && !skipped) yield return null;
+            while (!entered && !skipped)
+            {
+                yield return null;
+            }
         }
 
         private bool TakeAdvance()
@@ -95,7 +109,13 @@ namespace RoyalVault.Unity
             card.transform.SetAsLastSibling();
             topBar.parent.SetAsLastSibling();
             foreach (StoryCardView other in cards)
-                if (other != card) StartCoroutine(FadeCard(other, 0f));
+            {
+                if (other != card)
+                {
+                    StartCoroutine(FadeCard(other, 0f));
+                }
+            }
+
             StartCoroutine(FadeCard(card, 1f));
         }
 
@@ -126,7 +146,11 @@ namespace RoyalVault.Unity
             group.alpha = 0f;
             group.blocksRaycasts = false;
             enterButton.gameObject.SetActive(false);
-            foreach (StoryCardView card in cards) card.Group.alpha = 0f;
+            foreach (StoryCardView card in cards)
+            {
+                card.Group.alpha = 0f;
+            }
+
             IsPlaying = false;
         }
 
@@ -138,7 +162,11 @@ namespace RoyalVault.Unity
 
         private void Update()
         {
-            if (!IsPlaying || ShowsEnter) return;
+            if (!IsPlaying || ShowsEnter)
+            {
+                return;
+            }
+
             continuePrompt.alpha = 0.45f + 0.4f * Mathf.Sin(Time.time * 3f);
         }
     }

@@ -46,7 +46,11 @@ namespace RoyalVault.Unity
             card.Group.alpha = 1f;
             card.Tell(scene, number, chapterLabel);
             yield return Tween.Run(0.45f, Appear, Ease.OutCubic);
-            while (!closeNow && (!TakeAdvance() || card.NextBeat())) yield return null;
+            while (!closeNow && (!TakeAdvance() || card.NextBeat()))
+            {
+                yield return null;
+            }
+
             yield return Tween.Run(0.35f, k => group.alpha = 1f - k, Ease.InOutSine);
             SetVisible(false);
         }
@@ -75,7 +79,10 @@ namespace RoyalVault.Unity
 
         private void Update()
         {
-            if (IsShowing) continuePrompt.alpha = 0.45f + 0.4f * Mathf.Sin(Time.time * 3f);
+            if (IsShowing)
+            {
+                continuePrompt.alpha = 0.45f + 0.4f * Mathf.Sin(Time.time * 3f);
+            }
         }
     }
 }

@@ -22,7 +22,13 @@ namespace RoyalVault.Unity
         private float flash;
 
         public int SymbolIndex { get; private set; } = -1;
-        public RectTransform Rect { get { return (RectTransform)transform; } }
+        public RectTransform Rect
+        {
+            get
+            {
+                return (RectTransform)transform;
+            }
+        }
         public ThemeDefinition.SymbolArt Art => art;
         public SymbolStyle Style => art != null ? art.style : SymbolStyle.Card;
         public bool IsCelebrating => pulse != null;
@@ -48,12 +54,19 @@ namespace RoyalVault.Unity
 
         private void OnDestroy()
         {
-            if (material != null) Destroy(material);
+            if (material != null)
+            {
+                Destroy(material);
+            }
         }
 
         public void SetSymbol(int index, ThemeDefinition.SymbolArt symbolArt)
         {
-            if (index == SymbolIndex && symbolArt == art) return;
+            if (index == SymbolIndex && symbolArt == art)
+            {
+                return;
+            }
+
             SymbolIndex = index;
             art = symbolArt;
             Apply();
@@ -61,7 +74,11 @@ namespace RoyalVault.Unity
 
         public void SetBlur(bool value)
         {
-            if (value == blurred) return;
+            if (value == blurred)
+            {
+                return;
+            }
+
             blurred = value;
             Apply();
         }
@@ -71,13 +88,20 @@ namespace RoyalVault.Unity
             Sprite sprite = art == null ? null : blurred && art.blur != null ? art.blur : art.sprite;
             image.sprite = sprite;
             image.color = sprite == null ? Color.clear : Color.white;
-            if (blurred) Shine(-1f);
+            if (blurred)
+            {
+                Shine(-1f);
+            }
         }
 
         // Dims the symbol while other symbols are winning
         public void SetDimmed(bool dimmed)
         {
-            if (art == null) return;
+            if (art == null)
+            {
+                return;
+            }
+
             image.color = dimmed ? new Color(0.42f, 0.42f, 0.46f, 1f) : Color.white;
         }
 
@@ -91,37 +115,59 @@ namespace RoyalVault.Unity
 
         public void StopCelebrating()
         {
-            if (pulse != null) StopCoroutine(pulse);
+            if (pulse != null)
+            {
+                StopCoroutine(pulse);
+            }
+
             pulse = null;
             image.rectTransform.localScale = Vector3.one;
             image.rectTransform.localRotation = Quaternion.identity;
             glow.color = new Color(glow.color.r, glow.color.g, glow.color.b, 0f);
             Shine(-1f);
-            if (art != null && !blurred) image.sprite = art.sprite;
+            if (art != null && !blurred)
+            {
+                image.sprite = art.sprite;
+            }
         }
 
         // A special symbol lands: a squash, a settle and a flash of light
         public void Land()
         {
-            if (art == null || !isActiveAndEnabled) return;
+            if (art == null || !isActiveAndEnabled)
+            {
+                return;
+            }
+
             StartCoroutine(LandRoutine());
         }
 
         // A single band of light passes over the symbol (idle reels)
         public void Glint()
         {
-            if (art == null || pulse != null || glint != null || !isActiveAndEnabled) return;
+            if (art == null || pulse != null || glint != null || !isActiveAndEnabled)
+            {
+                return;
+            }
+
             glint = StartCoroutine(GlintRoutine());
         }
 
         private void Shine(float position)
         {
-            if (material != null) material.SetFloat(ShinePos, position);
+            if (material != null)
+            {
+                material.SetFloat(ShinePos, position);
+            }
         }
 
         private void Update()
         {
-            if (material == null) return;
+            if (material == null)
+            {
+                return;
+            }
+
             flash = Mathf.MoveTowards(flash, 0f, Time.deltaTime * 2.2f);
             material.SetFloat(Flash, flash);
         }
@@ -136,10 +182,17 @@ namespace RoyalVault.Unity
         {
             SymbolStyle style = Style;
             Color g = GlowColour();
-            if (material != null) material.SetColor(ShineColor, Color.Lerp(Color.white, new Color(g.r, g.g, g.b, 1f), 0.35f));
+            if (material != null)
+            {
+                material.SetColor(ShineColor, Color.Lerp(Color.white, new Color(g.r, g.g, g.b, 1f), 0.35f));
+            }
+
             bool grand = style == SymbolStyle.Wild || style == SymbolStyle.Jackpot || style == SymbolStyle.Scatter;
             float pop = grand ? 1.2f : 1.13f;
-            if (grand) flash = 0.9f;
+            if (grand)
+            {
+                flash = 0.9f;
+            }
 
             // the pop: in fast with a little overshoot, settling to the pulse
             float t = 0f;
@@ -160,7 +213,11 @@ namespace RoyalVault.Unity
             {
                 float k = Mathf.Sin((t - popTime) * Mathf.PI * 2f * 0.9f) * 0.5f + 0.5f;
                 image.rectTransform.localScale = Vector3.one * (1.04f + 0.06f * k + (grand ? 0.03f : 0f));
-                if (style == SymbolStyle.Gem) image.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(t * 3.1f) * 2.5f);
+                if (style == SymbolStyle.Gem)
+                {
+                    image.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(t * 3.1f) * 2.5f);
+                }
+
                 glow.color = new Color(g.r, g.g, g.b, 0.4f + 0.45f * k);
                 sweep += Time.deltaTime / 1.3f;
                 Shine(Mathf.Lerp(-0.4f, 1.4f, Mathf.Clamp01(Mathf.Repeat(sweep, 1f) / 0.75f)));
@@ -193,14 +250,33 @@ namespace RoyalVault.Unity
         private IEnumerator LandRoutine()
         {
             flash = 0.75f;
-            yield return Tween.Run(0.08f, k => { if (pulse == null) image.rectTransform.localScale = new Vector3(1f + 0.08f * k, 1f - 0.1f * k, 1f); }, Ease.OutCubic);
-            yield return Tween.Run(0.24f, k => { if (pulse == null) image.rectTransform.localScale = Vector3.LerpUnclamped(new Vector3(1.08f, 0.9f, 1f), Vector3.one, Ease.OutBack(k)); }, Ease.Linear);
-            if (pulse == null) image.rectTransform.localScale = Vector3.one;
+            yield return Tween.Run(0.08f, k =>
+            {
+                if (pulse == null)
+                {
+                    image.rectTransform.localScale = new Vector3(1f + 0.08f * k, 1f - 0.1f * k, 1f);
+                }
+            }, Ease.OutCubic);
+            yield return Tween.Run(0.24f, k =>
+            {
+                if (pulse == null)
+                {
+                    image.rectTransform.localScale = Vector3.LerpUnclamped(new Vector3(1.08f, 0.9f, 1f), Vector3.one, Ease.OutBack(k));
+                }
+            }, Ease.Linear);
+            if (pulse == null)
+            {
+                image.rectTransform.localScale = Vector3.one;
+            }
         }
 
         private IEnumerator GlintRoutine()
         {
-            if (material != null) material.SetColor(ShineColor, new Color(1f, 0.96f, 0.85f, 1f));
+            if (material != null)
+            {
+                material.SetColor(ShineColor, new Color(1f, 0.96f, 0.85f, 1f));
+            }
+
             yield return Tween.Run(0.75f, k => Shine(Mathf.Lerp(-0.4f, 1.4f, k)), Ease.InOutSine);
             Shine(-1f);
             glint = null;

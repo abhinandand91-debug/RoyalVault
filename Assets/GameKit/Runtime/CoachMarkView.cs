@@ -53,7 +53,11 @@ namespace GameKit
             group.blocksRaycasts = true;
             transform.SetAsLastSibling();
             yield return Tween.Run(0.3f, k => group.alpha = k, Ease.OutCubic);
-            while (!advance && !closeNow) yield return null;
+            while (!advance && !closeNow)
+            {
+                yield return null;
+            }
+
             yield return Tween.Run(0.25f, k => group.alpha = 1f - k, Ease.Linear);
             Hide();
         }
@@ -62,7 +66,10 @@ namespace GameKit
         private Rect Spotlight(RectTransform target)
         {
             Rect hole = LocalRect(target);
-            hole.xMin -= padding; hole.xMax += padding; hole.yMin -= padding; hole.yMax += padding;
+            hole.xMin -= padding;
+            hole.xMax += padding;
+            hole.yMin -= padding;
+            hole.yMax += padding;
             Vector2 size = ((RectTransform)transform).rect.size;
             float l = -size.x / 2f, r = size.x / 2f, b = -size.y / 2f, t = size.y / 2f;
             Place(shades[0], l, hole.xMin, b, t);
@@ -98,7 +105,10 @@ namespace GameKit
 
         private void Update()
         {
-            if (IsShowing) ring.localScale = Vector3.one * (1f + 0.05f * Mathf.Sin(Time.time * 4f));
+            if (IsShowing)
+            {
+                ring.localScale = Vector3.one * (1f + 0.05f * Mathf.Sin(Time.time * 4f));
+            }
         }
     }
 }

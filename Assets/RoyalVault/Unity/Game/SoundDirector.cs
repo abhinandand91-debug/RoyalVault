@@ -38,7 +38,10 @@ namespace RoyalVault.Unity
             {
                 SoundPlayer.Muted = !SoundPlayer.Muted;
                 console.SetSoundOn(!SoundPlayer.Muted);
-                if (!SoundPlayer.Muted) sound.Play(SoundCue.ButtonClick);
+                if (!SoundPlayer.Muted)
+                {
+                    sound.Play(SoundCue.ButtonClick);
+                }
             };
             console.SetSoundOn(!SoundPlayer.Muted);
 
@@ -77,7 +80,10 @@ namespace RoyalVault.Unity
             flow.SpinPaid += context =>
             {
                 SpinOutcome o = context.Outcome;
-                if (o.IsWin && o.Tier < WinTier.Big && o.JackpotTier < 0) sound.Play(SoundCue.SmallWin);
+                if (o.IsWin && o.Tier < WinTier.Big && o.JackpotTier < 0)
+                {
+                    sound.Play(SoundCue.SmallWin);
+                }
             };
             bigWin.Opened += OnCelebration;
             bigWin.Closed += () => sound.StopLoop(SoundCue.CoinShowerLoop, 0.4f);
@@ -90,15 +96,26 @@ namespace RoyalVault.Unity
         private void PlayMusic(bool freeSpins)
         {
             SoundBank bank = sound.Bank;
-            if (bank == null) return;
+            if (bank == null)
+            {
+                return;
+            }
+
             sound.PlayMusic(freeSpins && bank.freeSpinsMusic != null ? bank.freeSpinsMusic : bank.baseGameMusic);
         }
 
         private void OnReelStopped(int reel)
         {
-            if (outcome == null) return;
+            if (outcome == null)
+            {
+                return;
+            }
             // each stop a touch higher; reels landing in the same frame make one sound
-            if (Time.frameCount != lastStopFrame) sound.Play(SoundCue.ReelStop, 1f, 1f + 0.03f * landed);
+            if (Time.frameCount != lastStopFrame)
+            {
+                sound.Play(SoundCue.ReelStop, 1f, 1f + 0.03f * landed);
+            }
+
             lastStopFrame = Time.frameCount;
             landed++;
             bool seal = false, crown = false, wildLanded = false;
@@ -109,26 +126,55 @@ namespace RoyalVault.Unity
                 crown |= symbol == jackpot;
                 wildLanded |= symbol == wild;
             }
-            if (seal) sound.Play(SoundCue.ScatterLand);
-            if (crown) sound.Play(SoundCue.JackpotLand);
-            if (wildLanded) sound.Play(SoundCue.WildLand);
+            if (seal)
+            {
+                sound.Play(SoundCue.ScatterLand);
+            }
+
+            if (crown)
+            {
+                sound.Play(SoundCue.JackpotLand);
+            }
+
+            if (wildLanded)
+            {
+                sound.Play(SoundCue.WildLand);
+            }
         }
 
         private void OnCelebration(CelebrationKind kind, bool counting)
         {
             switch (kind)
             {
-                case CelebrationKind.BigWin: sound.Play(SoundCue.BigWin); break;
-                case CelebrationKind.MegaWin: sound.Play(SoundCue.MegaWin); break;
-                case CelebrationKind.EpicWin: sound.Play(SoundCue.EpicWin); break;
-                case CelebrationKind.Jackpot: sound.Play(SoundCue.JackpotWin); break;
-                case CelebrationKind.FreeSpinsAwarded: sound.Play(SoundCue.FreeSpinsAwarded); break;
-                case CelebrationKind.FreeSpinsTotal: sound.Play(SoundCue.FreeSpinsTotal); break;
+                case CelebrationKind.BigWin:
+                    sound.Play(SoundCue.BigWin);
+                    break;
+                case CelebrationKind.MegaWin:
+                    sound.Play(SoundCue.MegaWin);
+                    break;
+                case CelebrationKind.EpicWin:
+                    sound.Play(SoundCue.EpicWin);
+                    break;
+                case CelebrationKind.Jackpot:
+                    sound.Play(SoundCue.JackpotWin);
+                    break;
+                case CelebrationKind.FreeSpinsAwarded:
+                    sound.Play(SoundCue.FreeSpinsAwarded);
+                    break;
+                case CelebrationKind.FreeSpinsTotal:
+                    sound.Play(SoundCue.FreeSpinsTotal);
+                    break;
             }
             // the guardians call up their flame for the big moments
             if (kind == CelebrationKind.BigWin || kind == CelebrationKind.MegaWin || kind == CelebrationKind.EpicWin || kind == CelebrationKind.Jackpot)
+            {
                 sound.Play(SoundCue.GuardianFlame, 0.8f);
-            if (counting) sound.StartLoop(SoundCue.CoinShowerLoop);
+            }
+
+            if (counting)
+            {
+                sound.StartLoop(SoundCue.CoinShowerLoop);
+            }
         }
     }
 }

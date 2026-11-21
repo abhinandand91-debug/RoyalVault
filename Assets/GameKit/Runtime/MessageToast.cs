@@ -16,7 +16,10 @@ namespace GameKit
             label = text;
         }
 
-        private void Awake() { group.alpha = 0f; }
+        private void Awake()
+        {
+            group.alpha = 0f;
+        }
 
         public void Show(string message, float seconds = 2f)
         {

@@ -14,7 +14,10 @@ namespace SlotKit
             Row = row;
         }
 
-        public override string ToString() { return $"({Reel},{Row})"; }
+        public override string ToString()
+        {
+            return $"({Reel},{Row})";
+        }
     }
 
     // The symbols showing in the window after a spin, as symbol indices
@@ -34,8 +37,14 @@ namespace SlotKit
 
         public int this[int reel, int row]
         {
-            get { return cells[reel, row]; }
-            set { cells[reel, row] = value; }
+            get
+            {
+                return cells[reel, row];
+            }
+            set
+            {
+                cells[reel, row] = value;
+            }
         }
 
         // Every cell holding symbol
@@ -43,8 +52,16 @@ namespace SlotKit
         {
             var found = new List<GridPosition>();
             for (int reel = 0; reel < Reels; reel++)
+            {
                 for (int row = 0; row < Rows; row++)
-                    if (cells[reel, row] == symbol) found.Add(new GridPosition(reel, row));
+                {
+                    if (cells[reel, row] == symbol)
+                    {
+                        found.Add(new GridPosition(reel, row));
+                    }
+                }
+            }
+
             return found;
         }
 
@@ -56,7 +73,9 @@ namespace SlotKit
             {
                 int[] strip = machine.Strips[reel];
                 for (int row = 0; row < machine.Rows; row++)
+                {
                     grid[reel, row] = strip[(stops[reel] + row) % strip.Length];
+                }
             }
             return grid;
         }

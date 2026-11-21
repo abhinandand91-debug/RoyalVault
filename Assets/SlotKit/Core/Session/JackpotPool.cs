@@ -17,19 +17,37 @@ namespace SlotKit
             this.tiers = tiers;
             centi = new long[tiers.Length];
             for (int i = 0; i < tiers.Length; i++)
+            {
                 centi[i] = 100 * (saved != null && i < saved.Length && saved[i] >= tiers[i].Seed ? saved[i] : tiers[i].Seed);
+            }
         }
 
-        public int Count { get { return tiers.Length; } }
+        public int Count
+        {
+            get
+            {
+                return tiers.Length;
+            }
+        }
 
-        public JackpotTierDefinition Tier(int index) { return tiers[index]; }
+        public JackpotTierDefinition Tier(int index)
+        {
+            return tiers[index];
+        }
 
-        public long Value(int index) { return centi[index] / 100; }
+        public long Value(int index)
+        {
+            return centi[index] / 100;
+        }
 
         public long[] Values()
         {
             var values = new long[tiers.Length];
-            for (int i = 0; i < values.Length; i++) values[i] = Value(i);
+            for (int i = 0; i < values.Length; i++)
+            {
+                values[i] = Value(i);
+            }
+
             return values;
         }
 
@@ -40,7 +58,10 @@ namespace SlotKit
             {
                 long before = Value(i);
                 centi[i] += (long)Math.Round(bet * tiers[i].ContributionPercent);
-                if (Value(i) != before) Changed?.Invoke(i);
+                if (Value(i) != before)
+                {
+                    Changed?.Invoke(i);
+                }
             }
         }
 
