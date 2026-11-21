@@ -31,6 +31,7 @@ namespace RoyalVault.Unity
         [SerializeField] private Color magic = new Color(0.35f, 0.75f, 1f, 1f);
 
         private CharacterView[] guardians = new CharacterView[0];
+        private System.Collections.Generic.List<(Transform guardian, int index)> lifted;
         private Vector2[] fallbackStarts = { new Vector2(-700f, 250f), new Vector2(700f, 250f) };
 
         /// <summary>The fireballs leave the guardians' hands.</summary>
@@ -76,6 +77,11 @@ namespace RoyalVault.Unity
             IsPlaying = true;
             var active = new System.Collections.Generic.List<CharacterView>();
             foreach (CharacterView g in guardians) if (g != null && g.isActiveAndEnabled) active.Add(g);
+
+            // the guardians lean in over the reel frame, so for the throw they are drawn above the machine
+            // (an interrupted clash would have left them there: put them back first)
+            if (lifted != null) Restore(lifted);
+            lifted = RaiseAboveMachine(active);
 
             // wind-up: both lean in and call up their flame; throw when both are ready
             foreach (CharacterView g in active) g.WindUp();
@@ -135,7 +141,35 @@ namespace RoyalVault.Unity
             StartCoroutine(Shake(0.35f, 14f));
             yield return Tween.Run(0.08f, k => flash.color = new Color(Mathf.Lerp(magic.r, 1f, 0.7f), Mathf.Lerp(magic.g, 1f, 0.7f), 1f, 0.55f * k), Ease.Linear);
             yield return Tween.Run(0.5f, k => flash.color = new Color(Mathf.Lerp(magic.r, 1f, 0.7f), Mathf.Lerp(magic.g, 1f, 0.7f), 1f, 0.55f * (1f - k)), Ease.OutCubic);
+            // by now they have recoiled back into their niches: return them behind the machine
+            Restore(lifted);
+            lifted = null;
             IsPlaying = false;
+        }
+
+        /// <summary>
+        /// Moves each guardian to just above the machine in the drawing order (still under this effect layer, the console
+        /// and the celebrations) and returns where each was, to put it back.
+        /// </summary>
+        private System.Collections.Generic.List<(Transform guardian, int index)> RaiseAboveMachine(System.Collections.Generic.List<CharacterView> active)
+        {
+            var lifted = new System.Collections.Generic.List<(Transform, int)>();
+            if (shakeTarget == null) return lifted;
+            Transform machine = shakeTarget;
+            foreach (CharacterView g in active)
+            {
+                Transform t = g.transform;
+                if (t.parent != machine.parent || t.GetSiblingIndex() > machine.GetSiblingIndex()) continue;
+                lifted.Add((t, t.GetSiblingIndex()));
+            }
+            // move the later ones first so the remembered indices stay right
+            for (int i = lifted.Count - 1; i >= 0; i--) lifted[i].Item1.SetSiblingIndex(machine.GetSiblingIndex());
+            return lifted;
+        }
+
+        private static void Restore(System.Collections.Generic.List<(Transform guardian, int index)> lifted)
+        {
+            foreach ((Transform guardian, int index) in lifted) guardian.SetSiblingIndex(index);
         }
 
         private IEnumerator Rings()
