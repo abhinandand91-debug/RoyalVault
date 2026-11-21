@@ -18,7 +18,8 @@ namespace RoyalVault.Unity
         private Material material;
         private ThemeDefinition.SymbolArt art;
         private Coroutine pulse;
-        private Coroutine glint;
+        private Tween glint;
+        private Sequence landing;
         private bool blurred;
         private float flash;
 
@@ -121,7 +122,8 @@ namespace RoyalVault.Unity
                 StopCoroutine(pulse);
             }
 
-            Tween.StopAll(this);
+            landing.Stop();
+            glint.Stop();
             pulse = null;
             image.rectTransform.localScale = Vector3.one;
             image.rectTransform.localRotation = Quaternion.identity;
@@ -141,18 +143,29 @@ namespace RoyalVault.Unity
                 return;
             }
 
-            StartCoroutine(LandRoutine());
+            flash = 0.75f;
+            landing.Stop();
+            var squashed = new Vector3(1.08f, 0.9f, 1f);
+            landing = Sequence.Create()
+                .Chain(Tween.Custom(this, Vector3.one, squashed, 0.08f, (view, scale) => view.Squash(scale), Ease.OutCubic))
+                .Chain(Tween.Custom(this, squashed, Vector3.one, 0.24f, (view, scale) => view.Squash(scale), Ease.OutBack));
         }
 
         // A single band of light passes over the symbol (idle reels)
         public void Glint()
         {
-            if (art == null || pulse != null || glint != null || !isActiveAndEnabled)
+            if (art == null || pulse != null || glint.isAlive || !isActiveAndEnabled)
             {
                 return;
             }
 
-            glint = StartCoroutine(GlintRoutine());
+            if (material != null)
+            {
+                material.SetColor(ShineColor, new Color(1f, 0.96f, 0.85f, 1f));
+            }
+
+            glint = Tween.Custom(this, -0.4f, 1.4f, 0.75f, (view, position) => view.Shine(position), Ease.InOutSine)
+                .OnComplete(this, view => view.Shine(-1f));
         }
 
         private void Shine(float position)
@@ -249,18 +262,6 @@ namespace RoyalVault.Unity
             StopCelebrating();
         }
 
-        private IEnumerator LandRoutine()
-        {
-            flash = 0.75f;
-            var squashed = new Vector3(1.08f, 0.9f, 1f);
-            yield return Tween.Custom(this, Vector3.one, squashed, 0.08f, (view, scale) => view.Squash(scale), Ease.OutCubic).ToYieldInstruction();
-            yield return Tween.Custom(this, squashed, Vector3.one, 0.24f, (view, scale) => view.Squash(scale), Ease.OutBack).ToYieldInstruction();
-            if (pulse == null)
-            {
-                image.rectTransform.localScale = Vector3.one;
-            }
-        }
-
         // Landing squash, unless a celebration has taken over the scale
         private void Squash(Vector3 scale)
         {
@@ -268,18 +269,6 @@ namespace RoyalVault.Unity
             {
                 image.rectTransform.localScale = scale;
             }
-        }
-
-        private IEnumerator GlintRoutine()
-        {
-            if (material != null)
-            {
-                material.SetColor(ShineColor, new Color(1f, 0.96f, 0.85f, 1f));
-            }
-
-            yield return Tween.Custom(this, -0.4f, 1.4f, 0.75f, (view, position) => view.Shine(position), Ease.InOutSine).ToYieldInstruction();
-            Shine(-1f);
-            glint = null;
         }
     }
 }

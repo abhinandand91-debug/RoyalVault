@@ -1,5 +1,6 @@
 using System.Collections;
 using GameKit;
+using PrimeTween;
 using SlotKit;
 using UnityEngine;
 
@@ -19,6 +20,7 @@ namespace RoyalVault.Unity
         private MessageToast toast;
         private long freeSpinRoundWin;
         private StoryDirector story;
+        private readonly WaitForSeconds autoSpinPause = new WaitForSeconds(0.35f);
 
         // Spins played automatically after the player starts auto play
         public int AutoPlaySpins = 25;
@@ -87,7 +89,7 @@ namespace RoyalVault.Unity
             // a saved free spin round carries on
             if (session.FreeSpins.Remaining > 0)
             {
-                StartCoroutine(After(1.2f, () => flow.RequestSpin()));
+                Tween.Delay(this, 1.2f, controller => controller.flow.RequestSpin());
             }
             else if (story != null)
             {
@@ -186,17 +188,11 @@ namespace RoyalVault.Unity
 
             if (context.ContinueAutomatically)
             {
-                yield return new WaitForSeconds(0.35f);
+                yield return autoSpinPause;
                 flow.RequestSpin();
                 yield break;
             }
             console.SetControls(true, false, session.Bet);
-        }
-
-        private static IEnumerator After(float seconds, System.Action action)
-        {
-            yield return new WaitForSeconds(seconds);
-            action();
         }
     }
 }

@@ -59,3 +59,49 @@ if (condition) ExecuteAction();
 
 These coding standards are mandatory for all newly generated or modified C# files.
 Before completing a task, review the modified files and correct any formatting violations.
+
+## Performance Standards – Mandatory
+
+The game will keep growing, so every runtime feature is written to scale from the start.
+
+### 1. Animation
+
+- Use PrimeTween for all timed animation: fades, moves, scales, colours, delays and chains.
+- Use a PrimeTween `Sequence` instead of a coroutine when the timing is fixed.
+- Use a coroutine only when the code waits on the player or on game state (a tap, a reel landing, a scene load).
+- Keep the `Tween` or `Sequence` handle in a field and call `Stop()` on it when the animation is cancelled.
+
+### 2. No Allocations in Hot Paths
+
+- Hot paths are `Update`, `LateUpdate`, coroutine loops, tween callbacks and anything that runs every spin.
+- Do not create classes, arrays, lists or delegates there; reuse fields instead.
+- Do not use LINQ there.
+- Do not build strings there; update text only when its value changes.
+- Tween callbacks must not capture locals or `this`: use the target overload, for example
+  `Tween.Custom(this, 0f, 1f, duration, (view, value) => view.SetGlow(value))`.
+- Cache `WaitForSeconds` and other yield instructions in fields.
+
+### 3. Cached References
+
+- Never call `GetComponent`, `Find`, `FindObjectOfType` or `Camera.main` in hot paths.
+- Get references once in `Awake`, `Setup` or through serialized fields.
+
+### 4. Object Pooling
+
+- Pool anything spawned repeatedly (coins, particles, popups, symbols) instead of `Instantiate` and `Destroy`.
+
+### 5. UI
+
+- Turn off `raycastTarget` on every graphic that is not clickable.
+- Put frequently changing UI (counters, effects) on its own nested `Canvas` so the whole screen does not rebuild.
+- Avoid layout groups on animated content; position elements directly.
+- Fade groups with `CanvasGroup.alpha` rather than toggling many objects.
+
+### 6. Events and Lifetime
+
+- Unsubscribe from events on longer-lived objects in `OnDestroy`.
+- Stop tweens and coroutines that a view owns when it is disabled or destroyed.
+
+### 7. Measure
+
+- Profile with the Unity Profiler before micro-optimising; fix what the profiler shows first.

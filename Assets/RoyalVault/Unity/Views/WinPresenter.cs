@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using System;
+using PrimeTween;
 using SlotKit;
 using UnityEngine;
 
@@ -17,6 +18,8 @@ namespace RoyalVault.Unity
         private FlameClashView clash;
         private StoryDirector story;
         private Coroutine routine;
+        private readonly List<GridPosition> wonCells = new List<GridPosition>();
+        private readonly WaitForSeconds linePause = new WaitForSeconds(1.5f);
 
         public void Bind(MachineView machineView, ConsoleView consoleView, BigWinView bigWinView, JackpotPanelView jackpotView,
                          CharacterView[] characterViews, FlameClashView flameClash = null, StoryDirector storyDirector = null)
@@ -76,7 +79,8 @@ namespace RoyalVault.Unity
         // Everything that won, together
         private IEnumerator ShowAllWins(SpinOutcome outcome, float seconds)
         {
-            var cells = new List<GridPosition>();
+            List<GridPosition> cells = wonCells;
+            cells.Clear();
             foreach (LineWin line in outcome.LineWins)
             {
                 cells.AddRange(line.Positions);
@@ -95,7 +99,7 @@ namespace RoyalVault.Unity
             }
 
             console.ShowWin(outcome.TotalWin, Mathf.Clamp(outcome.TotalWin / (float)Math.Max(1, outcome.TotalBet) * 0.25f, 0.4f, 2.5f));
-            yield return new WaitForSeconds(seconds);
+            yield return Tween.Delay(seconds).ToYieldInstruction();
             machine.HideLines();
         }
 
@@ -136,7 +140,7 @@ namespace RoyalVault.Unity
                     machine.HideLines();
                     machine.HighlightCells(line.Positions, 1.5f);
                     machine.ShowLine(line.Line, line.Amount * outcome.Multiplier, 0);
-                    yield return new WaitForSeconds(1.5f);
+                    yield return linePause;
                 }
             }
         }

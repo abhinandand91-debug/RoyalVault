@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Collections;
-using System.Linq;
 using System;
 using GameKit;
 using PrimeTween;
@@ -34,6 +33,7 @@ namespace RoyalVault.Unity
         private GameObject sparksVfx;
         private float vfxScale = 90f;
         private List<(Transform guardian, int index)> lifted;
+        private readonly List<CharacterView> activeGuardians = new List<CharacterView>();
         private Vector2[] fallbackStarts = { new Vector2(-700f, 250f), new Vector2(700f, 250f) };
 
         // The fireballs leave the guardians' hands
@@ -100,7 +100,7 @@ namespace RoyalVault.Unity
         public IEnumerator Play()
         {
             IsPlaying = true;
-            List<CharacterView> active = guardians.Where(g => g != null && g.isActiveAndEnabled).ToList();
+            List<CharacterView> active = ActiveGuardians();
             if (lifted != null)
             {
                 Restore(lifted);
@@ -116,6 +116,20 @@ namespace RoyalVault.Unity
             Restore(lifted);
             lifted = null;
             IsPlaying = false;
+        }
+
+        private List<CharacterView> ActiveGuardians()
+        {
+            activeGuardians.Clear();
+            foreach (CharacterView guardian in guardians)
+            {
+                if (guardian != null && guardian.isActiveAndEnabled)
+                {
+                    activeGuardians.Add(guardian);
+                }
+            }
+
+            return activeGuardians;
         }
 
         private static IEnumerator WindUp(List<CharacterView> active)

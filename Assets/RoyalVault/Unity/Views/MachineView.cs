@@ -55,6 +55,7 @@ namespace RoyalVault.Unity
         private RectTransform paylineLayer;
         private readonly List<PaylineView> paylines = new List<PaylineView>();
         private readonly List<SymbolView> celebrating = new List<SymbolView>();
+        private readonly List<SymbolView> glintCandidates = new List<SymbolView>();
 
         public bool IsSpinning
         {
@@ -266,14 +267,14 @@ namespace RoyalVault.Unity
         }
 
         // Celebrates the given cells and dims the rest of the window
-        public void HighlightCells(IEnumerable<GridPosition> positions, float seconds)
+        public void HighlightCells(IReadOnlyList<GridPosition> positions, float seconds)
         {
             StopCelebrating();
-            var lit = new HashSet<SymbolView>();
-            foreach (GridPosition position in positions)
+            for (int i = 0; i < positions.Count; i++)
             {
+                GridPosition position = positions[i];
                 SymbolView view = SymbolAt(position);
-                if (lit.Add(view))
+                if (!celebrating.Contains(view))
                 {
                     view.Celebrate(seconds);
                     celebrating.Add(view);
@@ -288,7 +289,7 @@ namespace RoyalVault.Unity
                 for (int row = 0; row < machine.Rows; row++)
                 {
                     SymbolView view = reels[r].ViewAt(row);
-                    view.SetDimmed(lit.Count > 0 && !lit.Contains(view));
+                    view.SetDimmed(celebrating.Count > 0 && !celebrating.Contains(view));
                 }
             }
         }
@@ -577,7 +578,8 @@ namespace RoyalVault.Unity
                 return;
             }
 
-            var candidates = new List<SymbolView>();
+            List<SymbolView> candidates = glintCandidates;
+            candidates.Clear();
             foreach (ReelView reel in reels)
             {
                 for (int row = 0; row < machine.Rows; row++)

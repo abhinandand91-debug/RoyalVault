@@ -33,10 +33,12 @@ namespace RoyalVault.Unity
 
         private const string IntroSeenKey = "royalvault.story.intro.seen";
 
+        private Sequence tipCycle;
+
         // True once the story has been told, or when there is none
         public bool StoryDone { get; private set; } = true;
 
-        private readonly List<RectTransform> dust = new List<RectTransform>();
+        private readonly List<Image> dust = new List<Image>();
         private float shown;
         private int tipIndex;
 
@@ -94,7 +96,7 @@ namespace RoyalVault.Unity
             {
                 if (tips.Length > 0)
                 {
-                    StartCoroutine(RotateTips());
+                    RotateTips();
                 }
 
                 return;
@@ -108,7 +110,7 @@ namespace RoyalVault.Unity
         {
             for (int i = 0; i < 26; i++)
             {
-                dust.Add(UiFactory.Image("Dust", dustLayer, dustSprite, RandomDustPosition(true), Vector2.one * Random.Range(10f, 30f)).rectTransform);
+                dust.Add(UiFactory.Image("Dust", dustLayer, dustSprite, RandomDustPosition(true), Vector2.one * Random.Range(10f, 30f)));
             }
         }
 
@@ -148,7 +150,7 @@ namespace RoyalVault.Unity
             float width = fillArea.rect.width;
             tip.anchoredPosition = new Vector2(-width * 0.5f + width * shown, 0f);
             tip.gameObject.SetActive(shown > 0.005f && shown < 0.999f);
-            percent.text = Mathf.RoundToInt(shown * 100f) + "%";
+            percent.SetText("{0:0}%", Mathf.Round(shown * 100f));
         }
 
         public IEnumerator FadeOut()
@@ -178,17 +180,18 @@ namespace RoyalVault.Unity
             // the tip twinkles
             tip.localScale = Vector3.one * (1f + 0.18f * Mathf.Sin(time * 9f));
 
-            foreach (RectTransform mote in dust)
+            foreach (Image mote in dust)
             {
-                Vector2 p = mote.anchoredPosition + new Vector2(Mathf.Sin(time + Phase(mote)) * 6f, 38f) * Time.deltaTime;
+                RectTransform rect = mote.rectTransform;
+                float phase = Phase(rect);
+                Vector2 p = rect.anchoredPosition + new Vector2(Mathf.Sin(time + phase) * 6f, 38f) * Time.deltaTime;
                 if (p.y > 560f)
                 {
                     p = RandomDustPosition(false);
                 }
 
-                mote.anchoredPosition = p;
-                var image = mote.GetComponent<Image>();
-                image.color = new Color(1f, 0.86f, 0.55f, 0.15f + 0.35f * (Mathf.Sin(time * 2f + Phase(mote) * 3f) * 0.5f + 0.5f));
+                rect.anchoredPosition = p;
+                mote.color = new Color(1f, 0.86f, 0.55f, 0.15f + 0.35f * (Mathf.Sin(time * 2f + phase * 3f) * 0.5f + 0.5f));
             }
         }
 
@@ -202,16 +205,25 @@ namespace RoyalVault.Unity
             return new Vector2(Random.Range(-940f, 940f), anywhere ? Random.Range(-540f, 540f) : -560f);
         }
 
-        private IEnumerator RotateTips()
+        // One tip after another, fading in and out, until the screen goes away
+        private void RotateTips()
         {
-            while (true)
-            {
-                tipText.text = tips[tipIndex % tips.Length].ToUpperInvariant() + "…";
-                yield return Tween.Alpha(tipText, 0f, 1f, 0.35f, Ease.Linear).ToYieldInstruction();
-                yield return new WaitForSeconds(1.3f);
-                yield return Tween.Alpha(tipText, 1f, 0f, 0.35f, Ease.Linear).ToYieldInstruction();
-                tipIndex++;
-            }
+            tipCycle = Sequence.Create(cycles: -1)
+                .ChainCallback(this, screen => screen.NextTip())
+                .Chain(Tween.Alpha(tipText, 0f, 1f, 0.35f, Ease.Linear))
+                .ChainDelay(1.3f)
+                .Chain(Tween.Alpha(tipText, 1f, 0f, 0.35f, Ease.Linear));
+        }
+
+        private void OnDestroy()
+        {
+            tipCycle.Stop();
+        }
+
+        private void NextTip()
+        {
+            tipText.text = tips[tipIndex % tips.Length].ToUpperInvariant() + "…";
+            tipIndex++;
         }
     }
 }

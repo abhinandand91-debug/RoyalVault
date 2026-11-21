@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Collections;
 using System.Linq;
 using GameKit;
 using PrimeTween;
@@ -17,6 +16,8 @@ namespace RoyalVault.Unity
         [SerializeField] private RectTransform content;
         [SerializeField] private Button close;
         [SerializeField] private Button backdrop;
+
+        private Tween fade;
 
         public bool IsOpen { get; private set; }
 
@@ -126,9 +127,7 @@ namespace RoyalVault.Unity
             IsOpen = true;
             gameObject.SetActive(true);
             transform.SetAsLastSibling();
-            StopAllCoroutines();
-            Tween.StopAll(group);
-            StartCoroutine(Fade(1f));
+            Fade(1f);
         }
 
         public void Close()
@@ -139,19 +138,17 @@ namespace RoyalVault.Unity
             }
 
             IsOpen = false;
-            StopAllCoroutines();
-            Tween.StopAll(group);
-            StartCoroutine(Fade(0f));
+            Fade(0f);
         }
 
-        private IEnumerator Fade(float to)
+        private void Fade(float to)
         {
             group.blocksRaycasts = to > 0f;
-            float from = group.alpha;
-            yield return Tween.Alpha(group, from, to, 0.22f, Ease.OutCubic).ToYieldInstruction();
+            fade.Stop();
+            fade = Tween.Alpha(group, group.alpha, to, 0.22f, Ease.OutCubic);
             if (to <= 0f)
             {
-                SetVisible(false);
+                fade.OnComplete(this, view => view.SetVisible(false));
             }
         }
 

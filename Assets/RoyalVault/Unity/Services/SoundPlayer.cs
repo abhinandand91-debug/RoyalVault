@@ -1,5 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
+using PrimeTween;
 using UnityEngine;
 
 namespace RoyalVault.Unity
@@ -19,7 +19,7 @@ namespace RoyalVault.Unity
         private AudioSource[] music = new AudioSource[2];
         private int musicIndex;
         private AudioClip currentMusic;
-        private Coroutine fade;
+        private Sequence musicFade;
         private int next;
 
         public SoundBank Bank => bank;
@@ -122,19 +122,8 @@ namespace RoyalVault.Unity
                 return;
             }
 
-            StartCoroutine(FadeOut(source, seconds));
-        }
-
-        private static IEnumerator FadeOut(AudioSource source, float seconds)
-        {
-            float from = source.volume;
-            for (float t = 0f; t < seconds; t += Time.unscaledDeltaTime)
-            {
-                source.volume = from * (1f - t / seconds);
-                yield return null;
-            }
-            source.Stop();
-            source.volume = from;
+            Tween.AudioVolume(source, source.volume, 0f, seconds, useUnscaledTime: true)
+                .OnComplete(source, loop => loop.Stop());
         }
 
         // Cross-fades to clip (null fades the music out)
@@ -156,45 +145,27 @@ namespace RoyalVault.Unity
             }
 
             currentMusic = clip;
-            if (fade != null)
-            {
-                StopCoroutine(fade);
-            }
-
-            fade = StartCoroutine(CrossFade(clip, seconds));
+            musicFade.Stop();
+            musicFade = CrossFade(clip, Mathf.Max(0.01f, seconds));
         }
 
-        private IEnumerator CrossFade(AudioClip clip, float seconds)
+        // The playing music fades out while the new clip fades in; null only fades out
+        private Sequence CrossFade(AudioClip clip, float seconds)
         {
             AudioSource outgoing = music[musicIndex];
             musicIndex = 1 - musicIndex;
             AudioSource incoming = music[musicIndex];
-            float target = bank.musicVolume;
-            float outFrom = outgoing.volume;
+            Sequence crossFade = Sequence.Create(useUnscaledTime: true)
+                .Chain(Tween.AudioVolume(outgoing, outgoing.volume, 0f, seconds));
             if (clip != null)
             {
                 incoming.clip = clip;
                 incoming.volume = 0f;
                 incoming.Play();
-            }
-            for (float t = 0f; t < seconds; t += Time.unscaledDeltaTime)
-            {
-                float k = t / Mathf.Max(0.01f, seconds);
-                outgoing.volume = outFrom * (1f - k);
-                if (clip != null)
-                {
-                    incoming.volume = target * k;
-                }
-
-                yield return null;
-            }
-            outgoing.Stop();
-            if (clip != null)
-            {
-                incoming.volume = target;
+                crossFade.Group(Tween.AudioVolume(incoming, 0f, bank.musicVolume, seconds));
             }
 
-            fade = null;
+            return crossFade.ChainCallback(outgoing, source => source.Stop());
         }
 
         private void Remember(SoundCue cue)

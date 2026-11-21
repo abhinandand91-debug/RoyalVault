@@ -1,4 +1,3 @@
-using System.Collections;
 using GameKit;
 using PrimeTween;
 using SlotKit;
@@ -31,7 +30,7 @@ namespace RoyalVault.Unity
         private bool open;
         private int lit;
         private float shake;
-        private Coroutine routine;
+        private Sequence animation;
 
         // A seal landed and cracked the seal further (the stage, 1 = first crack)
         public event System.Action<int> Cracked;
@@ -186,13 +185,8 @@ namespace RoyalVault.Unity
             sparks.StartColor = new Color(1f, 0.9f, 0.6f, 1f);
             sparks.Burst(14 + 10 * lit, 1f + 0.3f * lit);
             shake = 1f;
-            if (routine != null)
-            {
-                StopCoroutine(routine);
-            }
-
-            StopTweens();
-            routine = StartCoroutine(lit >= needed ? Shatter() : Pulse(lit));
+            animation.Stop();
+            animation = lit >= needed ? Shatter() : Pulse(lit);
             if (lit >= needed)
             {
                 Broke?.Invoke();
@@ -203,32 +197,35 @@ namespace RoyalVault.Unity
             }
         }
 
-        private IEnumerator Pulse(int stage)
+        private Sequence Pulse(int stage)
         {
             // the seal wakes a little with each crack, but stays below full gold so the light in the cracks shows
             float brightness = Mathf.Lerp(0.55f, 0.85f, stage / (float)needed);
             Color from = face.color;
             Color to = new Color(brightness + 0.25f, brightness + 0.2f, brightness, 1f);
-            Tween.Scale(seal, 1f, 1.18f, 0.12f, Ease.OutCubic);
-            yield return Tween.Color(face, from, Color.white * 1.3f, 0.12f, Ease.OutCubic).ToYieldInstruction();
-            Tween.Scale(seal, 1.18f, 1f, 0.35f, Ease.OutCubic);
-            yield return Tween.Color(face, Color.white * 1.3f, to, 0.35f, Ease.OutCubic).ToYieldInstruction();
+            Color bright = Color.white * 1.3f;
+            return Sequence.Create()
+                .Chain(Tween.Scale(seal, 1f, 1.18f, 0.12f, Ease.OutCubic))
+                .Group(Tween.Color(face, from, bright, 0.12f, Ease.OutCubic))
+                .Chain(Tween.Scale(seal, 1.18f, 1f, 0.35f, Ease.OutCubic))
+                .Group(Tween.Color(face, bright, to, 0.35f, Ease.OutCubic));
         }
 
         // The seal bursts: a flash, the face breaks away and the vault's blue light pours out
-        private IEnumerator Shatter()
+        private Sequence Shatter()
         {
             sparks.StartColor = new Color(1f, 0.95f, 0.8f, 1f);
             sparks.Burst(60, 2.4f);
             // the seal is small: its store effect plays at about half the clash's size
             UiVfx.Play(breakVfx, seal.parent, seal.anchoredPosition, vfxScale * 0.55f, 3f);
             var light = new Color(1f, 0.9f, 0.6f, 1f);
-            Tween.Scale(seal, 1f, 1.35f, 0.15f, Ease.OutCubic);
-            yield return Tween.Color(glow, new Color(light.r, light.g, light.b, 0f), light, 0.15f, Ease.OutCubic).ToYieldInstruction();
-            ShowOpen(false);
-            Tween.Scale(seal, 1.35f, 1f, 0.5f, Ease.OutCubic);
-            yield return Tween.Color(glow, light, new Color(light.r, light.g, light.b, 0f), 0.5f, Ease.OutCubic).ToYieldInstruction();
-            routine = null;
+            var dark = new Color(light.r, light.g, light.b, 0f);
+            return Sequence.Create()
+                .Chain(Tween.Scale(seal, 1f, 1.35f, 0.15f, Ease.OutCubic))
+                .Group(Tween.Color(glow, dark, light, 0.15f, Ease.OutCubic))
+                .ChainCallback(this, view => view.ShowOpen(false))
+                .Chain(Tween.Scale(seal, 1.35f, 1f, 0.5f, Ease.OutCubic))
+                .Group(Tween.Color(glow, light, dark, 0.5f, Ease.OutCubic));
         }
 
         private void ShowOpen(bool instant)
@@ -252,13 +249,7 @@ namespace RoyalVault.Unity
         {
             open = false;
             lit = 0;
-            if (routine != null)
-            {
-                StopCoroutine(routine);
-                routine = null;
-            }
-
-            StopTweens();
+            animation.Stop();
             ShowCracks(0);
             foreach (Image pip in pips)
             {
@@ -272,15 +263,13 @@ namespace RoyalVault.Unity
             }
             else
             {
-                Tween.Color(face, new Color(1f, 1f, 1f, 0.35f), restColour, 0.6f, Ease.InOutSine);
+                animation = Sequence.Create(Tween.Color(face, new Color(1f, 1f, 1f, 0.35f), restColour, 0.6f, Ease.InOutSine));
             }
         }
 
-        private void StopTweens()
+        private void OnDestroy()
         {
-            Tween.StopAll(seal);
-            Tween.StopAll(face);
-            Tween.StopAll(glow);
+            animation.Stop();
         }
 
         private void Update()

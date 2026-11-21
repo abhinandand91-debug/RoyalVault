@@ -29,6 +29,9 @@ namespace RoyalVault.Unity
 
         private Coroutine celebrate;
         private Coroutine throwing;
+        private Sequence recoil;
+        private Tween lifting;
+        private readonly WaitForSeconds celebrateHold = new WaitForSeconds(0.7f);
         private float lift;
         private float lunge;
         private Vector2 figureHome;
@@ -97,13 +100,7 @@ namespace RoyalVault.Unity
                 return;
             }
 
-            if (throwing != null)
-            {
-                StopCoroutine(throwing);
-            }
-
-            Tween.StopAll(this);
-
+            StopThrow();
             throwing = StartCoroutine(WindUpRoutine());
         }
 
@@ -116,14 +113,27 @@ namespace RoyalVault.Unity
                 return;
             }
 
+            StopThrow();
+            if (flame != null)
+            {
+                flame.Burst(30, 3f);
+                sparks.Burst(20, 1.2f);
+            }
+
+            recoil = Sequence.Create()
+                .Chain(Tween.Custom(this, 1f, 1.35f, 0.12f, (view, value) => view.lunge = value, Ease.OutCubic))
+                .Chain(Tween.Custom(this, 1.35f, 0f, 0.6f, (view, value) => view.lunge = value, Ease.InOutSine));
+        }
+
+        private void StopThrow()
+        {
             if (throwing != null)
             {
                 StopCoroutine(throwing);
+                throwing = null;
             }
 
-            Tween.StopAll(this);
-
-            throwing = StartCoroutine(ReleaseRoutine());
+            recoil.Stop();
         }
 
         private IEnumerator WindUpRoutine()
@@ -150,19 +160,6 @@ namespace RoyalVault.Unity
                 yield return null;
             }
             ReadyToThrow = true;
-            throwing = null;
-        }
-
-        private IEnumerator ReleaseRoutine()
-        {
-            if (flame != null)
-            {
-                flame.Burst(30, 3f);
-                sparks.Burst(20, 1.2f);
-            }
-            yield return Tween.Custom(this, 1f, 1.35f, 0.12f, (view, value) => view.lunge = value, Ease.OutCubic).ToYieldInstruction();
-            yield return Tween.Custom(this, 1.35f, 0f, 0.6f, (view, value) => view.lunge = value, Ease.InOutSine).ToYieldInstruction();
-            lunge = 0f;
             throwing = null;
         }
 
@@ -310,7 +307,7 @@ namespace RoyalVault.Unity
                 StopCoroutine(celebrate);
             }
 
-            Tween.StopAll(image);
+            lifting.Stop();
 
             celebrate = StartCoroutine(CelebrateRoutine());
         }
@@ -332,14 +329,16 @@ namespace RoyalVault.Unity
                 sparks.Burst(46, 1f);
                 embers.Burst(20, 2f);
             }
-            yield return Tween.Custom(image, 0f, 1f, 0.25f, (_, value) => Lift(value), Ease.OutCubic).ToYieldInstruction();
+            lifting = Tween.Custom(this, 0f, 1f, 0.25f, (view, value) => view.Lift(value), Ease.OutCubic);
+            yield return lifting.ToYieldInstruction();
             if (sparks != null)
             {
                 sparks.Burst(24, 0.8f);
             }
 
-            yield return new WaitForSeconds(0.7f);
-            yield return Tween.Custom(image, 1f, 0f, 0.6f, (_, value) => Lift(value), Ease.InOutSine).ToYieldInstruction();
+            yield return celebrateHold;
+            lifting = Tween.Custom(this, 1f, 0f, 0.6f, (view, value) => view.Lift(value), Ease.InOutSine);
+            yield return lifting.ToYieldInstruction();
             celebrate = null;
         }
 

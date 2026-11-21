@@ -34,6 +34,8 @@ namespace RoyalVault.Unity
         private readonly List<RectTransform> coins = new List<RectTransform>();
         private bool skipped;
         private float heroClock;
+        private RectTransform popping;
+        private readonly WaitForSeconds settle = new WaitForSeconds(0.6f);
 
         public bool IsShowing { get; private set; }
 
@@ -126,12 +128,13 @@ namespace RoyalVault.Unity
             Opened?.Invoke(kind, value > 0);
             RectTransform hero = heading == null ? banner.rectTransform : title.rectTransform;
             heroClock = 0f;
-            yield return Tween.Custom(this, 0f, 1f, 0.35f, (view, k) => view.PopIn(hero, k), Ease.Linear).ToYieldInstruction();
+            popping = hero;
+            yield return Tween.Custom(this, 0f, 1f, 0.35f, (view, k) => view.PopIn(k), Ease.Linear).ToYieldInstruction();
             yield return Hold(value > 0 ? countSeconds + 1.4f : countSeconds, coinsOn ? countSeconds : 0f);
             if (skipped && value > 0)
             {
                 amount.Set(value);
-                yield return new WaitForSeconds(0.6f);
+                yield return settle;
             }
             yield return Tween.Custom(this, 0f, 1f, 0.3f, (view, k) => view.FadeOut(k), Ease.Linear).ToYieldInstruction();
             Close();
@@ -157,10 +160,10 @@ namespace RoyalVault.Unity
             }
         }
 
-        private void PopIn(RectTransform hero, float k)
+        private void PopIn(float k)
         {
             group.alpha = k;
-            hero.localScale = Vector3.one * Mathf.LerpUnclamped(0.6f, 1f, Easing.Evaluate(k, Ease.OutBack));
+            popping.localScale = Vector3.one * Mathf.LerpUnclamped(0.6f, 1f, Easing.Evaluate(k, Ease.OutBack));
         }
 
         // Turns the rays, poses the heroes and showers coins for coinSeconds

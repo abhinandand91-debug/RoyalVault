@@ -1,4 +1,3 @@
-using System.Collections;
 using GameKit;
 using PrimeTween;
 using SlotKit;
@@ -82,16 +81,9 @@ namespace RoyalVault.Unity
                 return;
             }
 
-            StartCoroutine(Flash(plaques[slotOfTier[tier]].rectTransform));
-        }
-
-        private IEnumerator Flash(RectTransform plaque)
-        {
-            for (int i = 0; i < 4; i++)
-            {
-                yield return Tween.Scale(plaque, 1f, 1.08f, 0.18f, Ease.OutCubic).ToYieldInstruction();
-                yield return Tween.Scale(plaque, 1.08f, 1f, 0.18f, Ease.InOutSine).ToYieldInstruction();
-            }
+            Transform plaque = plaques[slotOfTier[tier]].transform;
+            Tween.StopAll(plaque);
+            Tween.Scale(plaque, 1f, 1.08f, 0.18f, Ease.OutCubic, cycles: 8, cycleMode: CycleMode.Yoyo);
         }
     }
 }
