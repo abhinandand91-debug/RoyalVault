@@ -225,6 +225,13 @@ namespace RoyalVault.Tests
             paytable.Open();
             yield return new WaitForSeconds(0.5f);
             yield return Shot("11_paytable");
+            paytable.ShowPage(1, false);
+            yield return new WaitForSeconds(0.2f);
+            yield return Shot("11b_paytable_features");
+            paytable.ShowPage(2, false);
+            yield return new WaitForSeconds(0.2f);
+            yield return Shot("11c_paytable_lines");
+            paytable.ShowPage(0, false);
             paytable.Close();
             yield return new WaitForSeconds(0.4f);
         }

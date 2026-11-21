@@ -125,6 +125,7 @@ MonoBehaviour:
   jackpotGrand: {fileID: 21300000, guid: eba32eec514c043d38001b20e3be44d6, type: 3}
   jackpotMinor: {fileID: 21300000, guid: c9eb84cfa1cc54294b039356d90e4814, type: 3}
   popupPanel: {fileID: 21300000, guid: 3f53bc29b96fd45ebb6610c772abd7b0, type: 3}
+  card: {fileID: 21300000, guid: ce72c95ad931d46239d368dc38463e34, type: 3}
   bigWinBanner: {fileID: 21300000, guid: 275862cc3d97f437aad11f9077a1f685, type: 3}
   coin: {fileID: 21300000, guid: 75ce2bdfc962b40b1b35d8e868b63f7f, type: 3}
   sparkle: {fileID: 21300000, guid: dd2dc367e58834f309ccd2443873b815, type: 3}

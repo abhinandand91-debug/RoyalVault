@@ -130,7 +130,7 @@ namespace RoyalVault.Unity
         {
             machineView.Build(Machine, theme);
             jackpots.Bind(Session.Jackpots);
-            paytable.Build(Machine, theme);
+            paytable.Build(Machine, theme, Session.Bet);
             foreach (CharacterView c in characters)
             {
                 c.Bind(theme.character, theme.characterEffectAnchor, theme.characterMagic, theme.characterAnimation);

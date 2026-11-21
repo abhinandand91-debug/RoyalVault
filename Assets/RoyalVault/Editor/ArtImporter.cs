@@ -63,6 +63,10 @@ namespace RoyalVault.EditorTools
             {
                 importer.spriteBorder = new Vector4(65, 0, 65, 1);
             }
+            else if (assetPath.EndsWith("Generated/card.png"))
+            {
+                importer.spriteBorder = new Vector4(24, 24, 24, 24);
+            }
             else if (assetPath.EndsWith("Generated/pill.png"))
             {
                 importer.spriteBorder = new Vector4(62, 62, 62, 62);

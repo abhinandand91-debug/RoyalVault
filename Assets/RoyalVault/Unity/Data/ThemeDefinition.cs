@@ -73,6 +73,7 @@ namespace RoyalVault.Unity
         public Sprite jackpotGrand;
         public Sprite jackpotMinor;
         public Sprite popupPanel;
+        [Tooltip("Rounded dark card with a gold edge (pay table entries)")] public Sprite card;
         public Sprite bigWinBanner;
         public Sprite coin;
         public Sprite sparkle;

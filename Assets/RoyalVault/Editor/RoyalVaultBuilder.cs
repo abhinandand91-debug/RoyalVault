@@ -170,6 +170,7 @@ namespace RoyalVault.EditorTools
             theme.consoleBar = Sprite("Generated/bar");
             theme.spinButton = Sprite("UI/spin_medallion");
             theme.pillButton = Sprite("Generated/pill");
+            theme.card = Sprite("Generated/card");
             theme.roundButton = Sprite("Generated/ring");
             theme.jackpotGrand = Sprite("UI/jackpot_grand");
             theme.jackpotMinor = Sprite("UI/jackpot_minor");
@@ -330,6 +331,7 @@ namespace RoyalVault.EditorTools
             Color fill = new Color32(18, 17, 24, 255), stroke = new Color32(184, 135, 59, 255);
             Write("pill", 256, 128, (x, y) => RoundedRect(x, y, 256, 128, 63.5f, fill, stroke, 3f));
             Write("ring", 128, 128, (x, y) => RoundedRect(x, y, 128, 128, 63.5f, new Color32(28, 24, 32, 255), new Color32(232, 199, 122, 255), 3f));
+            Write("card", 128, 128, (x, y) => RoundedRect(x, y, 128, 128, 18f, new Color32(14, 12, 18, 235), new Color32(150, 112, 52, 255), 2f));
             AssetDatabase.Refresh();
         }
 

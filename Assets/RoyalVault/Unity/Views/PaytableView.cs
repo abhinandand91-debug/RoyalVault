@@ -1,23 +1,35 @@
 using System.Collections.Generic;
-using System.Linq;
 using GameKit;
 using PrimeTween;
 using SlotKit;
 using TMPro;
-using UnityEngine.UI;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    // The pay table window, written from the machine definition so it always matches the maths
+    // The pay table window: symbols, features and paylines on tabs, written from the machine so it always matches the maths
     public sealed class PaytableView : MonoBehaviour
     {
+        private static readonly string[] TabNames = { "SYMBOLS", "FEATURES", "PAYLINES" };
+        private static readonly Color ActiveTab = new Color(1f, 0.86f, 0.52f, 1f);
+        private static readonly Color IdleTab = new Color(1f, 1f, 1f, 0.55f);
+
         [SerializeField] private CanvasGroup group;
         [SerializeField] private RectTransform content;
         [SerializeField] private Button close;
         [SerializeField] private Button backdrop;
 
+        private readonly List<PayValues> pays = new List<PayValues>();
+        private readonly List<CanvasGroup> pages = new List<CanvasGroup>();
+        private readonly List<Image> tabs = new List<Image>();
+        private readonly List<TextMeshProUGUI> tabLabels = new List<TextMeshProUGUI>();
+        private BetModel bet;
+        private ThemeDefinition theme;
+        private TextMeshProUGUI betNote;
         private Tween fade;
+        private Tween pageFade;
+        private int page;
 
         public bool IsOpen { get; private set; }
 
@@ -39,83 +51,19 @@ namespace RoyalVault.Unity
             }
         }
 
-        private const int Columns = 3;
-        private const float CellWidth = 390f, CellHeight = 96f, FirstRow = 168f;
-
-        // Writes one row per paying symbol, then the scatter, wild, free spin and jackpot rules
-        public void Build(MachineDefinition machine, ThemeDefinition theme)
+        public void Build(MachineDefinition machine, ThemeDefinition themeDefinition, BetModel betModel)
         {
-            for (int i = content.childCount - 1; i >= 0; i--)
-            {
-                Destroy(content.GetChild(i).gameObject);
-            }
-
-            List<int> paying = PayingSymbols(machine);
-            for (int n = 0; n < paying.Count; n++)
-            {
-                PayRow(machine.Symbols[paying[n]], n, theme);
-            }
-
-            float rulesY = FirstRow - Mathf.CeilToInt(paying.Count / (float)Columns) * CellHeight - 22f;
-            TextMeshProUGUI rules = UiFactory.Text("Rules", content, theme.bodyFont, string.Join("\n", Rules(machine)), 22f, theme.dimGold,
-                                                   new Vector2(0f, rulesY), new Vector2(1150f, 96f));
-            rules.textWrappingMode = TextWrappingModes.Normal;
-            rules.lineSpacing = -6f;
+            theme = themeDefinition;
+            bet = betModel;
+            Clear();
+            TabBar();
+            RectTransform symbols = Page("Symbols");
+            pays.AddRange(PaytableSymbolsPage.Build(symbols, machine, theme));
+            betNote = UiFactory.Text("Bet Note", symbols, theme.bodyFont, "", 17f, theme.dimGold, new Vector2(0f, -262f), new Vector2(1100f, 26f));
+            PaytableFeaturesPage.Build(Page("Features"), machine, theme);
+            PaytableLinesPage.Build(Page("Paylines"), machine, theme);
+            ShowPage(0, false);
         }
-
-        // Regular symbols and wilds found on the reels, best first
-        private static List<int> PayingSymbols(MachineDefinition machine)
-        {
-            var paying = new List<int>();
-            for (int i = 0; i < machine.Symbols.Length; i++)
-            {
-                SymbolKind kind = machine.Symbols[i].Kind;
-                bool pays = kind == SymbolKind.Regular || kind == SymbolKind.Wild;
-                if (pays && machine.Strips.Any(strip => System.Array.IndexOf(strip, i) >= 0))
-                {
-                    paying.Add(i);
-                }
-            }
-            paying.Reverse();
-            return paying;
-        }
-
-        private void PayRow(SymbolDefinition symbol, int index, ThemeDefinition theme)
-        {
-            var origin = new Vector2((index % Columns - (Columns - 1) * 0.5f) * CellWidth, FirstRow - index / Columns * CellHeight);
-            Image icon = UiFactory.Image(symbol.Id, content, theme.Symbol(symbol.Id)?.sprite, origin + new Vector2(-90f, 0f), Vector2.one * 86f);
-            icon.preserveAspect = true;
-            var lines = new List<string>();
-            for (int count = symbol.Pays.Length - 1; count >= 0; count--)
-            {
-                if (symbol.Pays[count] > 0)
-                {
-                    lines.Add($"<color=#B39A66>{count}</color>  {symbol.Pays[count]}");
-                }
-            }
-
-            TextMeshProUGUI pays = UiFactory.Text("Pays", content, theme.headingFont, string.Join("\n", lines), 21f, theme.ivory,
-                                                  origin + new Vector2(70f, 0f), new Vector2(180f, CellHeight), TextAlignmentOptions.Left);
-            pays.lineSpacing = -16f;
-        }
-
-        private static List<string> Rules(MachineDefinition machine)
-        {
-            var rules = new List<string> { $"Pays x line bet, left to right on {machine.Paylines.Length} lines. WILD stands in for all but the scatter and the crown." };
-            if (machine.ScatterAwards.Length > 0)
-            {
-                ScatterAward[] a = machine.ScatterAwards;
-                rules.Add($"{Join(a, x => x.Count)} SCATTERS pay {Join(a, x => x.TotalBetMultiplier + "x")} the bet with {Join(a, x => x.FreeSpins)} free spins, every win x{machine.FreeSpinMultiplier}.");
-            }
-            if (machine.JackpotTiers.Length > 0)
-            {
-                rules.Add($"{Join(machine.JackpotTiers, t => t.SymbolCount)} CROWNS anywhere win the {Join(machine.JackpotTiers, t => t.Name)} jackpot.");
-            }
-
-            return rules;
-        }
-
-        private static string Join<T>(IEnumerable<T> items, System.Func<T, object> part) => string.Join(" / ", items.Select(part));
 
         public void Open()
         {
@@ -127,6 +75,7 @@ namespace RoyalVault.Unity
             IsOpen = true;
             gameObject.SetActive(true);
             transform.SetAsLastSibling();
+            WriteValues();
             Fade(1f);
         }
 
@@ -139,6 +88,84 @@ namespace RoyalVault.Unity
 
             IsOpen = false;
             Fade(0f);
+        }
+
+        // Shows the tab at index; the tab buttons and the screenshot test call it
+        public void ShowPage(int index, bool animate = true)
+        {
+            page = Mathf.Clamp(index, 0, pages.Count - 1);
+            for (int i = 0; i < pages.Count; i++)
+            {
+                bool shown = i == page;
+                pages[i].gameObject.SetActive(shown);
+                tabs[i].color = shown ? ActiveTab : IdleTab;
+                tabLabels[i].color = shown ? theme.paleGold : theme.dimGold;
+            }
+
+            pageFade.Stop();
+            if (animate)
+            {
+                pageFade = Tween.Alpha(pages[page], 0f, 1f, 0.18f, Ease.OutCubic);
+            }
+            else
+            {
+                pages[page].alpha = 1f;
+            }
+        }
+
+        // Pays in credits at the bet being played now
+        private void WriteValues()
+        {
+            if (bet == null)
+            {
+                return;
+            }
+
+            foreach (PayValues values in pays)
+            {
+                values.Write(bet.LineBet);
+            }
+
+            betNote.text = "Wins in credits at your line bet of " + NumberFormat.Credits(bet.LineBet) + " (total bet "
+                           + NumberFormat.Credits(bet.TotalBet) + "). Line wins pay left to right.";
+        }
+
+        private void Clear()
+        {
+            for (int i = content.childCount - 1; i >= 0; i--)
+            {
+                Destroy(content.GetChild(i).gameObject);
+            }
+
+            pays.Clear();
+            pages.Clear();
+            tabs.Clear();
+            tabLabels.Clear();
+        }
+
+        private void TabBar()
+        {
+            const float width = 230f;
+            for (int i = 0; i < TabNames.Length; i++)
+            {
+                var position = new Vector2((i - (TabNames.Length - 1) * 0.5f) * (width + 14f), 186f);
+                Image pill = UiFactory.Image(TabNames[i] + " Tab", content, theme.pillButton, position, new Vector2(width, 50f));
+                pill.type = Image.Type.Sliced;
+                Button button = UiFactory.Button(pill);
+                int index = i;
+                button.onClick.AddListener(() => ShowPage(index));
+                TextMeshProUGUI label = UiFactory.Text("Label", pill.transform, theme.headingFont, TabNames[i], 18f, theme.dimGold, Vector2.zero,
+                                                       new Vector2(width, 50f), TextAlignmentOptions.Center, 16f);
+                tabs.Add(pill);
+                tabLabels.Add(label);
+            }
+        }
+
+        private RectTransform Page(string name)
+        {
+            RectTransform rect = UiFactory.Rect(name, content, Vector2.zero, content.rect.size);
+            pages.Add(rect.gameObject.AddComponent<CanvasGroup>());
+            return rect;
         }
 
         private void Fade(float to)
