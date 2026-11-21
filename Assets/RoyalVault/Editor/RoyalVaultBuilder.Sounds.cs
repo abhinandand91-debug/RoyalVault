@@ -62,12 +62,43 @@ namespace RoyalVault.EditorTools
                     }
                 }
                 foreach (SoundBank.Sound sound in bank.sounds)
-                    if (!sound.HasClips && found.TryGetValue(sound.cue, out List<AudioClip> clips)) sound.clips = clips.ToArray();
+                {
+                    if (sound.HasClips || !found.TryGetValue(sound.cue, out List<AudioClip> clips)) continue;
+                    sound.clips = clips.ToArray();
+                    // a starting mix for a newly filled cue; later Inspector changes are kept
+                    (sound.volume, sound.pitchVariance) = StartingMix(sound.cue);
+                }
             }
 
             if (created) AssetDatabase.CreateAsset(bank, path);
             EditorUtility.SetDirty(bank);
             return bank;
+        }
+
+        /// <summary>
+        /// Where a cue starts in the mix: interface and loops sit under the action, wins and the seal on top. Jingles and
+        /// transitions keep their pitch (shifting them would put them out of tune); clicks and stops vary a little.
+        /// </summary>
+        private static (float volume, float pitchVariance) StartingMix(SoundCue cue)
+        {
+            switch (cue)
+            {
+                case SoundCue.ButtonClick:
+                case SoundCue.BetChange: return (0.55f, 0.05f);
+                case SoundCue.SpinPress: return (0.7f, 0.03f);
+                case SoundCue.ReelSpinLoop: return (0.45f, 0f);
+                case SoundCue.ReelStop: return (0.8f, 0.04f);
+                case SoundCue.WildLand:
+                case SoundCue.ScatterLand:
+                case SoundCue.JackpotLand: return (0.85f, 0f);
+                case SoundCue.SealCrack: return (0.9f, 0f);
+                case SoundCue.SealBreak: return (1f, 0f);
+                case SoundCue.SmallWin: return (0.7f, 0f);
+                case SoundCue.CoinShowerLoop: return (0.5f, 0f);
+                case SoundCue.StoryPage: return (0.6f, 0f);
+                case SoundCue.GuardianFlame: return (0.7f, 0f);
+                default: return (1f, 0f); // big wins, jackpots, free spins
+            }
         }
     }
 }

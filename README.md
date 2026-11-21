@@ -56,7 +56,12 @@ art) and run **Royal Vault > Build All**: files are filled in by name.
 | `Music_Loading`, `Music_Base`, `Music_FreeSpins` | the music loops |
 | a cue's name, e.g. `ReelStop_01`, `ReelStop_02`, `BigWin`, `SealCrack` | that cue (every match is a variation) |
 
-Clips assigned by hand in the Inspector are kept. Music imports as streaming Vorbis, effects decompressed on load.
+Clips assigned by hand in the Inspector are kept, and a newly filled cue starts at a sensible place in the mix.
+Music imports as streaming Vorbis, effects decompressed on load.
+
+The effects currently come from Game Sound Planet's free "Strictly Slots" starter pack (not in this repository; see
+`Art.Private/Audio/GameSoundPlanet/SOURCE.txt` locally for which file fills which cue). The music slots are still
+empty.
 The `SoundTests` PlayMode tests spin forced outcomes and check that every moment reaches the player.
 
 ## The story

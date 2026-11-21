@@ -20,82 +20,114 @@ MonoBehaviour:
   effectsVolume: 1
   sounds:
   - cue: 0
-    clips: []
-    volume: 1
-    pitchVariance: 0.03
+    clips:
+    - {fileID: 8300000, guid: 75381197bd3154977b42a24a0a2dd61a, type: 3}
+    - {fileID: 8300000, guid: 3efd0c947a3794a5ba551f5554cb88d5, type: 3}
+    volume: 0.55
+    pitchVariance: 0.05
   - cue: 1
-    clips: []
-    volume: 1
+    clips:
+    - {fileID: 8300000, guid: 5452f71b6966c44b0b80efe7bb31bbbc, type: 3}
+    volume: 0.7
     pitchVariance: 0.03
   - cue: 2
-    clips: []
-    volume: 1
-    pitchVariance: 0.03
+    clips:
+    - {fileID: 8300000, guid: 16a150c8b4de04ac9b5c8f363e3b4a66, type: 3}
+    volume: 0.55
+    pitchVariance: 0.05
   - cue: 3
-    clips: []
-    volume: 1
-    pitchVariance: 0.03
+    clips:
+    - {fileID: 8300000, guid: 04c40b245edc14c5ca2aa6bbf333d702, type: 3}
+    volume: 0.45
+    pitchVariance: 0
   - cue: 4
-    clips: []
-    volume: 1
-    pitchVariance: 0.03
+    clips:
+    - {fileID: 8300000, guid: de340474673354b4c916f3c1bf12c917, type: 3}
+    - {fileID: 8300000, guid: 66b507b63f9dd4234ab34218dcbbd5fd, type: 3}
+    - {fileID: 8300000, guid: 3dcbe4b535be4446fb71265c8a401b4f, type: 3}
+    - {fileID: 8300000, guid: 1019098482d8d48f9bb2a14f6bdb62a7, type: 3}
+    - {fileID: 8300000, guid: dc6ed20be1f5c4ccc86f0e5883e9dcaf, type: 3}
+    volume: 0.8
+    pitchVariance: 0.04
   - cue: 5
-    clips: []
-    volume: 1
-    pitchVariance: 0.03
+    clips:
+    - {fileID: 8300000, guid: ca55d722eac944d71a9a48d39da581ec, type: 3}
+    volume: 0.85
+    pitchVariance: 0
   - cue: 6
-    clips: []
-    volume: 1
-    pitchVariance: 0.03
+    clips:
+    - {fileID: 8300000, guid: f2a921250124a46368ef67abbcab28a2, type: 3}
+    volume: 0.85
+    pitchVariance: 0
   - cue: 7
-    clips: []
-    volume: 1
-    pitchVariance: 0.03
+    clips:
+    - {fileID: 8300000, guid: c1370023bcfd44efdadc25ad393718bb, type: 3}
+    volume: 0.85
+    pitchVariance: 0
   - cue: 8
-    clips: []
-    volume: 1
-    pitchVariance: 0.03
+    clips:
+    - {fileID: 8300000, guid: 6f982ae785af34fdd9f1a6d24c6b6ae5, type: 3}
+    volume: 0.9
+    pitchVariance: 0
   - cue: 9
-    clips: []
+    clips:
+    - {fileID: 8300000, guid: 85a88635d738e45118a296c77acfc38e, type: 3}
     volume: 1
-    pitchVariance: 0.03
+    pitchVariance: 0
   - cue: 10
-    clips: []
-    volume: 1
-    pitchVariance: 0.03
+    clips:
+    - {fileID: 8300000, guid: fb0199bbce35843b5a53a5c16d0c2643, type: 3}
+    - {fileID: 8300000, guid: 529d4201ab9a348d28b42eb0fbdb037d, type: 3}
+    - {fileID: 8300000, guid: 0d5f698e5758341e4a074755ff8fff65, type: 3}
+    - {fileID: 8300000, guid: 252373285eecc448dadb3132efeeaf4a, type: 3}
+    - {fileID: 8300000, guid: b2e399539ca9b4b3c99ed8e62c692a70, type: 3}
+    - {fileID: 8300000, guid: 023a922327179490b9b133aa86be8e26, type: 3}
+    - {fileID: 8300000, guid: d52dcd3b1ae514c758c533790c647d63, type: 3}
+    - {fileID: 8300000, guid: 4f5a33f8175e0468dbab64199d6c19ed, type: 3}
+    volume: 0.7
+    pitchVariance: 0
   - cue: 11
-    clips: []
+    clips:
+    - {fileID: 8300000, guid: 3e236ee62d8cb458e9cd6a66b8d98643, type: 3}
     volume: 1
-    pitchVariance: 0.03
+    pitchVariance: 0
   - cue: 12
-    clips: []
+    clips:
+    - {fileID: 8300000, guid: 795ee646d589444f5a85a544948de9e9, type: 3}
     volume: 1
-    pitchVariance: 0.03
+    pitchVariance: 0
   - cue: 13
-    clips: []
+    clips:
+    - {fileID: 8300000, guid: 2c8ed9b614e804f048160ad942f7aabb, type: 3}
     volume: 1
-    pitchVariance: 0.03
+    pitchVariance: 0
   - cue: 14
-    clips: []
+    clips:
+    - {fileID: 8300000, guid: 0906fd35ba02e4512ad66167a7cd2f3b, type: 3}
     volume: 1
-    pitchVariance: 0.03
+    pitchVariance: 0
   - cue: 15
-    clips: []
-    volume: 1
-    pitchVariance: 0.03
+    clips:
+    - {fileID: 8300000, guid: 448a9f32afab04b2ba00f6843c3b2700, type: 3}
+    volume: 0.5
+    pitchVariance: 0
   - cue: 16
-    clips: []
+    clips:
+    - {fileID: 8300000, guid: 771253c0dcb604e48ac2511154c66142, type: 3}
     volume: 1
-    pitchVariance: 0.03
+    pitchVariance: 0
   - cue: 17
-    clips: []
+    clips:
+    - {fileID: 8300000, guid: 73693ab17c356458e892fa5f1e185964, type: 3}
     volume: 1
-    pitchVariance: 0.03
+    pitchVariance: 0
   - cue: 18
-    clips: []
-    volume: 1
-    pitchVariance: 0.03
+    clips:
+    - {fileID: 8300000, guid: a8f5c49329014485f99294cdc3c41bcd, type: 3}
+    volume: 0.6
+    pitchVariance: 0
   - cue: 19
-    clips: []
-    volume: 1
-    pitchVariance: 0.03
+    clips:
+    - {fileID: 8300000, guid: 329b671d1f1cf4583946a8c15c14221a, type: 3}
+    volume: 0.7
+    pitchVariance: 0
