@@ -283,8 +283,8 @@ namespace RoyalVault.EditorTools
             RectTransform seal = UiFactory.Rect("Seal", holder, new Vector2(0, 8), new Vector2(92, 92));
             Image face = UiFactory.Image("Face", seal, null, Vector2.zero, new Vector2(92, 92));
             face.preserveAspect = true;
-            Image[] fractures = CrackLayers(seal, "Fracture", 90f, img => { img.color = new Color(0.12f, 0.06f, 0.02f, 0.85f); });
-            Image[] cracks = CrackLayers(seal, "Crack", 84f, img => { img.material = theme.additive; });
+            Image[] fractures = CrackLayers(seal, "Fracture", 90f, img => img.color = new Color(0.12f, 0.06f, 0.02f, 0.85f));
+            Image[] cracks = CrackLayers(seal, "Crack", 84f, img => img.material = theme.additive);
             Image flash = UiFactory.Image("Flash", seal, theme.glow, Vector2.zero, new Vector2(190, 190));
             flash.material = theme.additive;
             flash.color = new Color(1f, 0.9f, 0.6f, 0f);

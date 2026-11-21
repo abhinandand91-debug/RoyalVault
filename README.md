@@ -152,8 +152,8 @@ animations are baked to frames like the guardians' (`CharacterAnimation`, set on
 
 ```
 Assets/GameKit         reusable in any Unity game, knows nothing about slots
-   GameKit               Tween/Ease, UiFactory, UiParticleEmitter, CountingText, TypewriterText,
-                         MessageToast, CoachMarkView (UGUI + TextMeshPro only)
+   GameKit               UiFactory, UiParticleEmitter, CountingText, TypewriterText, MessageToast,
+                         CoachMarkView, NumberFormat (UGUI, TextMeshPro and PrimeTween)
    GameKit.UIParticle    UiVfx: plays ParticleSystem prefabs inside a UI canvas (needs com.coffee.ui-particle)
 
 Assets/SlotKit         reusable in any slot game
@@ -169,6 +169,9 @@ Assets/RoyalVault      this game
                          WinPresenter, BigWinView, ConsoleView, CharacterView, story, sound
    RoyalVault.Editor     Build Everything, machine inspector, art importer
 ```
+
+Animation uses [PrimeTween](https://github.com/KyryloKuzyk/PrimeTween), installed from the npm registry
+(see `Packages/manifest.json`), so its source is never part of this repository.
 
 Royal Vault uses GameKit and SlotKit; neither ever references Royal Vault, so either folder can be
 copied into another project as it is.

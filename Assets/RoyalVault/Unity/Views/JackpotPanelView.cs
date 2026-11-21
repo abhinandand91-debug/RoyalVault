@@ -1,5 +1,6 @@
 using System.Collections;
 using GameKit;
+using PrimeTween;
 using SlotKit;
 using TMPro;
 using UnityEngine.UI;
@@ -88,8 +89,8 @@ namespace RoyalVault.Unity
         {
             for (int i = 0; i < 4; i++)
             {
-                yield return Tween.Run(0.18f, k => plaque.localScale = Vector3.one * (1f + 0.08f * k), Ease.OutCubic);
-                yield return Tween.Run(0.18f, k => plaque.localScale = Vector3.one * (1.08f - 0.08f * k), Ease.InOutSine);
+                yield return Tween.Scale(plaque, 1f, 1.08f, 0.18f, Ease.OutCubic).ToYieldInstruction();
+                yield return Tween.Scale(plaque, 1.08f, 1f, 0.18f, Ease.InOutSine).ToYieldInstruction();
             }
         }
     }

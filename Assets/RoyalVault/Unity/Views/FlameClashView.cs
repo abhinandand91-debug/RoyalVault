@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using System;
 using GameKit;
+using PrimeTween;
 using UnityEngine.UI;
 using UnityEngine;
 
@@ -205,11 +206,15 @@ namespace RoyalVault.Unity
             UiVfx.Play(impactVfx, layer, meetingPoint, vfxScale, 3f);
             UiVfx.Play(sparksVfx, layer, meetingPoint, vfxScale, 3f);
             Burst();
-            StartCoroutine(Rings());
-            StartCoroutine(Shake(0.35f, 14f));
-            Color c = Whiter(0.7f, 1f);
-            yield return Tween.Run(0.08f, k => flash.color = new Color(c.r, c.g, c.b, 0.55f * k), Ease.Linear);
-            yield return Tween.Run(0.5f, k => flash.color = new Color(c.r, c.g, c.b, 0.55f * (1f - k)), Ease.OutCubic);
+            Rings();
+            if (shakeTarget != null)
+            {
+                Tween.ShakeLocalPosition(shakeTarget, new Vector3(14f, 14f, 0f), 0.35f, frequency: 30f);
+            }
+
+            flash.color = Whiter(0.7f, 0f);
+            yield return Tween.Alpha(flash, 0f, 0.55f, 0.08f, Ease.Linear).ToYieldInstruction();
+            yield return Tween.Alpha(flash, 0.55f, 0f, 0.5f, Ease.OutCubic).ToYieldInstruction();
         }
 
         private void Burst()
@@ -262,39 +267,23 @@ namespace RoyalVault.Unity
             }
         }
 
-        private IEnumerator Rings()
+        // Shockwaves blasting out one after another
+        private void Rings()
         {
             for (int i = 0; i < rings.Length; i++)
             {
                 Image ring = rings[i];
-                int index = i;
+                Color c = i == 0 ? Whiter(0.5f, 1f) : new Color(1f, 0.85f, 0.5f, 1f);
+                float seconds = 0.7f + 0.2f * i;
+                float delay = 0.1f * i;
                 ring.gameObject.SetActive(true);
                 ring.rectTransform.anchoredPosition = meetingPoint;
-                Color c = index == 0 ? Whiter(0.5f, 1f) : new Color(1f, 0.85f, 0.5f, 1f);
-                StartCoroutine(Tween.Run(0.7f + 0.2f * index, k =>
-                {
-                    ring.rectTransform.localScale = Vector3.one * Mathf.Lerp(0.2f, 3.2f + index, Ease.OutCubic(k));
-                    ring.color = new Color(c.r, c.g, c.b, 1f - k);
-                }, Ease.Linear));
-                yield return new WaitForSeconds(0.1f);
+                ring.rectTransform.localScale = Vector3.one * 0.2f;
+                ring.color = new Color(c.r, c.g, c.b, 0f);
+                Tween.Scale(ring.rectTransform, 0.2f, 3.2f + i, seconds, Ease.OutCubic, startDelay: delay);
+                Tween.Color(ring, c, new Color(c.r, c.g, c.b, 0f), seconds, Ease.Linear, startDelay: delay);
             }
         }
 
-        private IEnumerator Shake(float seconds, float strength)
-        {
-            if (shakeTarget == null)
-            {
-                yield break;
-            }
-
-            Vector2 home = shakeTarget.anchoredPosition;
-            for (float t = 0f; t < seconds; t += Time.deltaTime)
-            {
-                float fade = 1f - t / seconds;
-                shakeTarget.anchoredPosition = home + UnityEngine.Random.insideUnitCircle * strength * fade;
-                yield return null;
-            }
-            shakeTarget.anchoredPosition = home;
-        }
     }
 }

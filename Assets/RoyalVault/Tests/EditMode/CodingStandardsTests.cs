@@ -16,6 +16,7 @@ namespace RoyalVault.Tests
         private static readonly Regex ControlKeyword = new Regex(@"(?<![\w.#])(if|for|foreach|while)\s*\(");
         private static readonly Regex ElseKeyword = new Regex(@"(?<![\w.#])else\b");
         private static readonly Regex Accessors = new Regex(@"\{\s*((private|protected|internal)\s+)?(get|set|init)\b");
+        private static readonly Regex InlineBlock = new Regex(@"\{[^{}]*;[^{}]*\}");
 
         [Test]
         public void ControlStatementsAlwaysUseBraces()
@@ -42,7 +43,8 @@ namespace RoyalVault.Tests
                 string[] lines = StripLiteralsAndComments(File.ReadAllText(path)).Split('\n');
                 for (int i = 0; i < lines.Length; i++)
                 {
-                    if (TopLevelSemicolons(lines[i]) > 1 && !Accessors.IsMatch(lines[i]))
+                    bool crowded = TopLevelSemicolons(lines[i]) > 1 || InlineBlock.IsMatch(lines[i]);
+                    if (crowded && !Accessors.IsMatch(lines[i]))
                     {
                         violations.Add(Where(path, i + 1));
                     }

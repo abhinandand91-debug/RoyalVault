@@ -1,6 +1,7 @@
 using System.Collections;
 using System;
 using GameKit;
+using PrimeTween;
 using UnityEngine.UI;
 using UnityEngine;
 
@@ -89,7 +90,7 @@ namespace RoyalVault.Unity
         {
             enterButton.gameObject.SetActive(true);
             continuePrompt.alpha = 0f;
-            StartCoroutine(Tween.Run(0.4f, k => enterButton.transform.localScale = Vector3.one * Ease.OutBack(k), Ease.Linear));
+            Tween.Scale(enterButton.transform, 0f, 1f, 0.4f, Ease.OutBack);
             while (!entered && !skipped)
             {
                 yield return null;
@@ -112,17 +113,17 @@ namespace RoyalVault.Unity
             {
                 if (other != card)
                 {
-                    StartCoroutine(FadeCard(other, 0f));
+                    FadeCard(other, 0f);
                 }
             }
 
-            StartCoroutine(FadeCard(card, 1f));
+            FadeCard(card, 1f);
         }
 
-        private static IEnumerator FadeCard(StoryCardView card, float target)
+        private static void FadeCard(StoryCardView card, float target)
         {
-            float from = card.Group.alpha;
-            yield return Tween.Run(0.8f, k => card.Group.alpha = Mathf.Lerp(from, target, k), Ease.InOutSine);
+            Tween.StopAll(card.Group);
+            Tween.Alpha(card.Group, card.Group.alpha, target, 0.8f, Ease.InOutSine);
         }
 
         private IEnumerator Open()
@@ -132,12 +133,12 @@ namespace RoyalVault.Unity
             gameObject.SetActive(true);
             group.alpha = 1f;
             group.blocksRaycasts = true;
-            yield return Tween.Run(0.6f, SetBars, Ease.OutCubic);
+            yield return Tween.Custom(this, 0f, 1f, 0.6f, (view, k) => view.SetBars(k), Ease.OutCubic).ToYieldInstruction();
         }
 
         private IEnumerator Close()
         {
-            yield return Tween.Run(0.6f, k => group.alpha = 1f - k, Ease.InOutSine);
+            yield return Tween.Alpha(group, 1f, 0f, 0.6f, Ease.InOutSine).ToYieldInstruction();
             Hide();
         }
 

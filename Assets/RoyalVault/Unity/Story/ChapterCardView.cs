@@ -1,5 +1,6 @@
 using System.Collections;
 using GameKit;
+using PrimeTween;
 using UnityEngine.UI;
 using UnityEngine;
 
@@ -45,13 +46,13 @@ namespace RoyalVault.Unity
             SetVisible(true);
             card.Group.alpha = 1f;
             card.Tell(scene, number, chapterLabel);
-            yield return Tween.Run(0.45f, Appear, Ease.OutCubic);
+            yield return Tween.Custom(this, 0f, 1f, 0.45f, (view, k) => view.Appear(k), Ease.OutCubic).ToYieldInstruction();
             while (!closeNow && (!TakeAdvance() || card.NextBeat()))
             {
                 yield return null;
             }
 
-            yield return Tween.Run(0.35f, k => group.alpha = 1f - k, Ease.InOutSine);
+            yield return Tween.Alpha(group, 1f, 0f, 0.35f, Ease.InOutSine).ToYieldInstruction();
             SetVisible(false);
         }
 

@@ -1,7 +1,8 @@
 using System.Collections;
+using PrimeTween;
 using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine;
 
 namespace GameKit
 {
@@ -52,13 +53,13 @@ namespace GameKit
             IsShowing = true;
             group.blocksRaycasts = true;
             transform.SetAsLastSibling();
-            yield return Tween.Run(0.3f, k => group.alpha = k, Ease.OutCubic);
+            yield return Tween.Alpha(group, 0f, 1f, 0.3f, Ease.OutCubic).ToYieldInstruction();
             while (!advance && !closeNow)
             {
                 yield return null;
             }
 
-            yield return Tween.Run(0.25f, k => group.alpha = 1f - k, Ease.Linear);
+            yield return Tween.Alpha(group, 1f, 0f, 0.25f, Ease.Linear).ToYieldInstruction();
             Hide();
         }
 

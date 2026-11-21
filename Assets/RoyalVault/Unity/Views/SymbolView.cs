@@ -1,5 +1,6 @@
 using System.Collections;
 using GameKit;
+using PrimeTween;
 using UnityEngine.UI;
 using UnityEngine;
 
@@ -120,6 +121,7 @@ namespace RoyalVault.Unity
                 StopCoroutine(pulse);
             }
 
+            Tween.StopAll(this);
             pulse = null;
             image.rectTransform.localScale = Vector3.one;
             image.rectTransform.localRotation = Quaternion.identity;
@@ -200,7 +202,7 @@ namespace RoyalVault.Unity
             while (t < popTime && t < seconds)
             {
                 float k = t / popTime;
-                float up = Ease.OutBack(Mathf.Min(1f, k * 1.7f));
+                float up = Easing.Evaluate(Mathf.Min(1f, k * 1.7f), Ease.OutBack);
                 image.rectTransform.localScale = Vector3.one * Mathf.LerpUnclamped(1f, pop, up) * (1f - 0.06f * k);
                 glow.color = new Color(g.r, g.g, g.b, 0.9f * k);
                 t += Time.deltaTime;
@@ -250,23 +252,21 @@ namespace RoyalVault.Unity
         private IEnumerator LandRoutine()
         {
             flash = 0.75f;
-            yield return Tween.Run(0.08f, k =>
-            {
-                if (pulse == null)
-                {
-                    image.rectTransform.localScale = new Vector3(1f + 0.08f * k, 1f - 0.1f * k, 1f);
-                }
-            }, Ease.OutCubic);
-            yield return Tween.Run(0.24f, k =>
-            {
-                if (pulse == null)
-                {
-                    image.rectTransform.localScale = Vector3.LerpUnclamped(new Vector3(1.08f, 0.9f, 1f), Vector3.one, Ease.OutBack(k));
-                }
-            }, Ease.Linear);
+            var squashed = new Vector3(1.08f, 0.9f, 1f);
+            yield return Tween.Custom(this, Vector3.one, squashed, 0.08f, (view, scale) => view.Squash(scale), Ease.OutCubic).ToYieldInstruction();
+            yield return Tween.Custom(this, squashed, Vector3.one, 0.24f, (view, scale) => view.Squash(scale), Ease.OutBack).ToYieldInstruction();
             if (pulse == null)
             {
                 image.rectTransform.localScale = Vector3.one;
+            }
+        }
+
+        // Landing squash, unless a celebration has taken over the scale
+        private void Squash(Vector3 scale)
+        {
+            if (pulse == null)
+            {
+                image.rectTransform.localScale = scale;
             }
         }
 
@@ -277,7 +277,7 @@ namespace RoyalVault.Unity
                 material.SetColor(ShineColor, new Color(1f, 0.96f, 0.85f, 1f));
             }
 
-            yield return Tween.Run(0.75f, k => Shine(Mathf.Lerp(-0.4f, 1.4f, k)), Ease.InOutSine);
+            yield return Tween.Custom(this, -0.4f, 1.4f, 0.75f, (view, position) => view.Shine(position), Ease.InOutSine).ToYieldInstruction();
             Shine(-1f);
             glint = null;
         }

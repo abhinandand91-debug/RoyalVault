@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using GameKit;
+using PrimeTween;
 using UnityEngine.UI;
 using UnityEngine;
 
@@ -80,7 +81,7 @@ namespace RoyalVault.Unity
             Track(ring.gameObject);
             StartCoroutine(Fade(ring, 0.45f, k =>
             {
-                ring.rectTransform.sizeDelta = cell * Mathf.Lerp(0.6f, 1.7f, Ease.OutCubic(k));
+                ring.rectTransform.sizeDelta = cell * Mathf.Lerp(0.6f, 1.7f, Easing.Evaluate(k, Ease.OutCubic));
                 ring.color = new Color(c.r, c.g, c.b, 0.85f * (1f - k));
             }));
         }

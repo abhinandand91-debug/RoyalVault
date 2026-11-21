@@ -1,5 +1,6 @@
 using System.Collections;
 using GameKit;
+using PrimeTween;
 using SlotKit;
 using UnityEngine.UI;
 using UnityEngine;
@@ -190,6 +191,7 @@ namespace RoyalVault.Unity
                 StopCoroutine(routine);
             }
 
+            StopTweens();
             routine = StartCoroutine(lit >= needed ? Shatter() : Pulse(lit));
             if (lit >= needed)
             {
@@ -207,16 +209,10 @@ namespace RoyalVault.Unity
             float brightness = Mathf.Lerp(0.55f, 0.85f, stage / (float)needed);
             Color from = face.color;
             Color to = new Color(brightness + 0.25f, brightness + 0.2f, brightness, 1f);
-            yield return Tween.Run(0.12f, k =>
-            {
-                seal.localScale = Vector3.one * (1f + 0.18f * k);
-                face.color = Color.Lerp(from, Color.white * 1.3f, k);
-            }, Ease.OutCubic);
-            yield return Tween.Run(0.35f, k =>
-            {
-                seal.localScale = Vector3.one * (1.18f - 0.18f * k);
-                face.color = Color.Lerp(Color.white * 1.3f, to, k);
-            }, Ease.OutCubic);
+            Tween.Scale(seal, 1f, 1.18f, 0.12f, Ease.OutCubic);
+            yield return Tween.Color(face, from, Color.white * 1.3f, 0.12f, Ease.OutCubic).ToYieldInstruction();
+            Tween.Scale(seal, 1.18f, 1f, 0.35f, Ease.OutCubic);
+            yield return Tween.Color(face, Color.white * 1.3f, to, 0.35f, Ease.OutCubic).ToYieldInstruction();
         }
 
         // The seal bursts: a flash, the face breaks away and the vault's blue light pours out
@@ -226,17 +222,12 @@ namespace RoyalVault.Unity
             sparks.Burst(60, 2.4f);
             // the seal is small: its store effect plays at about half the clash's size
             UiVfx.Play(breakVfx, seal.parent, seal.anchoredPosition, vfxScale * 0.55f, 3f);
-            yield return Tween.Run(0.15f, k =>
-            {
-                seal.localScale = Vector3.one * (1f + 0.35f * k);
-                glow.color = new Color(1f, 0.9f, 0.6f, k);
-            }, Ease.OutCubic);
+            var light = new Color(1f, 0.9f, 0.6f, 1f);
+            Tween.Scale(seal, 1f, 1.35f, 0.15f, Ease.OutCubic);
+            yield return Tween.Color(glow, new Color(light.r, light.g, light.b, 0f), light, 0.15f, Ease.OutCubic).ToYieldInstruction();
             ShowOpen(false);
-            yield return Tween.Run(0.5f, k =>
-            {
-                seal.localScale = Vector3.one * (1.35f - 0.35f * k);
-                glow.color = new Color(1f, 0.9f, 0.6f, 1f - k);
-            }, Ease.OutCubic);
+            Tween.Scale(seal, 1.35f, 1f, 0.5f, Ease.OutCubic);
+            yield return Tween.Color(glow, light, new Color(light.r, light.g, light.b, 0f), 0.5f, Ease.OutCubic).ToYieldInstruction();
             routine = null;
         }
 
@@ -266,6 +257,8 @@ namespace RoyalVault.Unity
                 StopCoroutine(routine);
                 routine = null;
             }
+
+            StopTweens();
             ShowCracks(0);
             foreach (Image pip in pips)
             {
@@ -279,8 +272,15 @@ namespace RoyalVault.Unity
             }
             else
             {
-                routine = StartCoroutine(Tween.Run(0.6f, k => face.color = Color.Lerp(new Color(1f, 1f, 1f, 0.35f), restColour, k), Ease.InOutSine));
+                Tween.Color(face, new Color(1f, 1f, 1f, 0.35f), restColour, 0.6f, Ease.InOutSine);
             }
+        }
+
+        private void StopTweens()
+        {
+            Tween.StopAll(seal);
+            Tween.StopAll(face);
+            Tween.StopAll(glow);
         }
 
         private void Update()

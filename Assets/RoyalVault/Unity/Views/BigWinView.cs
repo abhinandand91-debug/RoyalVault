@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using GameKit;
+using PrimeTween;
 using SlotKit;
 using TMPro;
 using UnityEngine.UI;
@@ -81,7 +82,7 @@ namespace RoyalVault.Unity
                 heroes[i].sprite = clip.frames[Mathf.FloorToInt(t * motion.framesPerSecond) % clip.frames.Length];
                 Vector2 home = heroHome[i];
                 float side = Mathf.Sign(home.x);
-                heroes[i].rectTransform.anchoredPosition = home + new Vector2(side * 520f * (1f - Ease.OutCubic(enter)), 0f);
+                heroes[i].rectTransform.anchoredPosition = home + new Vector2(side * 520f * (1f - Easing.Evaluate(enter, Ease.OutCubic)), 0f);
                 heroes[i].color = new Color(1f, 1f, 1f, enter);
             }
         }
@@ -125,14 +126,14 @@ namespace RoyalVault.Unity
             Opened?.Invoke(kind, value > 0);
             RectTransform hero = heading == null ? banner.rectTransform : title.rectTransform;
             heroClock = 0f;
-            yield return Tween.Run(0.35f, k => PopIn(hero, k), Ease.Linear);
+            yield return Tween.Custom(this, 0f, 1f, 0.35f, (view, k) => view.PopIn(hero, k), Ease.Linear).ToYieldInstruction();
             yield return Hold(value > 0 ? countSeconds + 1.4f : countSeconds, coinsOn ? countSeconds : 0f);
             if (skipped && value > 0)
             {
                 amount.Set(value);
                 yield return new WaitForSeconds(0.6f);
             }
-            yield return Tween.Run(0.3f, FadeOut, Ease.Linear);
+            yield return Tween.Custom(this, 0f, 1f, 0.3f, (view, k) => view.FadeOut(k), Ease.Linear).ToYieldInstruction();
             Close();
         }
 
@@ -159,7 +160,7 @@ namespace RoyalVault.Unity
         private void PopIn(RectTransform hero, float k)
         {
             group.alpha = k;
-            hero.localScale = Vector3.one * Mathf.LerpUnclamped(0.6f, 1f, Ease.OutBack(k));
+            hero.localScale = Vector3.one * Mathf.LerpUnclamped(0.6f, 1f, Easing.Evaluate(k, Ease.OutBack));
         }
 
         // Turns the rays, poses the heroes and showers coins for coinSeconds

@@ -1,4 +1,5 @@
 using GameKit;
+using PrimeTween;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine;
@@ -140,13 +141,13 @@ namespace RoyalVault.Unity
         private void PushCamera(float t)
         {
             float k = Mathf.Clamp01(t / (duration + 1.5f));
-            art.rectTransform.localScale = Vector3.one * (1f + push * (Ease.OutCubic(k) * 0.6f + k * 0.4f));
+            art.rectTransform.localScale = Vector3.one * (1f + push * (Easing.Evaluate(k, Ease.OutCubic) * 0.6f + k * 0.4f));
         }
 
         // Figures step in from their side of the screen, then sway gently
         private void MoveFigures(float t)
         {
-            float enter = Ease.OutCubic(Mathf.Clamp01((t - 0.2f) / 0.9f));
+            float enter = Easing.Evaluate(Mathf.Clamp01((t - 0.2f) / 0.9f), Ease.OutCubic);
             for (int i = 0; i < figures.Length && i < figureHome.Length; i++)
             {
                 if (!figures[i].gameObject.activeSelf)
@@ -164,7 +165,7 @@ namespace RoyalVault.Unity
         // Text fades in and rises into place
         private static void Reveal(TextMeshProUGUI text, float t)
         {
-            float k = Ease.OutCubic(Mathf.Clamp01(t / 0.7f));
+            float k = Easing.Evaluate(Mathf.Clamp01(t / 0.7f), Ease.OutCubic);
             text.alpha = k;
             text.margin = new Vector4(0f, (1f - k) * 36f, 0f, 0f);
         }

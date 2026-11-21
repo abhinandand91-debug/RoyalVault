@@ -1,5 +1,6 @@
 using System.Collections;
 using GameKit;
+using PrimeTween;
 using UnityEngine.UI;
 using UnityEngine;
 
@@ -101,6 +102,8 @@ namespace RoyalVault.Unity
                 StopCoroutine(throwing);
             }
 
+            Tween.StopAll(this);
+
             throwing = StartCoroutine(WindUpRoutine());
         }
 
@@ -118,6 +121,8 @@ namespace RoyalVault.Unity
                 StopCoroutine(throwing);
             }
 
+            Tween.StopAll(this);
+
             throwing = StartCoroutine(ReleaseRoutine());
         }
 
@@ -134,7 +139,7 @@ namespace RoyalVault.Unity
             while (true)
             {
                 t += Time.deltaTime;
-                lunge = Ease.OutCubic(Mathf.Clamp01(t / 0.35f));
+                lunge = Easing.Evaluate(Mathf.Clamp01(t / 0.35f), Ease.OutCubic);
                 surge = Mathf.Max(surge, 0.6f);
                 bool flameUp = motion == null ? t >= 0.4f : flameWeight > 0.6f && t >= 0.35f;
                 if (flameUp || t > 1.6f)
@@ -155,8 +160,8 @@ namespace RoyalVault.Unity
                 flame.Burst(30, 3f);
                 sparks.Burst(20, 1.2f);
             }
-            yield return Tween.Run(0.12f, k => lunge = 1f + 0.35f * k, Ease.OutCubic);
-            yield return Tween.Run(0.6f, k => lunge = 1.35f * (1f - k), Ease.InOutSine);
+            yield return Tween.Custom(this, 1f, 1.35f, 0.12f, (view, value) => view.lunge = value, Ease.OutCubic).ToYieldInstruction();
+            yield return Tween.Custom(this, 1.35f, 0f, 0.6f, (view, value) => view.lunge = value, Ease.InOutSine).ToYieldInstruction();
             lunge = 0f;
             throwing = null;
         }
@@ -305,6 +310,8 @@ namespace RoyalVault.Unity
                 StopCoroutine(celebrate);
             }
 
+            Tween.StopAll(image);
+
             celebrate = StartCoroutine(CelebrateRoutine());
         }
 
@@ -325,15 +332,22 @@ namespace RoyalVault.Unity
                 sparks.Burst(46, 1f);
                 embers.Burst(20, 2f);
             }
-            yield return Tween.Run(0.25f, k => { lift = k; image.color = Color.Lerp(Color.white, new Color(1.4f, 1.25f, 0.9f), k); }, Ease.OutCubic);
+            yield return Tween.Custom(image, 0f, 1f, 0.25f, (_, value) => Lift(value), Ease.OutCubic).ToYieldInstruction();
             if (sparks != null)
             {
                 sparks.Burst(24, 0.8f);
             }
 
             yield return new WaitForSeconds(0.7f);
-            yield return Tween.Run(0.6f, k => { lift = 1f - k; image.color = Color.Lerp(new Color(1.4f, 1.25f, 0.9f), Color.white, k); }, Ease.InOutSine);
+            yield return Tween.Custom(image, 1f, 0f, 0.6f, (_, value) => Lift(value), Ease.InOutSine).ToYieldInstruction();
             celebrate = null;
+        }
+
+        // Raises the figure in a warm light; 0 is at rest
+        private void Lift(float amount)
+        {
+            lift = amount;
+            image.color = Color.Lerp(Color.white, new Color(1.4f, 1.25f, 0.9f), amount);
         }
     }
 }

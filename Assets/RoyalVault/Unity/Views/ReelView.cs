@@ -1,6 +1,7 @@
 using System.Collections;
 using System;
 using GameKit;
+using PrimeTween;
 using SlotKit;
 using UnityEngine.UI;
 using UnityEngine;
@@ -71,6 +72,8 @@ namespace RoyalVault.Unity
                 StopCoroutine(spin);
             }
 
+            Tween.StopAll(this);
+
             hurry = false;
             spin = StartCoroutine(SpinRoutine(targetTop, delay, runSeconds, onStopped));
         }
@@ -91,20 +94,12 @@ namespace RoyalVault.Unity
             float start = position;
             if (!hurry)
             {
-                yield return Tween.Run(0.12f, k =>
-                {
-                    position = start + WindUp * k;
-                    Layout(false);
-                }, Ease.OutCubic);
+                yield return Tween.Custom(this, start, start + WindUp, 0.12f, (reel, p) => reel.MoveTo(p, false), Ease.OutCubic).ToYieldInstruction();
             }
 
             float end = StopBefore(target, Speed * runSeconds);
             yield return Run(end, runSeconds);
-            yield return Tween.Run(0.2f, k =>
-            {
-                position = end + Overshoot * k;
-                Layout(false);
-            }, Ease.OutCubic);
+            yield return Tween.Custom(this, end, end + Overshoot, 0.2f, (reel, p) => reel.MoveTo(p, false), Ease.OutCubic).ToYieldInstruction();
             position = target;
             Layout(false);
             spin = null;
@@ -155,11 +150,13 @@ namespace RoyalVault.Unity
         private IEnumerator FinishQuickly(float end)
         {
             float remaining = Mathf.Min(1.5f, position - end);
-            yield return Tween.Run(0.1f, k =>
-            {
-                position = end + remaining * (1f - k);
-                Layout(true);
-            }, Ease.Linear);
+            yield return Tween.Custom(this, end + remaining, end, 0.1f, (reel, p) => reel.MoveTo(p, true), Ease.Linear).ToYieldInstruction();
+        }
+
+        private void MoveTo(float newPosition, bool blur)
+        {
+            position = newPosition;
+            Layout(blur);
         }
 
         // Places the symbol views for the current position and gives them the right art

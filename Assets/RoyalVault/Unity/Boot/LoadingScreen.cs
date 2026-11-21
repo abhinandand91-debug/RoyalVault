@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using GameKit;
+using PrimeTween;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine;
@@ -128,7 +129,7 @@ namespace RoyalVault.Unity
             StoryCardView card = cards[0];
             card.Show(last.scene, last.number, story.chapterLabel, story.secondsPerScene);
             StoryDone = true;
-            yield return Tween.Run(0.6f, k => card.Group.alpha = k, Ease.InOutSine);
+            yield return Tween.Alpha(card.Group, 0f, 1f, 0.6f, Ease.InOutSine).ToYieldInstruction();
         }
 
         private void PlayPageSound()
@@ -157,7 +158,7 @@ namespace RoyalVault.Unity
                 sound.PlayMusic(null, 0.45f);
             }
 
-            yield return Tween.Run(0.45f, k => group.alpha = 1f - k, Ease.InOutSine);
+            yield return Tween.Alpha(group, 1f, 0f, 0.45f, Ease.InOutSine).ToYieldInstruction();
         }
 
         private void Update()
@@ -206,9 +207,9 @@ namespace RoyalVault.Unity
             while (true)
             {
                 tipText.text = tips[tipIndex % tips.Length].ToUpperInvariant() + "…";
-                yield return Tween.Run(0.35f, k => tipText.alpha = k, Ease.Linear);
+                yield return Tween.Alpha(tipText, 0f, 1f, 0.35f, Ease.Linear).ToYieldInstruction();
                 yield return new WaitForSeconds(1.3f);
-                yield return Tween.Run(0.35f, k => tipText.alpha = 1f - k, Ease.Linear);
+                yield return Tween.Alpha(tipText, 1f, 0f, 0.35f, Ease.Linear).ToYieldInstruction();
                 tipIndex++;
             }
         }

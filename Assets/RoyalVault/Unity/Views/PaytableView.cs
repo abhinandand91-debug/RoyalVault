@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 using GameKit;
+using PrimeTween;
 using SlotKit;
 using TMPro;
 using UnityEngine.UI;
@@ -126,6 +127,7 @@ namespace RoyalVault.Unity
             gameObject.SetActive(true);
             transform.SetAsLastSibling();
             StopAllCoroutines();
+            Tween.StopAll(group);
             StartCoroutine(Fade(1f));
         }
 
@@ -138,6 +140,7 @@ namespace RoyalVault.Unity
 
             IsOpen = false;
             StopAllCoroutines();
+            Tween.StopAll(group);
             StartCoroutine(Fade(0f));
         }
 
@@ -145,7 +148,7 @@ namespace RoyalVault.Unity
         {
             group.blocksRaycasts = to > 0f;
             float from = group.alpha;
-            yield return Tween.Run(0.22f, k => group.alpha = Mathf.Lerp(from, to, k), Ease.OutCubic);
+            yield return Tween.Alpha(group, from, to, 0.22f, Ease.OutCubic).ToYieldInstruction();
             if (to <= 0f)
             {
                 SetVisible(false);

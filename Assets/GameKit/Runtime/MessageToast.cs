@@ -1,4 +1,5 @@
 using System.Collections;
+using PrimeTween;
 using TMPro;
 using UnityEngine;
 
@@ -25,14 +26,15 @@ namespace GameKit
         {
             label.text = message;
             StopAllCoroutines();
+            Tween.StopAll(group);
             StartCoroutine(Run(seconds));
         }
 
         private IEnumerator Run(float seconds)
         {
-            yield return Tween.Run(0.2f, k => group.alpha = k, Ease.OutCubic);
+            yield return Tween.Alpha(group, 0f, 1f, 0.2f, Ease.OutCubic).ToYieldInstruction();
             yield return new WaitForSeconds(seconds);
-            yield return Tween.Run(0.4f, k => group.alpha = 1f - k, Ease.Linear);
+            yield return Tween.Alpha(group, 1f, 0f, 0.4f, Ease.Linear).ToYieldInstruction();
         }
     }
 }

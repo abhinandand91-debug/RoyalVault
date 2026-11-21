@@ -34,7 +34,10 @@ namespace RoyalVault.EditorTools
                     {
                         report = RtpSimulator.Run(machine.ToDefinition(), 1000000).ToString();
                     }
-                    finally { EditorUtility.ClearProgressBar(); }
+                    finally
+                    {
+                        EditorUtility.ClearProgressBar();
+                    }
                 }
             }
             if (!string.IsNullOrEmpty(report))
