@@ -4,7 +4,8 @@
     "references": [
         "RoyalVault.Core",
         "UnityEngine.UI",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Coffee.UIParticle"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

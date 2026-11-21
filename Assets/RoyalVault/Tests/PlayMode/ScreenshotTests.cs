@@ -140,6 +140,10 @@ namespace RoyalVault.Tests
             yield return WaitFor(() => seal.Count >= 2);
             yield return new WaitForSeconds(0.25f);
             yield return Shot("16_seal_cracking");
+            // the third seal shatters it
+            yield return WaitFor(() => seal.IsOpen);
+            yield return new WaitForSeconds(0.25f);
+            yield return Shot("24_seal_break");
             yield return WaitFor(() => Object.FindFirstObjectByType<BigWinView>(FindObjectsInactive.Include).IsShowing);
             yield return new WaitForSeconds(0.9f);
             yield return Shot("09_free_spins_awarded");

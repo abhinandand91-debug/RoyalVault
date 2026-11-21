@@ -159,6 +159,11 @@ namespace RoyalVault.EditorTools
             theme.additive = AdditiveMaterial();
             theme.symbolMaterial = SymbolMaterial();
             theme.rays = Sprite("Generated/rays");
+            // Hovl Studio's Magic Effects FREE, when imported (git-ignored: its licence allows no redistribution)
+            theme.clashImpactVfx = StorePrefab("Assets/Hovl Studio", "Electro hit");
+            theme.clashSparksVfx = StorePrefab("Assets/Hovl Studio", "Sparks explode blue");
+            theme.sealBreakVfx = StorePrefab("Assets/Hovl Studio", "Holy hit");
+            theme.vfxScale = 170f;
             theme.displayFont = fonts.Display;
             theme.headingFont = fonts.Heading;
             theme.labelFont = fonts.Label;
@@ -167,6 +172,19 @@ namespace RoyalVault.EditorTools
             if (created) AssetDatabase.CreateAsset(theme, path);
             EditorUtility.SetDirty(theme);
             return theme;
+        }
+
+        /// <summary>A prefab by exact name anywhere under <paramref name="folder"/>, or null when the pack is absent.</summary>
+        private static GameObject StorePrefab(string folder, string name)
+        {
+            if (!AssetDatabase.IsValidFolder(folder)) return null;
+            foreach (string guid in AssetDatabase.FindAssets(name + " t:Prefab", new[] { folder }))
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (Path.GetFileNameWithoutExtension(path) == name) return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            }
+            Debug.LogWarning("Royal Vault: store effect not found: " + folder + " / " + name);
+            return null;
         }
 
         /// <summary>How each symbol celebrates, and the colour of its light.</summary>

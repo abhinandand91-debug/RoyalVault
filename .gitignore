@@ -34,6 +34,9 @@
 # The purchased Crowns of Kemet pack itself, if it is imported into the project
 /Assets/RSG_Crowns_of_Kemet/
 /Assets/RSG_Crowns_of_Kemet.meta
+# Hovl Studio's Magic Effects FREE (Asset Store licence: use in the game, no redistribution)
+/Assets/Hovl Studio/
+/Assets/Hovl Studio.meta
 
 # Crash and build reports
 crashlytics-build.properties

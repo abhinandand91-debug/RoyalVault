@@ -101,7 +101,11 @@ namespace RoyalVault.Unity
             jackpots.Bind(Session.Jackpots);
             paytable.Build(Machine, theme);
             for (int i = 0; i < characters.Length; i++) characters[i].Bind(theme.character, theme.characterEffectAnchor, theme.characterMagic, theme.characterAnimation);
-            if (flameClash != null) flameClash.Bind(characters, theme.characterMagic);
+            if (flameClash != null)
+            {
+                flameClash.Bind(characters, theme.characterMagic);
+                flameClash.SetStoreEffects(theme.clashImpactVfx, theme.clashSparksVfx, theme.vfxScale);
+            }
             presenter.Bind(machineView, console, bigWin, jackpots, characters, flameClash);
             // the guardians' flames flare each time a reel is anticipated
             machineView.AnticipationStarted += reel => { foreach (CharacterView c in characters) c.Surge(); };

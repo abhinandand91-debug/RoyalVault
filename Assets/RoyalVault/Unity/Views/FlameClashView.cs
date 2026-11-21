@@ -31,6 +31,9 @@ namespace RoyalVault.Unity
         [SerializeField] private Color magic = new Color(0.35f, 0.75f, 1f, 1f);
 
         private CharacterView[] guardians = new CharacterView[0];
+        private GameObject impactVfx;
+        private GameObject sparksVfx;
+        private float vfxScale = 90f;
         private System.Collections.Generic.List<(Transform guardian, int index)> lifted;
         private Vector2[] fallbackStarts = { new Vector2(-700f, 250f), new Vector2(700f, 250f) };
 
@@ -54,6 +57,14 @@ namespace RoyalVault.Unity
             burst = burstEmitter;
             goldBurst = goldEmitter;
             shakeTarget = shake;
+        }
+
+        /// <summary>Optional store particle effects played where the flames meet (see <see cref="UiVfx"/>).</summary>
+        public void SetStoreEffects(GameObject impact, GameObject sparks, float scale)
+        {
+            impactVfx = impact;
+            sparksVfx = sparks;
+            vfxScale = scale;
         }
 
         public void Bind(CharacterView[] characters, Color magicColour)
@@ -131,6 +142,8 @@ namespace RoyalVault.Unity
             // the clash: the balls vanish into a flash, rings blast out, sparks spray, the machine jolts
             for (int i = 0; i < count; i++) { fireballs[i].gameObject.SetActive(false); trails[i].Intensity = 0f; }
             Clashed?.Invoke();
+            UiVfx.Play(impactVfx, layer, meetingPoint, vfxScale, 3f);
+            UiVfx.Play(sparksVfx, layer, meetingPoint, vfxScale, 3f);
             burst.Origin = meetingPoint - ((RectTransform)burst.transform).anchoredPosition;
             goldBurst.Origin = burst.Origin;
             burst.StartColor = new Color(Mathf.Lerp(magic.r, 1f, 0.5f), Mathf.Lerp(magic.g, 1f, 0.5f), 1f, 1f);

@@ -110,6 +110,10 @@ MonoBehaviour:
   additive: {fileID: 2100000, guid: 87cfb5d4bd56c432b83a1803eae1b483, type: 2}
   symbolMaterial: {fileID: 2100000, guid: 7284114aa04e14d309421c3aa0c1a3d5, type: 2}
   rays: {fileID: 21300000, guid: 5d0cc192600e942708d3d6aabaf48c8b, type: 3}
+  clashImpactVfx: {fileID: 2965222256817593503, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+  clashSparksVfx: {fileID: 952961124639765284, guid: 1095a5c9f65bfbe4383f63d5d1886c65, type: 3}
+  sealBreakVfx: {fileID: 2944396702758532163, guid: e190bf97c041e58448af6b043116cba0, type: 3}
+  vfxScale: 170
   story: {fileID: 11400000, guid: ced7b3d86de1841f9bd3e7d24fd11d34, type: 2}
   sounds: {fileID: 11400000, guid: 89b77e2e548124804a9d37d2e28379ea, type: 2}
   heroLeft: {fileID: 11400000, guid: ef808432880fa41b2b25aff5bf39c723, type: 2}

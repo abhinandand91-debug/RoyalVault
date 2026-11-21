@@ -26,6 +26,8 @@ namespace RoyalVault.Unity
         [SerializeField] private Color magicColour = new Color(0.35f, 0.75f, 1f, 1f);
 
         private int scatter = -1;
+        private GameObject breakVfx;
+        private float vfxScale = 90f;
         private int needed = 3;
         private SpinOutcome outcome;
         private bool freeSpin;
@@ -85,6 +87,8 @@ namespace RoyalVault.Unity
             foreach (ThemeDefinition.SymbolArt art in theme.symbols)
                 if (art.id == id) face.sprite = art.sprite;
             magicColour = theme.characterMagic;
+            breakVfx = theme.sealBreakVfx;
+            vfxScale = theme.vfxScale;
 
             flow.SpinStarted += OnSpinStarted;
             machineView.ReelStopped += OnReelStopped;
@@ -146,6 +150,8 @@ namespace RoyalVault.Unity
         {
             sparks.StartColor = new Color(1f, 0.95f, 0.8f, 1f);
             sparks.Burst(60, 2.4f);
+            // the seal is small: its store effect plays at about half the clash's size
+            UiVfx.Play(breakVfx, seal.parent, seal.anchoredPosition, vfxScale * 0.55f, 3f);
             yield return Tween.Run(0.15f, k => { seal.localScale = Vector3.one * (1f + 0.35f * k); glow.color = new Color(1f, 0.9f, 0.6f, k); }, Ease.OutCubic);
             ShowOpen(false);
             yield return Tween.Run(0.5f, k =>
