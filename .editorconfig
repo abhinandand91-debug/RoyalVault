@@ -1,0 +1,20 @@
+root = true
+
+[*.cs]
+
+# Indentation
+indent_style = space
+indent_size = 4
+
+# Allman brace style
+csharp_new_line_before_open_brace = all
+
+# Always require braces
+csharp_prefer_braces = true:warning
+dotnet_diagnostic.IDE0011.severity = warning
+
+# One statement per line
+csharp_preserve_single_line_statements = false
+
+# One block per line
+csharp_preserve_single_line_blocks = false
