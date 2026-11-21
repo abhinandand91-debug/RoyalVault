@@ -56,6 +56,13 @@ namespace RoyalVault.Unity
             };
             machine.ReelStopped += OnReelStopped;
             machine.AllReelsStopped += () => sound.StopLoop(SoundCue.ReelSpinLoop);
+            // the long wait on the last reels: a rising loop, and its tail when the last one lands
+            machine.AnticipationStarted += reel => sound.StartLoop(SoundCue.AnticipationLoop);
+            machine.AnticipationEnded += () =>
+            {
+                sound.StopLoop(SoundCue.AnticipationLoop, 0.12f);
+                sound.Play(SoundCue.AnticipationEnd);
+            };
 
             // the seal on the vault door
             if (seal != null)

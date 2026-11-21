@@ -76,12 +76,16 @@ The `SoundTests` PlayMode tests spin forced outcomes and check that every moment
   every spin) or **All At Once**, with the gap between reels for each. Every reel runs exactly its scheduled time: the
   part of a lap needed to reach its target symbol is made up by one jump along the strip while it is a motion blur, so
   reels land in exactly the order asked for.
+- **Anticipation:** when the landed reels are one Vault Seal short of free spins (or one crown short of a jackpot),
+  every reel still to land spins longer, one by one, inside a frame of light with sparks rising, while the guardians'
+  flames flare and the anticipation loop plays. It reacts only to what has landed, so it can end in a miss. Toggle and
+  timings are under *Anticipation* on the `MachineView`; there is none when every reel lands at once.
 - `ShowcaseTests` (PlayMode) spins every showcase result and checks it, and spins all nine start / stop order pairs
   checking that every cell shows what the engine decided.
 
-| Epic win | Grand jackpot |
-|---|---|
-| ![Epic win](docs/screenshots/19_epic_win.jpg) | ![Grand jackpot](docs/screenshots/20_grand_jackpot.jpg) |
+| Epic win | Grand jackpot | Anticipation |
+|---|---|---|
+| ![Epic win](docs/screenshots/19_epic_win.jpg) | ![Grand jackpot](docs/screenshots/20_grand_jackpot.jpg) | ![Anticipation](docs/screenshots/21_anticipation.jpg) |
 
 ## The story
 

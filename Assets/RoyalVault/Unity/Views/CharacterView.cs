@@ -84,6 +84,14 @@ namespace RoyalVault.Unity
             nextSurge = Time.time + 3f + phase;
         }
 
+        /// <summary>The hand's flame flares up and throws embers (the guardians watch the reels being anticipated).</summary>
+        public void Surge()
+        {
+            if (!isActiveAndEnabled || hand == null) return;
+            surge = 1f;
+            embers.Burst(10, 1.6f);
+        }
+
         /// <summary>True while the one-shot action plays.</summary>
         public bool IsActing => motion != null && clip == motion.action;
 

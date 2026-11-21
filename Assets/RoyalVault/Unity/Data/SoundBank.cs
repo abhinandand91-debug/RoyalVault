@@ -31,6 +31,9 @@ namespace RoyalVault.Unity
         // story and characters
         StoryPage,
         GuardianFlame,
+        // anticipation (added last: the bank stores cues by number)
+        AnticipationLoop,
+        AnticipationEnd,
     }
 
     /// <summary>

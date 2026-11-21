@@ -99,6 +99,8 @@ namespace RoyalVault.Unity
             paytable.Build(Machine, theme);
             for (int i = 0; i < characters.Length; i++) characters[i].Bind(theme.character, theme.characterEffectAnchor, theme.characterMagic, theme.characterAnimation);
             presenter.Bind(machineView, console, bigWin, jackpots, characters);
+            // the guardians' flames flare each time a reel is anticipated
+            machineView.AnticipationStarted += reel => { foreach (CharacterView c in characters) c.Surge(); };
             if (sealMeter != null) sealMeter.Bind(Machine, theme, machineView, Flow, Session);
             // sound listens to everything above; the views stay silent themselves
             var player = gameObject.AddComponent<SoundPlayer>();

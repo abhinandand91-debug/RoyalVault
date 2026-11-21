@@ -118,7 +118,13 @@ namespace RoyalVault.Tests
             yield return WaitFor(() => game.Flow.State == SpinState.Idle, 30f);
 
             // free spins: the award card, then a free spin with the counter in the console
+            bool anticipating = false;
+            Object.FindFirstObjectByType<MachineView>().AnticipationStarted += reel => anticipating = true;
             yield return SpinTo(game, new[] { 33, 48, 5, 22, 6 });
+            // two seals down: the last reels are anticipated in a column of light
+            yield return WaitFor(() => anticipating);
+            yield return new WaitForSeconds(0.7f);
+            yield return Shot("21_anticipation");
             // the seal meter cracks as the seals land
             var seal = Object.FindFirstObjectByType<SealMeterView>();
             yield return WaitFor(() => seal.Count >= 2);

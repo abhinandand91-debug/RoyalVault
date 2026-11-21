@@ -92,5 +92,51 @@ namespace RoyalVault.Tests
             machine.StopOrder = ReelOrder.Sequential;
             PlayerPrefs.DeleteAll();
         }
+        [UnityTest, Timeout(300000)]
+        public IEnumerator AnticipationWaitsOnTheReelsAfterTheSecondSeal()
+        {
+            yield return LoadGame();
+            var game = Object.FindFirstObjectByType<GameBootstrap>();
+            var machine = Object.FindFirstObjectByType<MachineView>();
+            SoundPlayer sound = game.Sound.Player;
+            var landedAt = new Dictionary<int, float>();
+            machine.ReelStopped += reel => landedAt[reel] = Time.time;
+
+            // three seals, left to right: the reels after the second seal are anticipated, each held back
+            yield return WaitFor(() => game.Flow.State == SpinState.Idle);
+            sound.ClearHistory();
+            landedAt.Clear();
+            game.ForceNextStops(33, 48, 5, 22, 6);
+            Assert.IsTrue(game.Flow.RequestSpin());
+            yield return WaitFor(() => landedAt.Count == game.Machine.Reels, 30f);
+            int scatter = game.Machine.FirstIndexOfKind(SymbolKind.Scatter);
+            SpinOutcome outcome = game.Engine.Evaluate(new[] { 33, 48, 5, 22, 6 }, 1);
+            int seals = 0, secondSealReel = -1;
+            for (int r = 0; r < game.Machine.Reels && secondSealReel < 0; r++)
+                for (int row = 0; row < game.Machine.Rows; row++)
+                    if (outcome.Grid[r, row] == scatter && ++seals == 2) secondSealReel = r;
+            var expected = new List<int>();
+            for (int r = secondSealReel + 1; r < game.Machine.Reels; r++) expected.Add(r);
+            CollectionAssert.AreEqual(expected, machine.AnticipatedReels, "anticipated after reel " + secondSealReel);
+            foreach (int r in expected)
+                Assert.Greater(landedAt[r] - landedAt[r - 1], 1.0f, "reel " + r + " is held back");
+            Assert.Contains(SoundCue.AnticipationLoop, (System.Collections.ICollection)new List<SoundCue>(sound.History));
+            Assert.Contains(SoundCue.AnticipationEnd, (System.Collections.ICollection)new List<SoundCue>(sound.History));
+            yield return WaitFor(() => game.Session.FreeSpins.Remaining == 0 && game.Flow.State == SpinState.Idle, 120f);
+
+            // a plain spin is not anticipated, and nothing is anticipated when every reel lands at once
+            game.ForceNextStops(19, 18, 40, 46, 23);
+            Assert.IsTrue(game.Flow.RequestSpin());
+            yield return WaitFor(() => game.Flow.State != SpinState.Spinning);
+            Assert.AreEqual(0, machine.AnticipatedReels.Count, "plain spin");
+            yield return WaitFor(() => game.Flow.State == SpinState.Idle);
+            machine.StopOrder = ReelOrder.AllAtOnce;
+            game.ForceNextStops(33, 48, 5, 22, 6);
+            Assert.IsTrue(game.Flow.RequestSpin());
+            yield return WaitFor(() => game.Flow.State != SpinState.Spinning);
+            Assert.AreEqual(0, machine.AnticipatedReels.Count, "all at once");
+            machine.StopOrder = ReelOrder.Sequential;
+            PlayerPrefs.DeleteAll();
+        }
     }
 }

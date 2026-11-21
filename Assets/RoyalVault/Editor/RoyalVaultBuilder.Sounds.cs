@@ -97,6 +97,8 @@ namespace RoyalVault.EditorTools
                 case SoundCue.CoinShowerLoop: return (0.5f, 0f);
                 case SoundCue.StoryPage: return (0.6f, 0f);
                 case SoundCue.GuardianFlame: return (0.7f, 0f);
+                case SoundCue.AnticipationLoop: return (0.8f, 0f);
+                case SoundCue.AnticipationEnd: return (0.85f, 0f);
                 default: return (1f, 0f); // big wins, jackpots, free spins
             }
         }
