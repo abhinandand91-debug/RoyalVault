@@ -1,7 +1,9 @@
 {
     "name": "RoyalVault.Core",
     "rootNamespace": "RoyalVault.Core",
-    "references": [],
+    "references": [
+        "SlotKit.Core"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

@@ -2,10 +2,11 @@ using System.IO;
 using System.Linq;
 using RoyalVault.Core;
 using RoyalVault.Unity;
+using SlotKit;
 using TMPro;
 using UnityEditor;
-using UnityEngine;
 using UnityEngine.TextCore.LowLevel;
+using UnityEngine;
 
 namespace RoyalVault.EditorTools
 {

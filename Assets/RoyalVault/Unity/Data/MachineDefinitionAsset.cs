@@ -1,6 +1,6 @@
-using System;
 using System.Collections.Generic;
-using RoyalVault.Core;
+using System;
+using SlotKit;
 using UnityEngine;
 
 namespace RoyalVault.Unity

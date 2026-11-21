@@ -1,11 +1,12 @@
 using System.Collections;
 using System.IO;
+using GameKit;
 using NUnit.Framework;
-using RoyalVault.Core;
 using RoyalVault.Unity;
-using UnityEngine;
+using SlotKit;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine;
 
 namespace RoyalVault.Tests
 {

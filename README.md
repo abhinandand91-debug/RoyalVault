@@ -151,18 +151,27 @@ animations are baked to frames like the guardians' (`CharacterAnimation`, set on
 ## How it is built
 
 ```
-GameBootstrap  (single entry point: reads the assets, builds Core, hands it to the views)
-   │
-   ├── Core  (plain C#, no Unity references: RoyalVault.Core.asmdef has noEngineReferences)
-   │     MachineDefinition ─► SpinEngine ─► WinEvaluator [PaylineRule, ScatterRule, JackpotRule] ─► SpinOutcome
-   │     GameSession [Wallet, BetModel, JackpotPool, FreeSpinState] ◄── ISaveStore
-   │     SpinFlow ─► FeaturePipeline [FreeSpins, Jackpot, WinTier, AutoPlay]   (ISlotFeature plug-ins)
-   │
-   └── Unity  (presentation only: shows what Core decided, never decides itself)
-         MachineView ─► ReelView ─► SymbolView, PaylineView
-         WinPresenter, BigWinView, JackpotPanelView, ConsoleView, SpinButtonView, CharacterView, PaytableView
-         RoundController  (console presses → flow requests; flow events → reel spins and win shows)
+Assets/GameKit         reusable in any Unity game, knows nothing about slots
+   GameKit               Tween/Ease, UiFactory, UiParticleEmitter, CountingText, TypewriterText,
+                         MessageToast, CoachMarkView (UGUI + TextMeshPro only)
+   GameKit.UIParticle    UiVfx: plays ParticleSystem prefabs inside a UI canvas (needs com.coffee.ui-particle)
+
+Assets/SlotKit         reusable in any slot game
+   SlotKit.Core          plain C#, noEngineReferences
+                         MachineDefinition ─► SpinEngine ─► WinEvaluator [PaylineRule, ScatterRule, JackpotRule] ─► SpinOutcome
+                         GameSession [Wallet, BetModel, JackpotPool, FreeSpinState] ◄── ISaveStore
+                         SpinFlow ─► FeaturePipeline [FreeSpins, Jackpot, WinTier, AutoPlay]   (ISlotFeature plug-ins)
+
+Assets/RoyalVault      this game
+   RoyalVault.Core       the shipped machine presets (plain C#)
+   RoyalVault.Unity      presentation: shows what SlotKit decided, never decides itself
+                         GameBootstrap (entry point) ─► MachineView ─► ReelView ─► SymbolView, PaylineView
+                         WinPresenter, BigWinView, ConsoleView, CharacterView, story, sound
+   RoyalVault.Editor     Build Everything, machine inspector, art importer
 ```
+
+Royal Vault uses GameKit and SlotKit; neither ever references Royal Vault, so either folder can be
+copied into another project as it is.
 
 - **Data, not code.** A machine is a `MachineDefinitionAsset` (ScriptableObject): grid size, symbols, reel
   strips, paylines, pays, scatter and jackpot rules, bets. The look is a `ThemeDefinition` (ScriptableObject):

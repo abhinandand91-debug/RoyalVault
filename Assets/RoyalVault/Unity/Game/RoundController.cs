@@ -1,5 +1,6 @@
 using System.Collections;
-using RoyalVault.Core;
+using GameKit;
+using SlotKit;
 using UnityEngine;
 
 namespace RoyalVault.Unity

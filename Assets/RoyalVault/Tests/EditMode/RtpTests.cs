@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using RoyalVault.Core;
+using SlotKit;
 using UnityEngine;
 
 namespace RoyalVault.Tests

@@ -2,6 +2,8 @@
     "name": "RoyalVault.Editor",
     "rootNamespace": "RoyalVault.EditorTools",
     "references": [
+        "SlotKit.Core",
+        "GameKit",
         "RoyalVault.Core",
         "RoyalVault.Unity",
         "UnityEngine.UI",

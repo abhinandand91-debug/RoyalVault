@@ -2,6 +2,7 @@
     "name": "RoyalVault.Tests",
     "rootNamespace": "RoyalVault.Tests",
     "references": [
+        "SlotKit.Core",
         "RoyalVault.Core",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"

@@ -1,3 +1,5 @@
+using SlotKit;
+
 namespace RoyalVault.Core
 {
     // The machines that ship with the game

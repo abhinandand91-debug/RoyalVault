@@ -2,10 +2,11 @@
     "name": "RoyalVault.Unity",
     "rootNamespace": "RoyalVault.Unity",
     "references": [
-        "RoyalVault.Core",
+        "SlotKit.Core",
+        "GameKit",
+        "GameKit.UIParticle",
         "UnityEngine.UI",
-        "Unity.TextMeshPro",
-        "Coffee.UIParticle"
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

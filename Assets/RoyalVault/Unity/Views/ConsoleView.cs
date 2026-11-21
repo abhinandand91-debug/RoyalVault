@@ -1,8 +1,9 @@
 using System;
-using RoyalVault.Core;
+using GameKit;
+using SlotKit;
 using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine;
 
 namespace RoyalVault.Unity
 {

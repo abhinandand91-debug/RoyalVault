@@ -2,7 +2,8 @@
     "name": "RoyalVault.PlayModeTests",
     "rootNamespace": "RoyalVault.Tests",
     "references": [
-        "RoyalVault.Core",
+        "SlotKit.Core",
+        "GameKit",
         "RoyalVault.Unity",
         "UnityEngine.UI",
         "Unity.TextMeshPro",
