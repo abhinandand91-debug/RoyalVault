@@ -34,6 +34,9 @@ namespace RoyalVault.Unity
         // anticipation (added last: the bank stores cues by number)
         AnticipationLoop,
         AnticipationEnd,
+        // the guardians' flame clash
+        FlameThrow,
+        FlameClash,
     }
 
     /// <summary>

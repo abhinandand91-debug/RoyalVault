@@ -141,3 +141,13 @@ MonoBehaviour:
     - {fileID: 8300000, guid: a36cf74ca87ae4f2993f9c162360298f, type: 3}
     volume: 0.85
     pitchVariance: 0
+  - cue: 22
+    clips:
+    - {fileID: 8300000, guid: 7d84398a66a2648a4b858860da794024, type: 3}
+    volume: 0.85
+    pitchVariance: 0.03
+  - cue: 23
+    clips:
+    - {fileID: 8300000, guid: 78512e3cf1e8c474098340029ac8acd3, type: 3}
+    volume: 1
+    pitchVariance: 0

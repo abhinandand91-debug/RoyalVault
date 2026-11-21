@@ -52,6 +52,7 @@ namespace RoyalVault.EditorTools
             // console
             ConsoleView console = Console(t, theme);
             SealMeterView sealMeter = SealMeter(console.transform, theme);
+            FlameClashView flameClash = FlameClash(t, theme, machineRect);
             MessageToast toast = Toast(t, theme);
 
             // overlays
@@ -60,7 +61,7 @@ namespace RoyalVault.EditorTools
 
             var presenter = root.AddComponent<WinPresenter>();
             var bootstrap = root.AddComponent<GameBootstrap>();
-            bootstrap.Setup(machine, theme, machineView, console, jackpots, presenter, bigWin, paytable, toast, new[] { left, right }, sealMeter);
+            bootstrap.Setup(machine, theme, machineView, console, jackpots, presenter, bigWin, paytable, toast, new[] { left, right }, sealMeter, flameClash);
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             Object.DestroyImmediate(root);
@@ -126,6 +127,56 @@ namespace RoyalVault.EditorTools
             var view = holder.gameObject.AddComponent<CharacterView>();
             view.Setup(image, phase);
             view.SetupEffects(aura, hand, handGlow, flame, embers, sparks, dust);
+            return view;
+        }
+
+        /// <summary>The guardians' flame clash: two fireballs with spark trails, a flash, shockwave rings and bursts.</summary>
+        private static FlameClashView FlameClash(Transform parent, ThemeDefinition theme, RectTransform machine)
+        {
+            RectTransform layer = UiFactory.Stretch("Flame Clash", parent);
+            var fireballs = new Image[2];
+            var cores = new Image[2];
+            var trails = new UiParticleEmitter[2];
+            for (int i = 0; i < 2; i++)
+            {
+                UiParticleEmitter trail = Emitter("Trail " + (i + 1), layer, theme, theme.glow, Vector2.zero);
+                trail.Rate = 150f; trail.LifeRange = new Vector2(0.25f, 0.55f); trail.SizeRange = new Vector2(26f, 54f); trail.EndSize = 0.1f;
+                trail.Area = new Vector2(16f, 16f); trail.VelocityMin = new Vector2(-30f, -30f); trail.VelocityMax = new Vector2(30f, 30f);
+                trail.Swirl = 30f; trail.SwirlFrequency = 12f; trail.MaxParticles = 140; trail.Intensity = 0f;
+                trails[i] = trail;
+
+                fireballs[i] = UiFactory.Image("Fireball " + (i + 1), layer, theme.glow, Vector2.zero, new Vector2(190, 190));
+                fireballs[i].material = theme.additive;
+                cores[i] = UiFactory.Image("Core", fireballs[i].transform, theme.glow, Vector2.zero, new Vector2(80, 80));
+                cores[i].material = theme.additive;
+                cores[i].color = Color.white;
+                fireballs[i].gameObject.SetActive(false);
+            }
+
+            var rings = new Image[2];
+            for (int i = 0; i < 2; i++)
+            {
+                rings[i] = UiFactory.Image("Shockwave " + (i + 1), layer, Sprite("Generated/ring"), Vector2.zero, new Vector2(220, 220));
+                rings[i].material = theme.additive;
+                rings[i].gameObject.SetActive(false);
+            }
+
+            UiParticleEmitter burst = Emitter("Clash Burst", layer, theme, theme.sparkle, Vector2.zero);
+            burst.Rate = 0f; burst.LifeRange = new Vector2(0.6f, 1.3f); burst.SizeRange = new Vector2(16f, 40f); burst.EndSize = 0.15f;
+            burst.VelocityMin = new Vector2(-300f, 200f); burst.VelocityMax = new Vector2(300f, 700f);
+            burst.Gravity = new Vector2(0f, -500f); burst.Drag = 0.5f; burst.MaxParticles = 160;
+            UiParticleEmitter gold = Emitter("Clash Gold", layer, theme, theme.glow, Vector2.zero);
+            gold.Rate = 0f; gold.LifeRange = new Vector2(0.7f, 1.5f); gold.SizeRange = new Vector2(10f, 22f); gold.EndSize = 0.2f;
+            gold.VelocityMin = new Vector2(-200f, 150f); gold.VelocityMax = new Vector2(200f, 520f);
+            gold.Gravity = new Vector2(0f, -650f); gold.Drag = 0.4f; gold.MaxParticles = 90;
+            gold.StartColor = new Color(1f, 0.88f, 0.55f, 1f); gold.EndColor = new Color(1f, 0.6f, 0.2f, 0f);
+
+            Image flash = Stretch("Flash", layer, theme.white);
+            flash.material = theme.additive;
+            flash.color = new Color(1f, 1f, 1f, 0f);
+
+            var view = layer.gameObject.AddComponent<FlameClashView>();
+            view.Setup(layer, fireballs, cores, trails, flash, rings, burst, gold, machine);
             return view;
         }
 

@@ -98,8 +98,18 @@ namespace RoyalVault.Tests
             yield return new WaitForSeconds(2.2f);
             yield return Shot("05_win_cycle");
 
-            // a big win and a mega win
+            // a big win and a mega win: first the guardians hurl their flames and they clash in the centre
+            var clash = Object.FindFirstObjectByType<FlameClashView>();
+            bool thrown = false, clashed = false;
+            clash.Thrown += () => thrown = true;
+            clash.Clashed += () => clashed = true;
             yield return SpinTo(game, new[] { 33, 13, 48, 1, 5 });
+            yield return WaitFor(() => thrown);
+            yield return new WaitForSeconds(0.3f);
+            yield return Shot("22_flame_throw");
+            yield return WaitFor(() => clashed);
+            yield return new WaitForSeconds(0.1f);
+            yield return Shot("23_flame_clash");
             yield return WaitFor(() => Object.FindFirstObjectByType<BigWinView>(FindObjectsInactive.Include).IsShowing);
             yield return new WaitForSeconds(2.2f);
             yield return Shot("06_big_win");

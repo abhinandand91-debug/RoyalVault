@@ -17,11 +17,13 @@ namespace RoyalVault.Unity
         private BigWinView bigWin;
         private JackpotPanelView jackpots;
         private CharacterView[] characters;
+        private FlameClashView clash;
         private Coroutine routine;
 
         public void Bind(MachineView machineView, ConsoleView consoleView, BigWinView bigWinView, JackpotPanelView jackpotView,
-                         CharacterView[] characterViews)
+                         CharacterView[] characterViews, FlameClashView flameClash = null)
         {
+            clash = flameClash;
             machine = machineView;
             console = consoleView;
             bigWin = bigWinView;
@@ -69,6 +71,8 @@ namespace RoyalVault.Unity
             // the celebration for jackpots and big wins
             if (outcome.JackpotTier >= 0 || outcome.Tier >= WinTier.Big)
             {
+                // the guardians hurl their flames together and the clash opens the celebration
+                if (clash != null && clash.PlayOnBigWins && !quick) yield return clash.Play();
                 foreach (CharacterView character in characters) character.Celebrate();
                 if (outcome.JackpotTier >= 0) jackpots.Celebrate(outcome.JackpotTier);
                 string jackpotName = outcome.JackpotTier >= 0 ? context.Session.Machine.JackpotTiers[outcome.JackpotTier].Name : null;

@@ -37,6 +37,8 @@ namespace RoyalVault.Unity
         [Tooltip("Particles per second (0 = bursts only)")] public float Rate = 10f;
         public Vector2 LifeRange = new Vector2(0.6f, 1.2f);
         [Tooltip("Particles start anywhere in this box around the emitter")] public Vector2 Area = Vector2.zero;
+        [Tooltip("Where new particles start, relative to the emitter; move it to leave a trail behind a moving thing")]
+        public Vector2 Origin = Vector2.zero;
         public int MaxParticles = 80;
 
         [Header("Motion")]
@@ -110,7 +112,7 @@ namespace RoyalVault.Unity
             Particle p = pool.Count > 0 ? pool.Pop() : Create();
             p.Rect.gameObject.SetActive(true);
             p.Rect.SetAsLastSibling();
-            p.Position = new Vector2(Random.Range(-0.5f, 0.5f) * Area.x, Random.Range(-0.5f, 0.5f) * Area.y);
+            p.Position = Origin + new Vector2(Random.Range(-0.5f, 0.5f) * Area.x, Random.Range(-0.5f, 0.5f) * Area.y);
             var v = new Vector2(Random.Range(VelocityMin.x, VelocityMax.x), Random.Range(VelocityMin.y, VelocityMax.y));
             if (burst)
             {

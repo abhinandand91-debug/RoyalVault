@@ -41,6 +41,7 @@ namespace RoyalVault.Unity
         [SerializeField] private MessageToast toast;
         [SerializeField] private CharacterView[] characters = new CharacterView[0];
         [SerializeField] private SealMeterView sealMeter;
+        [SerializeField] private FlameClashView flameClash;
 
         public GameSession Session { get; private set; }
         public SpinEngine Engine { get; private set; }
@@ -58,7 +59,8 @@ namespace RoyalVault.Unity
 
         public void Setup(MachineDefinitionAsset machineAsset, ThemeDefinition themeAsset, MachineView machineViewRef, ConsoleView consoleView,
                           JackpotPanelView jackpotView, WinPresenter winPresenter, BigWinView bigWinView, PaytableView paytableView,
-                          MessageToast messageToast, CharacterView[] characterViews, SealMeterView sealMeterView)
+                          MessageToast messageToast, CharacterView[] characterViews, SealMeterView sealMeterView,
+                          FlameClashView flameClashView = null)
         {
             machine = machineAsset;
             theme = themeAsset;
@@ -71,6 +73,7 @@ namespace RoyalVault.Unity
             toast = messageToast;
             characters = characterViews;
             sealMeter = sealMeterView;
+            flameClash = flameClashView;
         }
 
         private void Awake()
@@ -98,7 +101,8 @@ namespace RoyalVault.Unity
             jackpots.Bind(Session.Jackpots);
             paytable.Build(Machine, theme);
             for (int i = 0; i < characters.Length; i++) characters[i].Bind(theme.character, theme.characterEffectAnchor, theme.characterMagic, theme.characterAnimation);
-            presenter.Bind(machineView, console, bigWin, jackpots, characters);
+            if (flameClash != null) flameClash.Bind(characters, theme.characterMagic);
+            presenter.Bind(machineView, console, bigWin, jackpots, characters, flameClash);
             // the guardians' flames flare each time a reel is anticipated
             machineView.AnticipationStarted += reel => { foreach (CharacterView c in characters) c.Surge(); };
             if (sealMeter != null) sealMeter.Bind(Machine, theme, machineView, Flow, Session);
@@ -107,7 +111,7 @@ namespace RoyalVault.Unity
             player.Setup(theme.sounds);
             Sound = gameObject.AddComponent<SoundDirector>();
             gameObject.AddComponent<RoundController>().Bind(Session, Flow, machineView, console, presenter, bigWin, paytable, toast);
-            Sound.Bind(player, Machine, Session, Flow, machineView, console, bigWin, sealMeter);
+            Sound.Bind(player, Machine, Session, Flow, machineView, console, bigWin, sealMeter, flameClash);
             Showcase = new WinShowcase(Engine, Session, Flow, toast, () => showcaseWins, () => showcaseOrder);
         }
 

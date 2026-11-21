@@ -24,7 +24,7 @@ namespace RoyalVault.Unity
         public SoundPlayer Player => sound;
 
         public void Bind(SoundPlayer player, MachineDefinition definition, GameSession gameSession, SpinFlow flow, MachineView machineView,
-                         ConsoleView console, BigWinView bigWin, SealMeterView seal)
+                         ConsoleView console, BigWinView bigWin, SealMeterView seal, FlameClashView clash = null)
         {
             sound = player;
             session = gameSession;
@@ -63,6 +63,13 @@ namespace RoyalVault.Unity
                 sound.StopLoop(SoundCue.AnticipationLoop, 0.12f);
                 sound.Play(SoundCue.AnticipationEnd);
             };
+
+            // the guardians' flames: the throw, and the burst where they meet
+            if (clash != null)
+            {
+                clash.Thrown += () => sound.Play(SoundCue.FlameThrow);
+                clash.Clashed += () => sound.Play(SoundCue.FlameClash);
+            }
 
             // the seal on the vault door
             if (seal != null)

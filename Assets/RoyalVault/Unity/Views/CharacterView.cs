@@ -33,7 +33,11 @@ namespace RoyalVault.Unity
         private float flameWeight = 1f;
 
         private Coroutine celebrate;
+        private Coroutine throwing;
         private float lift;
+        private float lunge;
+        private Vector2 figureHome;
+        private bool homeKnown;
         private float surge;
         private float nextSurge;
 
@@ -82,6 +86,61 @@ namespace RoyalVault.Unity
             embers.StartColor = new Color(0.85f, 0.97f, 1f, 1f);
             embers.EndColor = new Color(magic.r, magic.g, magic.b, 0f);
             nextSurge = Time.time + 3f + phase;
+        }
+
+        /// <summary>True from the moment a throw's flame is up in the hand until it has been thrown.</summary>
+        public bool ReadyToThrow { get; private set; }
+
+        /// <summary>Where the magic burns, in world space (the fireball leaves from here).</summary>
+        public Vector3 HandPosition => hand != null ? hand.position : transform.position;
+
+        /// <summary>
+        /// The guardian winds up to hurl its flame at the reels: it leans and steps towards them and calls up the flame
+        /// (its baked action, when it has one). <see cref="ReadyToThrow"/> turns true when the flame is up in the hand;
+        /// call <see cref="Release"/> as the fireball leaves, and the guardian recoils and settles back.
+        /// </summary>
+        public void WindUp()
+        {
+            if (!isActiveAndEnabled) return;
+            if (throwing != null) StopCoroutine(throwing);
+            throwing = StartCoroutine(WindUpRoutine());
+        }
+
+        /// <summary>The flame leaves the hand: a recoil, a flash in the hand, then back to rest.</summary>
+        public void Release()
+        {
+            ReadyToThrow = false;
+            if (!isActiveAndEnabled) return;
+            if (throwing != null) StopCoroutine(throwing);
+            throwing = StartCoroutine(ReleaseRoutine());
+        }
+
+        private IEnumerator WindUpRoutine()
+        {
+            ReadyToThrow = false;
+            if (motion != null && !IsActing) Act();
+            float t = 0f;
+            // lean in over the first moment, then hold until the flame is up (the action's summon, or a short beat)
+            while (true)
+            {
+                t += Time.deltaTime;
+                lunge = Ease.OutCubic(Mathf.Clamp01(t / 0.35f));
+                surge = Mathf.Max(surge, 0.6f);
+                bool flameUp = motion == null ? t >= 0.4f : flameWeight > 0.6f && t >= 0.35f;
+                if (flameUp || t > 1.6f) break;
+                yield return null;
+            }
+            ReadyToThrow = true;
+            throwing = null;
+        }
+
+        private IEnumerator ReleaseRoutine()
+        {
+            if (flame != null) { flame.Burst(30, 3f); sparks.Burst(20, 1.2f); }
+            yield return Tween.Run(0.12f, k => lunge = 1f + 0.35f * k, Ease.OutCubic);
+            yield return Tween.Run(0.6f, k => lunge = 1.35f * (1f - k), Ease.InOutSine);
+            lunge = 0f;
+            throwing = null;
         }
 
         /// <summary>The hand's flame flares up and throws embers (the guardians watch the reels being anticipated).</summary>
@@ -139,17 +198,23 @@ namespace RoyalVault.Unity
             float breath = Mathf.Sin(time * 1.4f) * 0.5f + 0.5f;
             float sign = Mathf.Sign(image.rectTransform.localScale.x);
 
+            // a throw leans the figure towards the reels and steps it in (mirrored guardians lean the other way)
+            if (!homeKnown) { figureHome = image.rectTransform.anchoredPosition; homeKnown = true; }
+            image.rectTransform.anchoredPosition = figureHome + new Vector2(sign * 34f * lunge, 6f * lunge);
+            float lean = -sign * 6f * lunge;
+
             if (motion != null)
             {
                 // the frames carry the breathing; only the celebration lift is added
-                image.rectTransform.localScale = new Vector3(sign * (1f + lift * 0.03f), 1f + lift * 0.03f, 1f);
+                image.rectTransform.localScale = new Vector3(sign * (1f + lift * 0.03f + lunge * 0.04f), 1f + lift * 0.03f + lunge * 0.04f, 1f);
+                image.rectTransform.localRotation = Quaternion.Euler(0f, 0f, lean);
                 Animate();
             }
             else
             {
                 // a slow breath from the feet and the faintest sway
                 image.rectTransform.localScale = new Vector3(sign * (1f + lift * 0.04f), 1f + 0.012f * breath + lift * 0.05f, 1f);
-                image.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(time * 0.6f) * 0.35f);
+                image.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(time * 0.6f) * 0.35f + lean);
             }
 
             if (hand == null) return;

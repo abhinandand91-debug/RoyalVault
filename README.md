@@ -109,6 +109,18 @@ are unchanged.
 
 ![Seal meter: at rest, cracking, open](docs/screenshots/seal_meter.jpg)
 
+### The guardians' flame clash
+
+Before a big win or jackpot is announced, both Anubis lean and step towards the reels, call up their flame and hurl
+it: two blue fireballs with spark trails arc in and meet at the centre of the screen in a flash, shockwave rings and a
+spray of blue and gold sparks, with a jolt through the machine, and then the celebration opens. `FlameClashView` plays
+it (toggle, meeting point and flight time in the Inspector); the guardians' `WindUp` / `Release` lean them in, wait
+for the flame to be up in the hand and recoil as it leaves. It is skipped in quick spins (auto play, free spins).
+
+| The throw | The clash |
+|---|---|
+| ![Flame throw](docs/screenshots/22_flame_throw.jpg) | ![Flame clash](docs/screenshots/23_flame_clash.jpg) |
+
 ### The heroes celebrate
 
 On big wins, jackpots and the free spin cards, Cole and Ruby stride in at either side of the banner and play their

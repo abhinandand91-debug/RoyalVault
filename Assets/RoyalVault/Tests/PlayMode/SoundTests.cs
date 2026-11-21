@@ -53,6 +53,8 @@ namespace RoyalVault.Tests
             Assert.Greater(Count(player, SoundCue.WildLand), 0, "wild lands");
             yield return WaitFor(() => Count(player, SoundCue.BigWin) + Count(player, SoundCue.MegaWin) + Count(player, SoundCue.EpicWin) == 1);
             Assert.AreEqual(1, Count(player, SoundCue.GuardianFlame), "guardian flame");
+            Assert.AreEqual(1, Count(player, SoundCue.FlameThrow), "the guardians throw their flames");
+            Assert.AreEqual(1, Count(player, SoundCue.FlameClash), "the flames meet");
             Assert.AreEqual(1, Count(player, SoundCue.CoinShowerLoop), "coin shower");
             yield return WaitFor(() => game.Flow.State == SpinState.Idle, 40f);
 
