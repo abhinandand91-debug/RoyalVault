@@ -123,6 +123,7 @@ namespace RoyalVault.EditorTools
             theme.logo = Sprite("Machine/logo");
             theme.niche = Sprite("Machine/niche");
             theme.character = AssetDatabase.LoadAssetAtPath<Sprite>(Root + "Art.Private/Characters/anubis.png");
+            theme.characterAnimation = CreateCharacterAnimation(Root + "Art.Private/Characters/Anubis");
             theme.consoleBar = Sprite("Generated/bar");
             theme.spinButton = Sprite("UI/spin_btn");
             theme.spinButtonPressed = Sprite("UI/spin_btn_pressed");

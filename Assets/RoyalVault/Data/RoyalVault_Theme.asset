@@ -63,6 +63,7 @@ MonoBehaviour:
   niche: {fileID: 21300000, guid: 78094a83df1a441f7bc9f3e4760a2509, type: 3}
   character: {fileID: 21300000, guid: 98663f0ca23be4091ab8354bcacca9a9, type: 3}
   characterEffectAnchor: {x: 0.89, y: 0.837}
+  characterAnimation: {fileID: 11400000, guid: 148c3ddcc38204ef3a7dd9333d2621ae, type: 2}
   characterMagic: {r: 0.35, g: 0.75, b: 1, a: 1}
   additive: {fileID: 2100000, guid: 87cfb5d4bd56c432b83a1803eae1b483, type: 2}
   consoleBar: {fileID: 21300000, guid: 51ab14f97dd0441a9b3cc870d497b294, type: 3}

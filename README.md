@@ -13,11 +13,16 @@ celebrations, coin showers). A 3 x 3 classic machine ships alongside it on the s
 | **Win lines** | **Pay table** | **Classic 3 x 3** |
 | ![Win lines](docs/screenshots/04_win_lines.jpg) | ![Pay table](docs/screenshots/11_paytable.jpg) | ![Classic 3x3](docs/screenshots/13_classic_3x3.jpg) |
 
-The guardians breathe, their hands burn with a living blue flame that throws embers and surges every few seconds, and
-on big wins they rise in a flash with the flame erupting and gold sparks spraying (UiParticleEmitter, an additive UI
-particle system, since Unity's ParticleSystem does not draw in an overlay canvas).
+The guardians are animated: they idle with a blue flame in the hand and, on big wins and now and then on their own,
+lower the hand and call the flame up again. Their skeletal animation is baked offline to frames (a `CharacterAnimation`
+ScriptableObject holds the frames plus the hand's path), so the particle flame, embers and glow follow the hand frame
+by frame. On big wins they rise in a flash with gold sparks spraying (UiParticleEmitter, an additive UI particle
+system, since Unity's ParticleSystem does not draw in an overlay canvas). Without baked frames a still figure breathes
+procedurally instead.
 
-![Guardians celebrating](docs/screenshots/14_guardians_celebrate.jpg)
+| Idle | Action | Flame called |
+|---|---|---|
+| ![Idle](docs/screenshots/02_idle.jpg) | ![Action](docs/screenshots/15_guardians_act.jpg) | ![Celebrating](docs/screenshots/14_guardians_celebrate.jpg) |
 
 ## Running it
 
@@ -87,7 +92,8 @@ Reel strips and pays were tuned by simulation and are checked by the tests (1,00
   [Cormorant Garamond](https://fonts.google.com/specimen/Cormorant+Garamond), SIL Open Font License
   (`Assets/RoyalVault/Fonts/OFL-*.txt`).
 - The Anubis guardians are licensed art (Retro Style Games, Crowns of Kemet) and are **not** in this repository
-  (`Assets/RoyalVault/Art.Private` is git-ignored). Without them the game runs with empty niches.
+  (`Assets/RoyalVault/Art.Private` is git-ignored, including their baked animation frames). Without them the game
+  runs with empty niches.
 
 ## Licence
 

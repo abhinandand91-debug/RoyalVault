@@ -77,7 +77,7 @@ namespace RoyalVault.Unity
             machineView.Build(Machine, theme);
             jackpots.Bind(Session.Jackpots);
             paytable.Build(Machine, theme);
-            for (int i = 0; i < characters.Length; i++) characters[i].Bind(theme.character, theme.characterEffectAnchor, theme.characterMagic);
+            for (int i = 0; i < characters.Length; i++) characters[i].Bind(theme.character, theme.characterEffectAnchor, theme.characterMagic, theme.characterAnimation);
             presenter.Bind(machineView, console, bigWin, jackpots, characters);
             gameObject.AddComponent<RoundController>().Bind(Session, Flow, machineView, console, presenter, bigWin, paytable, toast);
         }

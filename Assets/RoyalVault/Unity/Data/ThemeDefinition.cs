@@ -31,6 +31,7 @@ namespace RoyalVault.Unity
         public Sprite niche;
         [Tooltip("Optional guardian character (licensed art may be missing in a public checkout)")] public Sprite character;
         [Tooltip("Where the character's magic burns, as a share of its art (0,0 = bottom left)")] public Vector2 characterEffectAnchor = new Vector2(0.89f, 0.837f);
+        [Tooltip("Optional baked animation for the character; without it the still art breathes procedurally")] public CharacterAnimation characterAnimation;
         public Color characterMagic = new Color(0.35f, 0.75f, 1f, 1f);
         [Tooltip("Additive material for glows and particles")] public Material additive;
 

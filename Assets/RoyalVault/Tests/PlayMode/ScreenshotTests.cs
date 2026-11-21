@@ -137,7 +137,9 @@ namespace RoyalVault.Tests
 
             // the guardians' celebration on their own (in play it sits under the big win overlay)
             foreach (CharacterView guardian in Object.FindObjectsByType<CharacterView>(FindObjectsSortMode.None)) guardian.Celebrate();
-            yield return new WaitForSeconds(0.35f);
+            yield return new WaitForSeconds(0.45f);
+            yield return Shot("15_guardians_act");
+            yield return new WaitForSeconds(0.6f);
             yield return Shot("14_guardians_celebrate");
             yield return new WaitForSeconds(2f);
 

@@ -37,8 +37,8 @@ namespace RoyalVault.EditorTools
             // the guardians in their niches
             UiFactory.Image("Niche Left", t, theme.niche, new Vector2(-800, -13), new Vector2(232, 751));
             UiFactory.Image("Niche Right", t, theme.niche, new Vector2(800, -13), new Vector2(232, 751));
-            CharacterView left = Character("Guardian Left", t, theme, -800f, false, 0f);
-            CharacterView right = Character("Guardian Right", t, theme, 800f, true, 1.7f);
+            CharacterView left = Character("Guardian Left", t, theme, -785f, false, 0f);
+            CharacterView right = Character("Guardian Right", t, theme, 785f, true, 1.7f);
 
             // the reels (built at run time) inside their frame
             RectTransform machineRect = UiFactory.Stretch("Machine", t);
