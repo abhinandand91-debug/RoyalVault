@@ -61,6 +61,12 @@ namespace RoyalVault.Unity
         [Range(0, 1000)] public int randomWildChancePerMille;
         [Min(1)] public int randomWildMin = 2;
         [Min(1)] public int randomWildMax = 3;
+        [Header("Sealed Relic")]
+        [Tooltip("Free spin rounds pick a relic symbol that expands over whole reels and pays on every line")]
+        public bool expandingFreeSpinSymbol;
+        [Tooltip("Symbol ids the relic is picked from; empty means any regular symbol")]
+        public string[] expandingSymbolPool = new string[0];
+
         [Tooltip("Version of the presets this asset was last brought up to; the builder adds new settings once")]
         [HideInInspector] public int presetVersion;
 
@@ -88,6 +94,8 @@ namespace RoyalVault.Unity
                 FreeSpinMultiplier = freeSpinMultiplier,
                 WinTierMultipliers = (int[])winTierMultipliers.Clone(),
                 RandomWilds = new RandomWildSettings { ChancePerMille = randomWildChancePerMille, MinWilds = randomWildMin, MaxWilds = randomWildMax },
+                ExpandingFreeSpinSymbol = expandingFreeSpinSymbol,
+                ExpandingSymbolPool = (string[])expandingSymbolPool.Clone(),
             };
             for (int i = 0; i < symbols.Length; i++)
             {
@@ -141,9 +149,13 @@ namespace RoyalVault.Unity
             ApplyPresetChanges(definition);
         }
 
-        // Brings an asset made from an older preset up to date once: 1 added random wilds, 2 rebalanced line pays for them
+        // Brings an asset made from an older preset up to date once: 1 added random wilds, 2 rebalanced line pays for them,
+        // 3 added the Sealed Relic (which replaces the free spin multiplier) and rebalanced again
         public void ApplyPresetChanges(MachineDefinition definition)
         {
+            freeSpinMultiplier = definition.FreeSpinMultiplier;
+            expandingFreeSpinSymbol = definition.ExpandingFreeSpinSymbol;
+            expandingSymbolPool = (string[])definition.ExpandingSymbolPool.Clone();
             randomWildChancePerMille = definition.RandomWilds.ChancePerMille;
             randomWildMin = definition.RandomWilds.MinWilds;
             randomWildMax = definition.RandomWilds.MaxWilds;
@@ -158,7 +170,7 @@ namespace RoyalVault.Unity
             presetVersion = CurrentPresetVersion;
         }
 
-        public const int CurrentPresetVersion = 2;
+        public const int CurrentPresetVersion = 3;
 
         // Problems with this machine; empty when it is ready to play
         public List<string> Validate()

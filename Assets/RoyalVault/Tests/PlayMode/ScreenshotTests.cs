@@ -210,15 +210,21 @@ namespace RoyalVault.Tests
         private static IEnumerator FreeSpins()
         {
             bool anticipating = false;
+            bool settled = false;
             Object.FindFirstObjectByType<MachineView>().AnticipationStarted += reel => anticipating = true;
+            Object.FindFirstObjectByType<RelicRevealView>(FindObjectsInactive.Include).Settled += () => settled = true;
+            game.ForceRelic("ruby");
             yield return SpinTo(game, new[] { 33, 48, 5, 22, 6 });
+            int[] relicStops = ShowcaseTests.RelicStops(game, game.Machine.SymbolIndex("ruby"));
             yield return ShotWhen(() => anticipating, 0.7f, "21_anticipation");
             var seal = Object.FindFirstObjectByType<SealMeterView>();
             yield return ShotWhen(() => seal.Count >= 2, 0.25f, "16_seal_cracking");
             yield return ShotWhen(() => seal.IsOpen, 0.25f, "24_seal_break");
             yield return ShotWhen(Celebrating, 0.9f, "09_free_spins_awarded");
+            game.ForceNextStops(relicStops);
+            yield return ShotWhen(() => settled, 0.6f, "29_relic_reveal");
             yield return WaitFor(() => game.Session.FreeSpins.Played > 0, 30f);
-            yield return ShotWhen(() => game.Flow.State != SpinState.Spinning, 0.4f, "10_free_spin");
+            yield return ShotWhen(() => game.Flow.State != SpinState.Spinning, 0.5f, "10_free_spin");
             while (game.Session.FreeSpins.Remaining > 0 || game.Flow.State != SpinState.Idle || Celebrating())
             {
                 yield return null;

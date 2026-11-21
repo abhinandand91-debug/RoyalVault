@@ -183,5 +183,17 @@ namespace RoyalVault.Unity
             fire.Thrown += () => sound.Play(SoundCue.FlameThrow, 0.7f);
             fire.Burned += () => sound.Play(SoundCue.FlameClash, 0.55f);
         }
+
+        // The Sealed Relic: faces flickering past, the relic settling, and its sweep over each reel
+        public void ListenToRelic(RelicRevealView reveal, MachineView machine)
+        {
+            if (reveal != null)
+            {
+                reveal.Ticked += () => sound.Play(SoundCue.ReelStop, 0.35f, 1.4f);
+                reveal.Settled += () => sound.Play(SoundCue.WildLand);
+            }
+
+            machine.RelicExpanded += reel => sound.Play(SoundCue.ScatterLand, 0.8f, 1f + 0.05f * reel);
+        }
     }
 }

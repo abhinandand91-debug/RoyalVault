@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System;
+using System.Collections;
 using GameKit;
 using SlotKit;
 using UnityEngine.UI;
@@ -56,6 +57,8 @@ namespace RoyalVault.Unity
         private readonly List<PaylineView> paylines = new List<PaylineView>();
         private readonly List<SymbolView> celebrating = new List<SymbolView>();
         private readonly List<SymbolView> glintCandidates = new List<SymbolView>();
+        private readonly WaitForSeconds relicRowPause = new WaitForSeconds(0.07f);
+        private readonly WaitForSeconds relicReelPause = new WaitForSeconds(0.14f);
 
         public bool IsSpinning
         {
@@ -177,6 +180,8 @@ namespace RoyalVault.Unity
 
         // A reel has landed (its index, 0 = leftmost), in the order set by StopOrder
         public event Action<int> ReelStopped;
+        // The Sealed Relic sweeps over a reel
+        public event Action<int> RelicExpanded;
         // The last reel of a spin has landed
         public event Action AllReelsStopped;
         // Anticipation began (or moved on) and this reel is the one being waited for
@@ -264,6 +269,23 @@ namespace RoyalVault.Unity
         public SymbolView SymbolAt(GridPosition position)
         {
             return reels[position.Reel].ViewAt(position.Row);
+        }
+
+        // The relic sweeps down each reel it covers: a flash of light, then every cell turns to the relic, top to bottom
+        public IEnumerator ExpandRelic(ExpandingWin win)
+        {
+            foreach (int reel in win.Reels)
+            {
+                columns[reel].alpha = 1f;
+                RelicExpanded?.Invoke(reel);
+                for (int row = 0; row < machine.Rows; row++)
+                {
+                    Burn(new GridPosition(reel, row), win.Symbol);
+                    yield return relicRowPause;
+                }
+
+                yield return relicReelPause;
+            }
         }
 
         public Vector3 CellWorldPosition(GridPosition position)

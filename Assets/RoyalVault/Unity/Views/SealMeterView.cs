@@ -18,6 +18,8 @@ namespace RoyalVault.Unity
         [SerializeField] private Image glow;
         [SerializeField] private Image magic;
         [SerializeField] private UiParticleEmitter sparks;
+        [Tooltip("The free spin round's Sealed Relic, shown in the open seal")]
+        [SerializeField] private Image relic;
         [SerializeField] private Color restColour = new Color(0.55f, 0.5f, 0.45f, 1f);
         [SerializeField] private Color magicColour = new Color(0.35f, 0.75f, 1f, 1f);
 
@@ -57,6 +59,24 @@ namespace RoyalVault.Unity
         public void SetupFractures(Image[] fractureImages)
         {
             fractures = fractureImages;
+        }
+
+        public void SetupRelic(Image relicImage)
+        {
+            relic = relicImage;
+        }
+
+        // The round's relic settles into the open seal and stays there until the seal mends
+        public void ShowRelic(Sprite sprite)
+        {
+            if (relic == null || sprite == null)
+            {
+                return;
+            }
+
+            relic.sprite = sprite;
+            relic.enabled = true;
+            Tween.Scale(relic.transform, 0f, 1f, 0.45f, Ease.OutBack);
         }
 
         private void ShowCracks(int stage)
@@ -121,10 +141,20 @@ namespace RoyalVault.Unity
             if (session.FreeSpins.Remaining > 0)
             {
                 ShowOpen(true);
+                ShowSavedRelic(machine, theme, session.FreeSpins.Relic);
             }
             else
             {
                 Mend(true);
+            }
+        }
+
+        // A round resumed from a save shows its relic straight away
+        private void ShowSavedRelic(MachineDefinition machine, ThemeDefinition theme, int symbol)
+        {
+            if (symbol >= 0)
+            {
+                ShowRelic(theme.Symbol(machine.Symbols[symbol].Id)?.sprite);
             }
         }
 
@@ -258,6 +288,11 @@ namespace RoyalVault.Unity
             }
 
             seal.localScale = Vector3.one;
+            if (relic != null)
+            {
+                relic.enabled = false;
+            }
+
             if (instant)
             {
                 face.color = restColour;

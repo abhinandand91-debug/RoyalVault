@@ -30,6 +30,23 @@ namespace SlotKit
         }
     }
 
+    // A symbol that covered whole reels and paid on every line, wherever its reels are
+    public sealed class ExpandingWin
+    {
+        public readonly int Symbol;
+        // The reels it covered, left to right
+        public readonly List<int> Reels;
+        // Credits, before any multiplier
+        public readonly long Amount;
+
+        public ExpandingWin(int symbol, List<int> reels, long amount)
+        {
+            Symbol = symbol;
+            Reels = reels;
+            Amount = amount;
+        }
+    }
+
     // A scatter win: credits and free spins for scatters anywhere in the window
     public sealed class ScatterWin
     {
@@ -65,6 +82,8 @@ namespace SlotKit
         // Multiplies line and scatter wins (free spins double them)
         public int Multiplier = 1;
         public WinTier Tier;
+        // The free spin relic's expanded win, or null
+        public ExpandingWin Expanded;
         // Cells a feature turned into wilds after the reels stopped (shown before the wins)
         public readonly List<GridPosition> AddedWilds = new List<GridPosition>();
 
@@ -81,6 +100,7 @@ namespace SlotKit
         {
             LineWins.Clear();
             Scatter = null;
+            Expanded = null;
             JackpotTier = -1;
             JackpotPositions.Clear();
         }
@@ -112,7 +132,8 @@ namespace SlotKit
         {
             get
             {
-                return (LineAmount + (Scatter != null ? Scatter.Amount : 0)) * Multiplier + JackpotAmount;
+                long expanded = Expanded != null ? Expanded.Amount : 0;
+                return (LineAmount + (Scatter != null ? Scatter.Amount : 0) + expanded) * Multiplier + JackpotAmount;
             }
         }
 

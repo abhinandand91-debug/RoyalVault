@@ -69,6 +69,10 @@ namespace SlotKit
         public int[] WinTierMultipliers = { 10, 25, 50 };
         // Random wilds on a losing base-game spin (0 percent turns the feature off)
         public RandomWildSettings RandomWilds = new RandomWildSettings();
+        // Free spin rounds pick one regular symbol that expands over whole reels and pays on every line
+        public bool ExpandingFreeSpinSymbol;
+        // The symbol ids the relic is picked from; empty means any regular symbol
+        public string[] ExpandingSymbolPool = new string[0];
 
         public int SymbolIndex(string id)
         {

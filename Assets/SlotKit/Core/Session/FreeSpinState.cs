@@ -16,6 +16,8 @@ namespace SlotKit
             }
         }
         public long RoundWin { get; private set; }
+        // The symbol that expands during this round (an index into the machine's symbols), or -1
+        public int Relic { get; private set; } = -1;
         public bool Active
         {
             get
@@ -27,9 +29,16 @@ namespace SlotKit
         // Raised after any change
         public event Action<FreeSpinState> Changed;
 
-        public FreeSpinState(int remaining = 0)
+        public FreeSpinState(int remaining = 0, int relic = -1)
         {
             Remaining = Math.Max(0, remaining);
+            Relic = Remaining > 0 ? relic : -1;
+        }
+
+        public void SetRelic(int symbol)
+        {
+            Relic = symbol;
+            Changed?.Invoke(this);
         }
 
         public void Add(int spins)
@@ -73,6 +82,7 @@ namespace SlotKit
         {
             Played = 0;
             RoundWin = 0;
+            Relic = -1;
             Changed?.Invoke(this);
         }
     }

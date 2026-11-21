@@ -33,13 +33,14 @@ namespace RoyalVault.EditorTools
 
             // overlays, last so they draw on top
             BigWinView bigWin = BigWin(t, theme);
+            RelicRevealView relicReveal = RelicReveal(t, theme);
             PaytableView paytable = Paytable(t, theme);
             ChapterCardView chapterCard = ChapterCard(t, theme);
             CoachMarkView coachMarks = CoachMarks(t, theme);
 
             var presenter = root.AddComponent<WinPresenter>();
             root.AddComponent<GameBootstrap>().Setup(machine, theme, machineView, console, jackpots, presenter, bigWin, paytable, toast, guardians,
-                                                     sealMeter, flameClash, chapterCard, coachMarks, guardianFire);
+                                                     sealMeter, flameClash, chapterCard, coachMarks, guardianFire, relicReveal);
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             Object.DestroyImmediate(root);
             return prefab;
@@ -221,6 +222,44 @@ namespace RoyalVault.EditorTools
             return view;
         }
 
+        // The Sealed Relic's reveal: a card that flickers through the symbols and settles on the round's relic
+        private static RelicRevealView RelicReveal(Transform parent, ThemeDefinition theme)
+        {
+            RectTransform overlay = UiFactory.Stretch("Relic Reveal", parent);
+            var group = overlay.gameObject.AddComponent<CanvasGroup>();
+            UiFactory.NestedCanvas(overlay.gameObject, true, true);
+            Image dim = Stretch("Dim", overlay, theme.white);
+            dim.color = new Color(0.01f, 0.01f, 0.02f, 0.82f);
+            Button tap = UiFactory.Button(dim);
+            tap.transition = Selectable.Transition.None;
+
+            UiFactory.Text("Title", overlay, theme.headingFont, "SEALED<space=0.4em>RELIC", 56, theme.gold, new Vector2(0, 300), new Vector2(1000, 80),
+                           TextAlignmentOptions.Center, 24);
+            Image glow = UiFactory.Image("Glow", overlay, theme.glow, new Vector2(0, 30), new Vector2(560, 560));
+            glow.material = theme.additive;
+            Image card = UiFactory.Image("Card", overlay, theme.card, new Vector2(0, 30), new Vector2(340, 340));
+            card.type = Image.Type.Sliced;
+            Image symbol = UiFactory.Image("Symbol", card.transform, null, Vector2.zero, new Vector2(270, 270));
+            symbol.preserveAspect = true;
+            symbol.color = Color.white;
+            UiParticleEmitter burst = Emitter("Burst", overlay, theme, theme.sparkle, new Vector2(0, 30));
+            burst.Rate = 0f;
+            burst.LifeRange = new Vector2(0.6f, 1.3f);
+            burst.SizeRange = new Vector2(16f, 36f);
+            burst.EndSize = 0.15f;
+            burst.VelocityMin = new Vector2(-300f, 150f);
+            burst.VelocityMax = new Vector2(300f, 600f);
+            burst.Gravity = new Vector2(0f, -500f);
+            burst.Drag = 0.5f;
+            burst.MaxParticles = 120;
+            TextMeshProUGUI caption = UiFactory.Text("Caption", overlay, theme.bodyFont, "On 3 or more reels it covers them all and pays on every line",
+                                                     30, theme.ivory, new Vector2(0, -210), new Vector2(1100, 50));
+
+            var view = overlay.gameObject.AddComponent<RelicRevealView>();
+            view.Setup(group, card.rectTransform, symbol, glow, caption, burst, tap);
+            return view;
+        }
+
         // Guardian's Fire: flames thrown at single cells, each leaving a trail and bursting on the symbol it turns wild
         private static GuardianFireView GuardianFire(Transform parent, ThemeDefinition theme)
         {
@@ -309,6 +348,10 @@ namespace RoyalVault.EditorTools
             RectTransform seal = UiFactory.Rect("Seal", holder, new Vector2(0, 8), new Vector2(92, 92));
             Image face = UiFactory.Image("Face", seal, null, Vector2.zero, new Vector2(92, 92));
             face.preserveAspect = true;
+            Image relic = UiFactory.Image("Relic", seal, null, Vector2.zero, new Vector2(72, 72));
+            relic.preserveAspect = true;
+            relic.color = Color.white;
+            relic.enabled = false;
             Image[] fractures = CrackLayers(seal, "Fracture", 90f, img => img.color = new Color(0.12f, 0.06f, 0.02f, 0.85f));
             Image[] cracks = CrackLayers(seal, "Crack", 84f, img => img.material = theme.additive);
             Image flash = UiFactory.Image("Flash", seal, theme.glow, Vector2.zero, new Vector2(190, 190));
@@ -318,6 +361,7 @@ namespace RoyalVault.EditorTools
             var view = holder.gameObject.AddComponent<SealMeterView>();
             view.Setup(seal, face, cracks, Pips(holder, theme), flash, magic, SealSparks(seal, theme));
             view.SetupFractures(fractures);
+            view.SetupRelic(relic);
             return view;
         }
 

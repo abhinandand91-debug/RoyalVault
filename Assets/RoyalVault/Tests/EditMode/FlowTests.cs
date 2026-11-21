@@ -68,14 +68,14 @@ namespace RoyalVault.Tests
         }
 
         [Test]
-        public void FreeSpins_CostNothingAndDoubleWins()
+        public void FreeSpins_CostNothingAndApplyTheMachineMultiplier()
         {
             var (session, flow, engine) = Create();
             session.FreeSpins.Add(2);
             long before = session.Wallet.Balance;
             SpinContext spin = Play(flow);
             Assert.IsTrue(spin.IsFreeSpin);
-            Assert.AreEqual(2, spin.Outcome.Multiplier);
+            Assert.AreEqual(session.Machine.FreeSpinMultiplier, spin.Outcome.Multiplier);
             Assert.AreEqual(before + spin.Outcome.TotalWin, session.Wallet.Balance);
             Assert.IsTrue(spin.ContinueAutomatically, "one free spin is still waiting");
             _ = engine;

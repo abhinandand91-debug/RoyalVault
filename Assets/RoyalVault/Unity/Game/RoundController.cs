@@ -25,6 +25,7 @@ namespace RoyalVault.Unity
         private readonly WaitForSeconds autoSpinPause = new WaitForSeconds(0.35f);
         private readonly List<ILandingStep> landingSteps = new List<ILandingStep>();
         private SpinContext landing;
+        private RelicRevealView relicReveal;
         private Action onReelsLanded;
 
         // Spins played automatically after the player starts auto play
@@ -151,6 +152,12 @@ namespace RoyalVault.Unity
             machine.Spin(context.Outcome, fast, onReelsLanded);
         }
 
+        // Reveals the Sealed Relic when a free spin round begins
+        public void SetRelicReveal(RelicRevealView reveal)
+        {
+            relicReveal = reveal;
+        }
+
         // Shown between the reels landing and the wins, in the order added
         public void AddLandingStep(ILandingStep step)
         {
@@ -191,6 +198,18 @@ namespace RoyalVault.Unity
             StartCoroutine(Finish(context));
         }
 
+        // The line under the free spins title: the multiplier when there is one, otherwise the relic
+        private string FreeSpinsLine()
+        {
+            if (session.Machine.FreeSpinMultiplier > 1)
+            {
+                return "EVERY WIN x" + session.Machine.FreeSpinMultiplier;
+            }
+
+            // a fixed gap: the heading font's kerning swallows a space after the D
+            return session.FreeSpins.Relic >= 0 ? "A SEALED<space=0.4em>RELIC AWAITS" : null;
+        }
+
         private IEnumerator Finish(SpinContext context)
         {
             SpinOutcome outcome = context.Outcome;
@@ -203,8 +222,11 @@ namespace RoyalVault.Unity
                 }
 
                 freeSpinRoundWin = 0;
-                yield return bigWin.ShowTitle(outcome.FreeSpinsAwarded + " FREE SPINS", "EVERY WIN x" + session.Machine.FreeSpinMultiplier, 0, 2.2f,
-                                             CelebrationKind.FreeSpinsAwarded);
+                yield return bigWin.ShowTitle(outcome.FreeSpinsAwarded + " FREE SPINS", FreeSpinsLine(), 0, 2.2f, CelebrationKind.FreeSpinsAwarded);
+                if (relicReveal != null && session.FreeSpins.Relic >= 0)
+                {
+                    yield return relicReveal.Play(session.FreeSpins.Relic);
+                }
             }
             else if (context.IsFreeSpin && outcome.FreeSpinsAwarded > 0)
             {

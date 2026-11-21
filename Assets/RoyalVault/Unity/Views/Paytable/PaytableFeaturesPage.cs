@@ -69,8 +69,17 @@ namespace RoyalVault.Unity
                     .Append(award.FreeSpins).Append(" free spins + ").Append(award.TotalBetMultiplier).Append("× bet\n");
             }
 
-            text.Append("\nSeals pay anywhere on the reels. Every free spin win is multiplied by ")
-                .Append(machine.FreeSpinMultiplier).Append('.');
+            text.Append("\nSeals pay anywhere.");
+            if (machine.ExpandingFreeSpinSymbol)
+            {
+                text.Append(" Each round reveals a <color=#E8C77A>Sealed Relic</color> that covers whole reels and pays on every line.");
+            }
+
+            if (machine.FreeSpinMultiplier > 1)
+            {
+                text.Append(" Every free spin win is multiplied by ").Append(machine.FreeSpinMultiplier).Append('.');
+            }
+
             return text.ToString();
         }
 

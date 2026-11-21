@@ -10,6 +10,8 @@ namespace SlotKit
         public int lineBetIndex;
         public long[] jackpots;
         public int freeSpins;
+        // The free spin round's relic symbol plus one, so saves made before relics existed read as none
+        public int freeSpinRelicPlusOne;
     }
 
     // Where the session is saved; the game uses PlayerPrefs, tests use memory
@@ -56,7 +58,7 @@ namespace SlotKit
             Wallet = new Wallet(saved != null ? saved.balance : machine.StartBalance);
             Bet = new BetModel(machine, saved != null ? saved.lineBetIndex : machine.DefaultLineBetIndex);
             Jackpots = new JackpotPool(machine.JackpotTiers, saved?.jackpots);
-            FreeSpins = new FreeSpinState(saved != null ? saved.freeSpins : 0);
+            FreeSpins = new FreeSpinState(saved != null ? saved.freeSpins : 0, saved != null ? saved.freeSpinRelicPlusOne - 1 : -1);
         }
 
         public void Save()
@@ -67,6 +69,7 @@ namespace SlotKit
                 lineBetIndex = Bet.LevelIndex,
                 jackpots = Jackpots.Values(),
                 freeSpins = FreeSpins.Remaining,
+                freeSpinRelicPlusOne = FreeSpins.Relic + 1,
             });
         }
     }

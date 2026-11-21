@@ -39,10 +39,10 @@ namespace RoyalVault.Core
                 Rows = 3,
                 Symbols = Symbols(new[]
                 {
-                    // line pays trimmed by about 11% to pay for Guardian's Fire, keeping the RTP near 95.7%
-                    Pay5(18, 45, 180), Pay5(18, 45, 180), Pay5(18, 60, 270), Pay5(30, 80, 300), Pay5(30, 100, 400),
-                    Pay5(50, 135, 500), Pay5(50, 160, 675), Pay5(65, 200, 800), Pay5(80, 270, 1000), Pay5(100, 330, 1600),
-                    Pay5(135, 500, 3300), Pay5(160, 800, 8000),
+                    // line pays trimmed to pay for Guardian's Fire and the Sealed Relic, keeping the RTP near 95.6%
+                    Pay5(16, 40, 165), Pay5(16, 40, 165), Pay5(16, 55, 250), Pay5(28, 75, 275), Pay5(28, 90, 370),
+                    Pay5(45, 125, 460), Pay5(45, 150, 620), Pay5(60, 185, 740), Pay5(75, 250, 925), Pay5(90, 305, 1475),
+                    Pay5(125, 460, 3000), Pay5(150, 750, 7500),
                 }),
                 Strips = new[]
                 {
@@ -69,7 +69,9 @@ namespace RoyalVault.Core
                 LineBets = new[] { 1, 2, 5, 10, 25, 50, 100 },
                 DefaultLineBetIndex = 2,
                 StartBalance = 50000,
-                FreeSpinMultiplier = 2,
+                // the Sealed Relic replaces the free spin multiplier
+                FreeSpinMultiplier = 1,
+                ExpandingFreeSpinSymbol = true,
                 RandomWilds = new RandomWildSettings { ChancePerMille = 20, MinWilds = 2, MaxWilds = 3 },
             };
         }

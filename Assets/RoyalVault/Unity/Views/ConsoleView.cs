@@ -83,10 +83,17 @@ namespace RoyalVault.Unity
             betPlus.interactable = !bet.IsMax;
         }
 
-        // During free spins the WIN caption shows the spins played and the multiplier
+        // During free spins the WIN caption shows the spins played, and the multiplier when there is one
         public void SetFreeSpins(FreeSpinState state, int multiplier)
         {
-            winLabel.text = state.Active ? $"FREE SPIN {Mathf.Max(1, state.Played)} / {state.Total}   ×{multiplier}" : "WIN";
+            if (!state.Active)
+            {
+                winLabel.text = "WIN";
+                return;
+            }
+
+            string spins = "FREE SPIN " + Mathf.Max(1, state.Played) + " / " + state.Total;
+            winLabel.text = multiplier > 1 ? spins + "   ×" + multiplier : spins;
         }
 
         public void SetAuto(bool active, int remaining)

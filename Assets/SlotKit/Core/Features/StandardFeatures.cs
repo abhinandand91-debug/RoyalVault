@@ -199,7 +199,8 @@ namespace SlotKit
         {
             return new FeaturePipeline(new ISlotFeature[]
             {
-                new RandomWildsFeature(random), new FreeSpinsFeature(), new JackpotFeature(), new WinTierFeature(), new AutoPlayFeature(),
+                new RandomWildsFeature(random), new FreeSpinsFeature(), new ExpandingSymbolFeature(random), new JackpotFeature(),
+                new WinTierFeature(), new AutoPlayFeature(),
             });
         }
     }

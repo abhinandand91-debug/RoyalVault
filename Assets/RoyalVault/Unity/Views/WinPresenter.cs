@@ -92,6 +92,7 @@ namespace RoyalVault.Unity
             }
 
             cells.AddRange(outcome.JackpotPositions);
+            AddRelicCells(outcome, cells);
             machine.HighlightCells(cells, seconds);
             for (int i = 0; i < outcome.LineWins.Count; i++)
             {
@@ -101,6 +102,23 @@ namespace RoyalVault.Unity
             console.ShowWin(outcome.TotalWin, Mathf.Clamp(outcome.TotalWin / (float)Math.Max(1, outcome.TotalBet) * 0.25f, 0.4f, 2.5f));
             yield return Tween.Delay(seconds).ToYieldInstruction();
             machine.HideLines();
+        }
+
+        // Every cell of the reels the relic covered
+        private void AddRelicCells(SpinOutcome outcome, List<GridPosition> cells)
+        {
+            if (outcome.Expanded == null)
+            {
+                return;
+            }
+
+            foreach (int reel in outcome.Expanded.Reels)
+            {
+                for (int row = 0; row < outcome.Grid.Rows; row++)
+                {
+                    cells.Add(new GridPosition(reel, row));
+                }
+            }
         }
 
         // The flame clash, then the big win or jackpot celebration

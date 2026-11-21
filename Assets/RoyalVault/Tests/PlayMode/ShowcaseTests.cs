@@ -229,5 +229,85 @@ namespace RoyalVault.Tests
 
             PlayerPrefs.DeleteAll();
         }
+
+        // The first stops (searched in order) where symbol shows on at least three reels
+        public static int[] RelicStops(GameBootstrap game, int symbol)
+        {
+            for (int seed = 0; seed < 20000; seed++)
+            {
+                var stops = new int[game.Machine.Reels];
+                for (int reel = 0; reel < stops.Length; reel++)
+                {
+                    stops[reel] = (seed * (11 + reel * 5) + reel) % game.Machine.Strips[reel].Length;
+                }
+
+                if (ReelsHolding(game.Engine.Evaluate(stops, 1).Grid, symbol) >= 3)
+                {
+                    return stops;
+                }
+            }
+
+            Assert.Fail("no stops with the relic on three reels");
+            return null;
+        }
+
+        private static int ReelsHolding(SymbolGrid grid, int symbol)
+        {
+            int reels = 0;
+            for (int reel = 0; reel < grid.Reels; reel++)
+            {
+                for (int row = 0; row < grid.Rows; row++)
+                {
+                    if (grid[reel, row] == symbol)
+                    {
+                        reels++;
+                        break;
+                    }
+                }
+            }
+
+            return reels;
+        }
+
+        [UnityTest, Timeout(300000)]
+        public IEnumerator TheSealedRelicCoversItsReelsDuringFreeSpins()
+        {
+            yield return LoadGame();
+            var game = Object.FindFirstObjectByType<GameBootstrap>();
+            var machine = Object.FindFirstObjectByType<MachineView>();
+            int relic = game.Machine.SymbolIndex("ruby");
+            SpinOutcome expanded = null;
+            game.Flow.SpinPaid += context =>
+            {
+                if (context.IsFreeSpin && expanded == null)
+                {
+                    expanded = context.Outcome;
+                }
+                else if (!context.IsFreeSpin)
+                {
+                    game.ForceNextStops(RelicStops(game, relic));
+                }
+            };
+
+            yield return WaitFor(() => game.Flow.State == SpinState.Idle);
+            game.ForceRelic("ruby");
+            game.ForceNextStops(ThreeSeals);
+            Assert.IsTrue(game.Flow.RequestSpin());
+            yield return WaitFor(() => expanded != null, 60f);
+
+            Assert.AreEqual(relic, game.Session.FreeSpins.Relic);
+            Assert.IsNotNull(expanded.Expanded, "the relic pays");
+            yield return WaitFor(() => game.Flow.State != SpinState.Spinning);
+            foreach (int reel in expanded.Expanded.Reels)
+            {
+                for (int row = 0; row < game.Machine.Rows; row++)
+                {
+                    Assert.AreEqual(relic, machine.SymbolAt(new GridPosition(reel, row)).SymbolIndex, "reel " + reel + " row " + row);
+                }
+            }
+
+            yield return WaitFor(() => game.Session.FreeSpins.Remaining == 0 && game.Flow.State == SpinState.Idle, 180f);
+            PlayerPrefs.DeleteAll();
+        }
     }
 }

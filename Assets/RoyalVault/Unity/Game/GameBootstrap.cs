@@ -41,6 +41,7 @@ namespace RoyalVault.Unity
         [SerializeField] private ChapterCardView chapterCard;
         [SerializeField] private CoachMarkView coachMarks;
         [SerializeField] private GuardianFireView guardianFire;
+        [SerializeField] private RelicRevealView relicReveal;
 
         public GameSession Session { get; private set; }
         public SpinEngine Engine { get; private set; }
@@ -85,7 +86,7 @@ namespace RoyalVault.Unity
                           JackpotPanelView jackpotView, WinPresenter winPresenter, BigWinView bigWinView, PaytableView paytableView,
                           MessageToast messageToast, CharacterView[] characterViews, SealMeterView sealMeterView,
                           FlameClashView flameClashView = null, ChapterCardView chapterCardView = null, CoachMarkView coachMarkView = null,
-                          GuardianFireView guardianFireView = null)
+                          GuardianFireView guardianFireView = null, RelicRevealView relicRevealView = null)
         {
             machine = machineAsset;
             theme = themeAsset;
@@ -102,6 +103,7 @@ namespace RoyalVault.Unity
             chapterCard = chapterCardView;
             coachMarks = coachMarkView;
             guardianFire = guardianFireView;
+            relicReveal = relicRevealView;
         }
 
         private void Awake()
@@ -154,6 +156,15 @@ namespace RoyalVault.Unity
                 guardianFire.Bind(characters, machineView, theme.characterMagic);
             }
 
+            if (relicReveal != null)
+            {
+                relicReveal.Bind(Machine, theme);
+                if (sealMeter != null)
+                {
+                    relicReveal.Revealed += sealMeter.ShowRelic;
+                }
+            }
+
             machineView.AnticipationStarted += reel =>
             {
                 foreach (CharacterView c in characters)
@@ -180,6 +191,10 @@ namespace RoyalVault.Unity
                 round.AddLandingStep(guardianFire);
                 Sound.ListenTo(guardianFire);
             }
+
+            round.AddLandingStep(new RelicLandingStep(machineView));
+            Sound.ListenToRelic(relicReveal, machineView);
+            round.SetRelicReveal(relicReveal);
             Showcase = new WinShowcase(Engine, Session, Flow, toast, () => showcaseWins, () => showcaseOrder);
         }
 
@@ -217,6 +232,12 @@ namespace RoyalVault.Unity
         public void ForceNextStops(params int[] stops)
         {
             Engine.ForcedStops = stops;
+        }
+
+        // Testing aid: the next free spin round's relic is the symbol with this id
+        public void ForceRelic(string symbolId)
+        {
+            Flow.Features.Get<ExpandingSymbolFeature>().ForcedRelic = Machine.SymbolIndex(symbolId);
         }
 
         // Testing aid: the next losing base-game spin gets Guardian's Fire

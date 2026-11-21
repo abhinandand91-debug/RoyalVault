@@ -82,7 +82,9 @@ MonoBehaviour:
   randomWildChancePerMille: 0
   randomWildMin: 2
   randomWildMax: 4
-  presetVersion: 2
+  expandingFreeSpinSymbol: 0
+  expandingSymbolPool: []
+  presetVersion: 3
   lineBets: 0100000002000000050000000a000000190000003200000064000000
   defaultLineBetIndex: 2
   startBalance: 20000
