@@ -119,6 +119,11 @@ namespace RoyalVault.Tests
 
             // free spins: the award card, then a free spin with the counter in the console
             yield return SpinTo(game, new[] { 33, 48, 5, 22, 6 });
+            // the seal meter cracks as the seals land
+            var seal = Object.FindFirstObjectByType<SealMeterView>();
+            yield return WaitFor(() => seal.Count >= 2);
+            yield return new WaitForSeconds(0.25f);
+            yield return Shot("16_seal_cracking");
             yield return WaitFor(() => Object.FindFirstObjectByType<BigWinView>(FindObjectsInactive.Include).IsShowing);
             yield return new WaitForSeconds(0.9f);
             yield return Shot("09_free_spins_awarded");

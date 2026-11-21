@@ -36,6 +36,16 @@ camera push and the captions rising in; a click moves on, and later starts show 
 |---|---|
 | ![The Card Game](docs/screenshots/01_loading.jpg) | ![Across the Sea of Sand](docs/screenshots/00_story_scene_2.jpg) |
 
+### The seal meter
+
+The story's golden seal sits beside the spin button. As the reels land, every Vault Seal cracks it a little more
+(light leaks through the cracks, sparks fly, a pip lights); when enough land for free spins it shatters and the vault
+stays open, glowing blue, for the whole round, and the next paid spin mends it. `SealMeterView` listens to the reels
+landing one by one (`MachineView.ReelStopped`) and only shows what the spin already decided, so the maths and RTP
+are unchanged.
+
+![Seal meter: at rest, cracking, open](docs/screenshots/seal_meter.jpg)
+
 ## Running it
 
 - Unity **6000.3.10f1** (Unity 6.3). Open the project, open `Assets/RoyalVault/Scenes/Boot.unity` and press Play.

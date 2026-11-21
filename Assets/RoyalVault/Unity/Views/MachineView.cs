@@ -99,6 +99,9 @@ namespace RoyalVault.Unity
             return new Vector2(x, y);
         }
 
+        /// <summary>A reel has landed (its index, 0 = leftmost); the reels land left to right.</summary>
+        public event Action<int> ReelStopped;
+
         /// <summary>Spins every reel to the outcome's stops, left to right, and calls back when the last one lands.</summary>
         public void Spin(SpinOutcome outcome, bool fast, Action onAllStopped)
         {
@@ -106,9 +109,11 @@ namespace RoyalVault.Unity
             int stopped = 0;
             for (int r = 0; r < reels.Length; r++)
             {
+                int reel = r;
                 float run = (fast ? 0.55f : RunSeconds) + r * (fast ? 0.1f : StopStagger);
                 reels[r].Spin(outcome.Stops[r], r * 0.05f, run, () =>
                 {
+                    ReelStopped?.Invoke(reel);
                     stopped++;
                     if (stopped == reels.Length) onAllStopped?.Invoke();
                 });

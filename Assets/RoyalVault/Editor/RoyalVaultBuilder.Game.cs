@@ -51,6 +51,7 @@ namespace RoyalVault.EditorTools
 
             // console
             ConsoleView console = Console(t, theme);
+            SealMeterView sealMeter = SealMeter(console.transform, theme);
             MessageToast toast = Toast(t, theme);
 
             // overlays
@@ -59,7 +60,7 @@ namespace RoyalVault.EditorTools
 
             var presenter = root.AddComponent<WinPresenter>();
             var bootstrap = root.AddComponent<GameBootstrap>();
-            bootstrap.Setup(machine, theme, machineView, console, jackpots, presenter, bigWin, paytable, toast, new[] { left, right });
+            bootstrap.Setup(machine, theme, machineView, console, jackpots, presenter, bigWin, paytable, toast, new[] { left, right }, sealMeter);
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             Object.DestroyImmediate(root);
@@ -125,6 +126,56 @@ namespace RoyalVault.EditorTools
             var view = holder.gameObject.AddComponent<CharacterView>();
             view.Setup(image, phase);
             view.SetupEffects(aura, hand, handGlow, flame, embers, sparks, dust);
+            return view;
+        }
+
+        /// <summary>The Vault Seal medallion beside the spin button: the seal's face, its cracks, the pips that count seals.</summary>
+        private static SealMeterView SealMeter(Transform parent, ThemeDefinition theme)
+        {
+            RectTransform holder = UiFactory.Rect("Seal Meter", parent, new Vector2(-250, -452), new Vector2(120, 120));
+
+            Image magic = UiFactory.Image("Vault Light", holder, theme.glow, Vector2.zero, new Vector2(230, 230));
+            magic.material = theme.additive;
+            magic.color = new Color(0f, 0f, 0f, 0f);
+
+            RectTransform seal = UiFactory.Rect("Seal", holder, new Vector2(0, 8), new Vector2(92, 92));
+            Image face = UiFactory.Image("Face", seal, null, Vector2.zero, new Vector2(92, 92));
+            face.preserveAspect = true;
+            var cracks = new Image[3];
+            var fractures = new Image[3];
+            for (int i = 0; i < cracks.Length; i++)
+            {
+                fractures[i] = UiFactory.Image("Fracture " + (i + 1), seal, Sprite("Generated/crack_" + (i + 1)), Vector2.zero, new Vector2(90, 90));
+                fractures[i].color = new Color(0.12f, 0.06f, 0.02f, 0.85f);
+                fractures[i].enabled = false;
+            }
+            for (int i = 0; i < cracks.Length; i++)
+            {
+                cracks[i] = UiFactory.Image("Crack " + (i + 1), seal, Sprite("Generated/crack_" + (i + 1)), Vector2.zero, new Vector2(84, 84));
+                cracks[i].material = theme.additive;
+                cracks[i].enabled = false;
+            }
+            Image flash = UiFactory.Image("Flash", seal, theme.glow, Vector2.zero, new Vector2(190, 190));
+            flash.material = theme.additive;
+            flash.color = new Color(1f, 0.9f, 0.6f, 0f);
+
+            // three small diamonds under the seal: one lights for every seal that lands
+            var pips = new Image[3];
+            for (int i = 0; i < pips.Length; i++)
+            {
+                pips[i] = UiFactory.Image("Pip " + (i + 1), holder, theme.white, new Vector2((i - 1) * 20f, -54f), new Vector2(8, 8));
+                pips[i].rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
+            }
+
+            UiParticleEmitter sparks = Emitter("Seal Sparks", seal, theme, theme.sparkle, Vector2.zero);
+            sparks.Rate = 0f; sparks.LifeRange = new Vector2(0.5f, 1.1f); sparks.SizeRange = new Vector2(10f, 22f); sparks.EndSize = 0.2f;
+            sparks.Area = new Vector2(40f, 40f); sparks.VelocityMin = new Vector2(-220f, 60f); sparks.VelocityMax = new Vector2(220f, 380f);
+            sparks.Gravity = new Vector2(0f, -600f); sparks.Drag = 0.8f; sparks.MaxParticles = 120;
+            sparks.EndColor = new Color(1f, 0.6f, 0.2f, 0f);
+
+            var view = holder.gameObject.AddComponent<SealMeterView>();
+            view.Setup(seal, face, cracks, pips, flash, magic, sparks);
+            view.SetupFractures(fractures);
             return view;
         }
 

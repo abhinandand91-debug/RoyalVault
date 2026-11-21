@@ -212,6 +212,8 @@ namespace RoyalVault.EditorTools
                 return new Color(1f, 0.86f, 0.52f, a);
             });
             // the console: a lacquer gradient, a gold rule that fades at its ends, and the raised socket for spin
+            // the seal meter's cracks, one texture per stage: each adds new fractures to the ones before
+            for (int stage = 1; stage <= 3; stage++) WriteCrack(stage);
             // dark at the foot of the screen, clear from 70% up: lays text over a painting
             Write("fade", 4, 256, (x, y) => new Color(0f, 0f, 0f, Mathf.Pow(Mathf.Clamp01(1f - y / 180f), 1.4f)));
             Write("bar", 4, 256, (x, y) => Color.Lerp(new Color32(6, 6, 8, 255), new Color32(23, 21, 28, 255), y / 255f));
@@ -256,6 +258,44 @@ namespace RoyalVault.EditorTools
             Color c = d < strokeWidth ? stroke : Color.Lerp(stroke, fill, Mathf.Clamp01(d - strokeWidth));
             c.a *= edge;
             return c;
+        }
+
+        /// <summary>Jagged glowing fractures running out from near the centre of a 128 x 128 seal.</summary>
+        private static void WriteCrack(int stage)
+        {
+            var random = new System.Random(stage * 7919);
+            var segments = new System.Collections.Generic.List<(Vector2 a, Vector2 b)>();
+            float[][] angles = { new[] { 25f, 150f, 268f }, new[] { 92f, 205f, 330f }, new[] { 55f, 120f, 238f, 300f } };
+            var centre = new Vector2(64f, 64f);
+            foreach (float degrees in angles[stage - 1])
+            {
+                float angle = degrees * Mathf.Deg2Rad;
+                float start = stage == 3 ? 22f : 5f;
+                float length = stage == 3 ? 30f : 54f;
+                Vector2 p = centre + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * start;
+                for (int i = 1; i <= 5; i++)
+                {
+                    float a = angle + (float)(random.NextDouble() - 0.5) * 0.9f;
+                    float r = start + length * i / 5f;
+                    Vector2 q = centre + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r;
+                    segments.Add((p, q));
+                    p = q;
+                }
+            }
+            Write("crack_" + stage, 128, 128, (x, y) =>
+            {
+                var point = new Vector2(x + 0.5f, y + 0.5f);
+                float d = float.MaxValue;
+                foreach (var (a, b) in segments)
+                {
+                    Vector2 ab = b - a;
+                    float t = Mathf.Clamp01(Vector2.Dot(point - a, ab) / ab.sqrMagnitude);
+                    d = Mathf.Min(d, Vector2.Distance(point, a + ab * t));
+                }
+                float core = Mathf.Clamp01(1.4f - d * 0.8f);
+                float halo = Mathf.Exp(-d / 2.5f) * 0.45f;
+                return new Color(1f, 1f, 1f, Mathf.Max(core, halo));
+            });
         }
 
         private static void Write(string name, int width, int height, System.Func<int, int, Color> pixel)
