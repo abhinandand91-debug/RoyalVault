@@ -201,8 +201,11 @@ Reel strips and pays were tuned by simulation and are checked by the tests (1,00
 
 | Machine | RTP | Hit rate | Free spins | Jackpots |
 |---|---|---|---|---|
-| Royal Vault 5 x 3 | about 95.5 % | 27.5 % | 1 in about 470 spins (8 / 12 / 20 at x2) | Minor 3, Major 4, Grand 5 crowns |
+| Royal Vault 5 x 3 | about 95.7 % | 28.5 % | 1 in about 455 spins (8 / 12 / 20 at x2) | Minor 3, Major 4, Grand 5 crowns |
 | Classic 3 x 3 | about 96.4 % | 10.9 % | 1 in about 690 spins (6 at x2) | Minor 3 crowns |
+
+Guardian's Fire (random wilds) rescues about 1 in 70 base-game spins on the 5 x 3 machine with 2 or 3 wilds; its line
+pays were trimmed by about 11% to pay for it. The classic machine does not use it.
 
 ## Tests
 

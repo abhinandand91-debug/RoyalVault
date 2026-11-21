@@ -82,7 +82,7 @@ MonoBehaviour:
   randomWildChancePerMille: 0
   randomWildMin: 2
   randomWildMax: 4
-  presetVersion: 1
+  presetVersion: 2
   lineBets: 0100000002000000050000000a000000190000003200000064000000
   defaultLineBetIndex: 2
   startBalance: 20000

@@ -60,7 +60,7 @@ namespace RoyalVault.Unity
         [Tooltip("Losing base-game spins rescued with extra wilds, per thousand; 0 turns the feature off")]
         [Range(0, 1000)] public int randomWildChancePerMille;
         [Min(1)] public int randomWildMin = 2;
-        [Min(1)] public int randomWildMax = 2;
+        [Min(1)] public int randomWildMax = 3;
         [Tooltip("Version of the presets this asset was last brought up to; the builder adds new settings once")]
         [HideInInspector] public int presetVersion;
 
@@ -138,19 +138,27 @@ namespace RoyalVault.Unity
             startBalance = definition.StartBalance;
             freeSpinMultiplier = definition.FreeSpinMultiplier;
             winTierMultipliers = (int[])definition.WinTierMultipliers.Clone();
-            CopyRandomWilds(definition);
+            ApplyPresetChanges(definition);
         }
 
-        // Settings added after the first presets shipped; the builder copies them into older assets once
-        public void CopyRandomWilds(MachineDefinition definition)
+        // Brings an asset made from an older preset up to date once: 1 added random wilds, 2 rebalanced line pays for them
+        public void ApplyPresetChanges(MachineDefinition definition)
         {
             randomWildChancePerMille = definition.RandomWilds.ChancePerMille;
             randomWildMin = definition.RandomWilds.MinWilds;
             randomWildMax = definition.RandomWilds.MaxWilds;
+            for (int i = 0; i < symbols.Length && i < definition.Symbols.Length; i++)
+            {
+                if (symbols[i].id == definition.Symbols[i].Id)
+                {
+                    symbols[i].pays = (int[])definition.Symbols[i].Pays.Clone();
+                }
+            }
+
             presetVersion = CurrentPresetVersion;
         }
 
-        public const int CurrentPresetVersion = 1;
+        public const int CurrentPresetVersion = 2;
 
         // Problems with this machine; empty when it is ready to play
         public List<string> Validate()

@@ -39,9 +39,10 @@ namespace RoyalVault.Core
                 Rows = 3,
                 Symbols = Symbols(new[]
                 {
-                    Pay5(20, 50, 200), Pay5(20, 50, 200), Pay5(20, 70, 300), Pay5(35, 90, 350), Pay5(35, 110, 450),
-                    Pay5(55, 150, 550), Pay5(55, 180, 750), Pay5(75, 220, 900), Pay5(90, 300, 1100), Pay5(110, 370, 1800),
-                    Pay5(150, 550, 3700), Pay5(180, 900, 9000),
+                    // line pays trimmed by about 11% to pay for Guardian's Fire, keeping the RTP near 95.7%
+                    Pay5(18, 45, 180), Pay5(18, 45, 180), Pay5(18, 60, 270), Pay5(30, 80, 300), Pay5(30, 100, 400),
+                    Pay5(50, 135, 500), Pay5(50, 160, 675), Pay5(65, 200, 800), Pay5(80, 270, 1000), Pay5(100, 330, 1600),
+                    Pay5(135, 500, 3300), Pay5(160, 800, 8000),
                 }),
                 Strips = new[]
                 {
@@ -69,7 +70,7 @@ namespace RoyalVault.Core
                 DefaultLineBetIndex = 2,
                 StartBalance = 50000,
                 FreeSpinMultiplier = 2,
-                RandomWilds = new RandomWildSettings { ChancePerMille = 6, MinWilds = 2, MaxWilds = 2 },
+                RandomWilds = new RandomWildSettings { ChancePerMille = 20, MinWilds = 2, MaxWilds = 3 },
             };
         }
 

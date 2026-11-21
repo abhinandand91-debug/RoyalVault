@@ -67,7 +67,7 @@ namespace RoyalVault.EditorTools
                 // keep Inspector edits, but bring in settings added since the asset was made
                 if (asset.presetVersion < MachineDefinitionAsset.CurrentPresetVersion)
                 {
-                    asset.CopyRandomWilds(preset);
+                    asset.ApplyPresetChanges(preset);
                     EditorUtility.SetDirty(asset);
                 }
 
