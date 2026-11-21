@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6042e8c3a1a04b79834553403830b0b, type: 3}
   m_Name: RoyalVault_Sounds
   m_EditorClassIdentifier: RoyalVault.Unity::RoyalVault.Unity.SoundBank
-  loadingMusic: {fileID: 0}
-  baseGameMusic: {fileID: 0}
-  freeSpinsMusic: {fileID: 0}
+  loadingMusic: {fileID: 8300000, guid: 4c02f9a231c1040d4b45704e3b91ab9d, type: 3}
+  baseGameMusic: {fileID: 8300000, guid: 986ab72c7f2494dcc81ef5dc30e9b523, type: 3}
+  freeSpinsMusic: {fileID: 8300000, guid: 0f2d4b79c70f94aee9882558b41e84d3, type: 3}
   musicVolume: 0.55
   musicFade: 1.2
   effectsVolume: 1

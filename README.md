@@ -60,8 +60,9 @@ Clips assigned by hand in the Inspector are kept, and a newly filled cue starts 
 Music imports as streaming Vorbis, effects decompressed on load.
 
 The effects currently come from Game Sound Planet's free "Strictly Slots" starter pack (not in this repository; see
-`Art.Private/Audio/GameSoundPlanet/SOURCE.txt` locally for which file fills which cue). The music slots are still
-empty.
+`Art.Private/Audio/GameSoundPlanet/SOURCE.txt` locally for which file fills which cue). The music is CC0 from
+OpenGameArt: "Desert Mystic" by PolygonDan on the loading screen and its stronger version in free spins, and "Desert
+Loop" by iamoneabe in the base game (also kept in `Art.Private/Audio`).
 The `SoundTests` PlayMode tests spin forced outcomes and check that every moment reaches the player.
 
 ## The story
