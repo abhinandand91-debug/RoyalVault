@@ -115,7 +115,10 @@ MonoBehaviour:
   randomWildMax: 3
   expandingFreeSpinSymbol: 1
   expandingSymbolPool: []
-  presetVersion: 3
+  gambleEnabled: 1
+  gambleMaxRounds: 5
+  gambleMaxWinTotalBets: 50
+  presetVersion: 4
   lineBets: 0100000002000000050000000a000000190000003200000064000000
   defaultLineBetIndex: 2
   startBalance: 50000

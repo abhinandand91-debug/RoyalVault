@@ -6,6 +6,7 @@ using RoyalVault.Unity;
 using SlotKit;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 using UnityEngine;
 
 namespace RoyalVault.Tests
@@ -94,6 +95,7 @@ namespace RoyalVault.Tests
             yield return FirstVisit();
             yield return LineWin();
             yield return GuardiansFire();
+            yield return Gamble();
             yield return BigWins();
             yield return Jackpot();
             yield return FreeSpins();
@@ -156,6 +158,35 @@ namespace RoyalVault.Tests
             yield return Shot("04_win_lines");
             yield return new WaitForSeconds(2.2f);
             yield return Shot("05_win_cycle");
+        }
+
+        // A plain win offers Ruby's Last Hand; one call is played and collected
+        private static IEnumerator Gamble()
+        {
+            yield return WaitFor(() => game.Flow.State == SpinState.Idle);
+            yield return SpinTo(game, new[] { 19, 18, 40, 46, 23 });
+            var view = Object.FindFirstObjectByType<GambleView>(FindObjectsInactive.Include);
+            Button offer = ButtonNamed("Gamble");
+            yield return ShotWhen(() => offer.gameObject.activeInHierarchy, 0.5f, "31_gamble_offer");
+            offer.onClick.Invoke();
+            yield return ShotWhen(() => view.IsOpen, 0.5f, "32_gamble_table");
+            ButtonNamed("RED  x2").onClick.Invoke();
+            yield return ShotWhen(() => game.Gamble.Rounds > 0, 0.8f, "33_gamble_card");
+            game.Gamble.Collect();
+            yield return WaitFor(() => !view.IsOpen, 10f);
+        }
+
+        private static Button ButtonNamed(string name)
+        {
+            foreach (Button button in Object.FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (button.name == name)
+                {
+                    return button;
+                }
+            }
+
+            return null;
         }
 
         // A losing spin rescued by the guardians' flames

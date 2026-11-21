@@ -26,6 +26,10 @@ namespace RoyalVault.Unity
         private readonly List<ILandingStep> landingSteps = new List<ILandingStep>();
         private SpinContext landing;
         private RelicRevealView relicReveal;
+        private GambleSession gamble;
+        private GambleView gambleView;
+        private long gambleWin;
+        private long gambleBet;
         private Action onReelsLanded;
 
         // Spins played automatically after the player starts auto play
@@ -106,7 +110,8 @@ namespace RoyalVault.Unity
 
         private void OnSpinPressed()
         {
-            if (paytable.IsOpen || bigWin.IsShowing || (story != null && story.IsTelling))
+            bool gambling = gambleView != null && gambleView.IsOpen;
+            if (paytable.IsOpen || bigWin.IsShowing || gambling || (story != null && story.IsTelling))
             {
                 return;
             }
@@ -141,6 +146,7 @@ namespace RoyalVault.Unity
         private void OnSpinStarted(SpinContext context)
         {
             presenter.Cancel();
+            console.OfferGamble(false);
             console.SetControls(false, true, session.Bet);
             if (!context.IsFreeSpin)
             {
@@ -150,6 +156,15 @@ namespace RoyalVault.Unity
             bool fast = autoPlay.Active || context.IsFreeSpin;
             landing = context;
             machine.Spin(context.Outcome, fast, onReelsLanded);
+        }
+
+        // Offers Ruby's Last Hand after a base-game win
+        public void SetGamble(GambleSession gambleSession, GambleView view)
+        {
+            gamble = gambleSession;
+            gambleView = view;
+            console.GamblePressed += OnGamblePressed;
+            session.Bet.Changed += bet => console.OfferGamble(false);
         }
 
         // Reveals the Sealed Relic when a free spin round begins
@@ -196,6 +211,41 @@ namespace RoyalVault.Unity
         private void OnSpinFinished(SpinContext context)
         {
             StartCoroutine(Finish(context));
+        }
+
+        // A plain base-game win played by hand may be gambled; free spins, jackpots and auto play are left alone
+        private void OfferGamble(SpinContext context)
+        {
+            SpinOutcome outcome = context.Outcome;
+            bool plain = !context.IsFreeSpin && outcome.FreeSpinsAwarded == 0 && outcome.JackpotTier < 0 && !autoPlay.Active;
+            if (gamble == null || !plain || !gamble.Offers(outcome.TotalWin, outcome.TotalBet))
+            {
+                return;
+            }
+
+            gambleWin = outcome.TotalWin;
+            gambleBet = outcome.TotalBet;
+            console.OfferGamble(true);
+        }
+
+        private void OnGamblePressed()
+        {
+            if (flow.State != SpinState.Idle || gambleView.IsOpen)
+            {
+                return;
+            }
+
+            console.OfferGamble(false);
+            presenter.Cancel();
+            StartCoroutine(RunGamble());
+        }
+
+        private IEnumerator RunGamble()
+        {
+            gamble.Start(gambleWin, gambleBet);
+            yield return gambleView.Play(gamble);
+            console.SetWin(gamble.Stake);
+            session.Save();
         }
 
         // The line under the free spins title: the multiplier when there is one, otherwise the relic
@@ -246,6 +296,7 @@ namespace RoyalVault.Unity
                 yield break;
             }
             console.SetControls(true, false, session.Bet);
+            OfferGamble(context);
         }
     }
 }

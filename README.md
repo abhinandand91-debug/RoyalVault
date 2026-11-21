@@ -209,6 +209,10 @@ spin round reveals a Sealed Relic: a regular symbol that, on 3 or more reels, co
 (it replaces the old x2 free spin multiplier). The base game returns about 85% and free spins about 10.5%, so an average
 round pays roughly 48 times the total bet. The classic machine uses neither feature.
 
+Ruby's Last Hand, the gamble offered after a plain base-game win, is fair (a colour is right half the time and pays x2,
+a suit a quarter of the time and pays x4), so it does not change the RTP. It allows 5 calls and stops a win growing past
+50 total bets; each machine can turn it off where gambles are not allowed.
+
 ## Tests
 
 - EditMode (`Assets/RoyalVault/Tests/EditMode`): engine and win rules, the spin flow and features, saving, a

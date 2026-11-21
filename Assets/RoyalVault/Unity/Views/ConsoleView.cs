@@ -1,5 +1,6 @@
 using System;
 using GameKit;
+using PrimeTween;
 using SlotKit;
 using TMPro;
 using UnityEngine.UI;
@@ -24,6 +25,8 @@ namespace RoyalVault.Unity
         [SerializeField] private Button menu;
         [SerializeField] private Button sound;
         [SerializeField] private Image soundIcon;
+        [Tooltip("Offered after a base-game win: double or nothing on Ruby's Last Hand")]
+        [SerializeField] private Button gamble;
 
         public event Action SpinPressed;
         public event Action BetDownPressed;
@@ -31,6 +34,7 @@ namespace RoyalVault.Unity
         public event Action AutoPressed;
         public event Action MenuPressed;
         public event Action SoundPressed;
+        public event Action GamblePressed;
 
         public void Setup(CountingText balanceText, TextMeshProUGUI winCaption, CountingText winText, TextMeshProUGUI totalBetText,
                           TextMeshProUGUI autoText, SpinButtonView spinButton, Button minus, Button plus, Button autoButton,
@@ -58,6 +62,11 @@ namespace RoyalVault.Unity
             auto.onClick.AddListener(() => AutoPressed?.Invoke());
             menu.onClick.AddListener(() => MenuPressed?.Invoke());
             sound.onClick.AddListener(() => SoundPressed?.Invoke());
+            if (gamble != null)
+            {
+                gamble.onClick.AddListener(() => GamblePressed?.Invoke());
+                OfferGamble(false);
+            }
         }
 
         public void SetBalance(long value, float seconds = 0f)
@@ -74,6 +83,31 @@ namespace RoyalVault.Unity
         public void ClearWin()
         {
             win.Set(0);
+        }
+
+        // Sets the win readout straight to value (after a gamble)
+        public void SetWin(long value)
+        {
+            win.Set(value, 0.4f);
+        }
+
+        public void SetupGamble(Button gambleButton)
+        {
+            gamble = gambleButton;
+        }
+
+        public void OfferGamble(bool offered)
+        {
+            if (gamble == null)
+            {
+                return;
+            }
+
+            gamble.gameObject.SetActive(offered);
+            if (offered)
+            {
+                Tween.Scale(gamble.transform, 0.6f, 1f, 0.35f, Ease.OutBack);
+            }
         }
 
         public void SetBet(BetModel bet)

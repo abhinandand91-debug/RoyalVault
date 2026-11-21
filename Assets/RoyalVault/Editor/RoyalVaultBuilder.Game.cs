@@ -34,13 +34,14 @@ namespace RoyalVault.EditorTools
             // overlays, last so they draw on top
             BigWinView bigWin = BigWin(t, theme);
             RelicRevealView relicReveal = RelicReveal(t, theme);
+            GambleView gamble = Gamble(t, theme);
             PaytableView paytable = Paytable(t, theme);
             ChapterCardView chapterCard = ChapterCard(t, theme);
             CoachMarkView coachMarks = CoachMarks(t, theme);
 
             var presenter = root.AddComponent<WinPresenter>();
             root.AddComponent<GameBootstrap>().Setup(machine, theme, machineView, console, jackpots, presenter, bigWin, paytable, toast, guardians,
-                                                     sealMeter, flameClash, chapterCard, coachMarks, guardianFire, relicReveal);
+                                                     sealMeter, flameClash, chapterCard, coachMarks, guardianFire, relicReveal, gamble);
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             Object.DestroyImmediate(root);
             return prefab;
@@ -479,8 +480,14 @@ namespace RoyalVault.EditorTools
             Button menu = IconButton("Menu", console, theme, theme.iconMenu, new Vector2(-884, -471), out _);
             Button sound = IconButton("Sound", console, theme, theme.iconSound, new Vector2(884, -471), out Image soundIcon);
 
+            Image gamblePill = Pill("Gamble", console, theme, new Vector2(-388, -462), new Vector2(136, 50));
+            UiFactory.Text("Label", gamblePill.transform, theme.headingFont, "GAMBLE", 16, theme.paleGold, Vector2.zero, new Vector2(136, 50),
+                           TextAlignmentOptions.Center, 14);
+            Button gambleButton = UiFactory.Button(gamblePill);
+
             var view = console.gameObject.AddComponent<ConsoleView>();
             view.Setup(balance, winLabel, win, totalBet, autoText, spin, minus, plus, UiFactory.Button(autoPill), menu, sound, soundIcon);
+            view.SetupGamble(gambleButton);
             return view;
         }
 

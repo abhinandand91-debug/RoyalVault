@@ -6,6 +6,7 @@ using RoyalVault.Unity;
 using SlotKit;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 using UnityEngine;
 
 namespace RoyalVault.Tests
@@ -307,6 +308,58 @@ namespace RoyalVault.Tests
             }
 
             yield return WaitFor(() => game.Session.FreeSpins.Remaining == 0 && game.Flow.State == SpinState.Idle, 180f);
+            PlayerPrefs.DeleteAll();
+        }
+
+        private static Button Named(string name)
+        {
+            foreach (Button button in Object.FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (button.name == name)
+                {
+                    return button;
+                }
+            }
+
+            Assert.Fail("no button " + name);
+            return null;
+        }
+
+        [UnityTest, Timeout(180000)]
+        public IEnumerator RubysLastHandGamblesAPlainWin()
+        {
+            yield return LoadGame();
+            var game = Object.FindFirstObjectByType<GameBootstrap>();
+            var view = Object.FindFirstObjectByType<GambleView>(FindObjectsInactive.Include);
+            long win = 0;
+            game.Flow.SpinPaid += context =>
+            {
+                win = context.Outcome.TotalWin;
+            };
+
+            yield return WaitFor(() => game.Flow.State == SpinState.Idle);
+            game.ForceNextStops(19, 18, 40, 46, 23);
+            Assert.IsTrue(game.Flow.RequestSpin());
+            Button offer = Named("Gamble");
+            yield return WaitFor(() => offer.gameObject.activeInHierarchy, 30f);
+            Assert.Greater(win, 0);
+            long before = game.Session.Wallet.Balance;
+
+            offer.onClick.Invoke();
+            yield return WaitFor(() => view.IsOpen && Named("RED  x2").interactable, 10f);
+            Named("RED  x2").onClick.Invoke();
+            yield return WaitFor(() => !game.Gamble.Active || game.Gamble.Rounds > 0, 10f);
+            yield return new WaitForSeconds(0.6f);
+            Card card = game.Gamble.History[0];
+            long expected = card.IsRed ? before + win : before - win;
+            Assert.AreEqual(expected, game.Session.Wallet.Balance, "the stake is settled on the wallet");
+            if (game.Gamble.Active)
+            {
+                Named("Collect").onClick.Invoke();
+            }
+
+            yield return WaitFor(() => !view.IsOpen, 10f);
+            Assert.IsTrue(game.Flow.RequestSpin(), "spins resume after the gamble");
             PlayerPrefs.DeleteAll();
         }
     }

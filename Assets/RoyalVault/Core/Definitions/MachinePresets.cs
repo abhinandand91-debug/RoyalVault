@@ -72,6 +72,7 @@ namespace RoyalVault.Core
                 // the Sealed Relic replaces the free spin multiplier
                 FreeSpinMultiplier = 1,
                 ExpandingFreeSpinSymbol = true,
+                Gamble = new GambleSettings { Enabled = true },
                 RandomWilds = new RandomWildSettings { ChancePerMille = 20, MinWilds = 2, MaxWilds = 3 },
             };
         }
@@ -102,6 +103,7 @@ namespace RoyalVault.Core
                 DefaultLineBetIndex = 2,
                 StartBalance = 20000,
                 FreeSpinMultiplier = 2,
+                Gamble = new GambleSettings { Enabled = true },
             };
         }
     }

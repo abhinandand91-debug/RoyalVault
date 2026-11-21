@@ -46,6 +46,15 @@ namespace SlotKit
         public int MaxWilds = 4;
     }
 
+    // The gamble after a win: how many guesses in a row, and the most it may grow to
+    public sealed class GambleSettings
+    {
+        public bool Enabled;
+        public int MaxRounds = 5;
+        // The stake may not grow past this many total bets
+        public int MaxWinTotalBets = 50;
+    }
+
     public sealed class MachineDefinition
     {
         public string Name = "Machine";
@@ -73,6 +82,8 @@ namespace SlotKit
         public bool ExpandingFreeSpinSymbol;
         // The symbol ids the relic is picked from; empty means any regular symbol
         public string[] ExpandingSymbolPool = new string[0];
+        // Double-or-nothing on a base-game win (turn off where gambles are not allowed)
+        public GambleSettings Gamble = new GambleSettings();
 
         public int SymbolIndex(string id)
         {

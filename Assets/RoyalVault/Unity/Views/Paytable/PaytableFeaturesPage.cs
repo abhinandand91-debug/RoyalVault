@@ -10,13 +10,19 @@ namespace RoyalVault.Unity
     // The special symbols side by side: the wild, the Vault Seal's free spins and the Crown's jackpots
     public static class PaytableFeaturesPage
     {
-        private static readonly Vector2 PanelSize = new Vector2(360f, 380f);
+        private static readonly Vector2 PanelSize = new Vector2(360f, 360f);
 
         public static void Build(RectTransform page, MachineDefinition machine, ThemeDefinition theme)
         {
             Panel(page, theme, -385f, IdOf(machine, SymbolKind.Wild), "WILD", WildText());
             Panel(page, theme, 0f, IdOf(machine, SymbolKind.Scatter), "VAULT SEAL", SealText(machine));
             Panel(page, theme, 385f, IdOf(machine, SymbolKind.Jackpot), "CROWN JACKPOTS", CrownText(machine));
+            if (machine.Gamble.Enabled)
+            {
+                string note = "After a win, gamble it on Ruby's Last Hand: call a colour to double it or a suit to quadruple it, up to "
+                              + machine.Gamble.MaxRounds + " times.";
+                UiFactory.Text("Gamble", page, theme.bodyFont, note, 17f, theme.dimGold, new Vector2(0f, -250f), new Vector2(1100f, 26f));
+            }
         }
 
         private static string IdOf(MachineDefinition machine, SymbolKind kind)
@@ -34,7 +40,7 @@ namespace RoyalVault.Unity
 
         private static void Panel(RectTransform page, ThemeDefinition theme, float x, string symbolId, string heading, string body)
         {
-            Image card = UiFactory.Image(heading, page, theme.card, new Vector2(x, -58f), PanelSize);
+            Image card = UiFactory.Image(heading, page, theme.card, new Vector2(x, -48f), PanelSize);
             card.type = Image.Type.Sliced;
             RectTransform rect = card.rectTransform;
 
@@ -48,7 +54,7 @@ namespace RoyalVault.Unity
                            TextAlignmentOptions.Center, 12f);
             Image rule = UiFactory.Image("Rule", rect, theme.line, new Vector2(0f, 7f), new Vector2(220f, 6f));
             rule.color = new Color(1f, 0.85f, 0.5f, 0.6f);
-            TextMeshProUGUI text = UiFactory.Text("Body", rect, theme.bodyFont, body, 19f, theme.ivory, new Vector2(0f, -90f), new Vector2(316f, 170f),
+            TextMeshProUGUI text = UiFactory.Text("Body", rect, theme.bodyFont, body, 19f, theme.ivory, new Vector2(0f, -88f), new Vector2(316f, 150f),
                                                   TextAlignmentOptions.Top);
             text.textWrappingMode = TextWrappingModes.Normal;
             text.lineSpacing = -4f;

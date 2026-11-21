@@ -42,10 +42,12 @@ namespace RoyalVault.Unity
         [SerializeField] private CoachMarkView coachMarks;
         [SerializeField] private GuardianFireView guardianFire;
         [SerializeField] private RelicRevealView relicReveal;
+        [SerializeField] private GambleView gambleView;
 
         public GameSession Session { get; private set; }
         public SpinEngine Engine { get; private set; }
         public SpinFlow Flow { get; private set; }
+        public GambleSession Gamble { get; private set; }
         public MachineDefinition Machine { get; private set; }
         public SoundDirector Sound { get; private set; }
         public WinShowcase Showcase { get; private set; }
@@ -86,7 +88,7 @@ namespace RoyalVault.Unity
                           JackpotPanelView jackpotView, WinPresenter winPresenter, BigWinView bigWinView, PaytableView paytableView,
                           MessageToast messageToast, CharacterView[] characterViews, SealMeterView sealMeterView,
                           FlameClashView flameClashView = null, ChapterCardView chapterCardView = null, CoachMarkView coachMarkView = null,
-                          GuardianFireView guardianFireView = null, RelicRevealView relicRevealView = null)
+                          GuardianFireView guardianFireView = null, RelicRevealView relicRevealView = null, GambleView gamble = null)
         {
             machine = machineAsset;
             theme = themeAsset;
@@ -104,6 +106,7 @@ namespace RoyalVault.Unity
             coachMarks = coachMarkView;
             guardianFire = guardianFireView;
             relicReveal = relicRevealView;
+            gambleView = gamble;
         }
 
         private void Awake()
@@ -129,6 +132,7 @@ namespace RoyalVault.Unity
             IRandom random = seed != 0 ? new SeededRandom(seed) : new SeededRandom();
             Engine = new SpinEngine(Machine, random);
             Flow = new SpinFlow(Session, Engine, StandardFeatures.Create(random));
+            Gamble = new GambleSession(Session.Wallet, random, Machine.Gamble);
         }
 
         private void BindViews()
@@ -195,6 +199,12 @@ namespace RoyalVault.Unity
             round.AddLandingStep(new RelicLandingStep(machineView));
             Sound.ListenToRelic(relicReveal, machineView);
             round.SetRelicReveal(relicReveal);
+            if (gambleView != null)
+            {
+                gambleView.Bind(theme, theme.heroRight);
+                round.SetGamble(Gamble, gambleView);
+                Sound.ListenTo(gambleView);
+            }
             Showcase = new WinShowcase(Engine, Session, Flow, toast, () => showcaseWins, () => showcaseOrder);
         }
 

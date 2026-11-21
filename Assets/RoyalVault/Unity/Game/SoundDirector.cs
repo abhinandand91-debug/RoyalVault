@@ -195,5 +195,12 @@ namespace RoyalVault.Unity
 
             machine.RelicExpanded += reel => sound.Play(SoundCue.ScatterLand, 0.8f, 1f + 0.05f * reel);
         }
+
+        // Ruby's Last Hand: each card turned, and each call won or lost
+        public void ListenTo(GambleView gamble)
+        {
+            gamble.Flipped += () => sound.Play(SoundCue.ReelStop, 0.6f, 1.25f);
+            gamble.Settled += right => sound.Play(right ? SoundCue.SmallWin : SoundCue.AnticipationEnd);
+        }
     }
 }

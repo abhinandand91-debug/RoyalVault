@@ -74,6 +74,10 @@ namespace RoyalVault.Unity
         public Sprite jackpotMinor;
         public Sprite popupPanel;
         [Tooltip("Rounded dark card with a gold edge (pay table entries)")] public Sprite card;
+        [Tooltip("Ruby's Last Hand: a playing card's face and back, and the suits hearts, diamonds, clubs, spades")]
+        public Sprite cardFace;
+        public Sprite cardBack;
+        public Sprite[] suits = new Sprite[4];
         public Sprite bigWinBanner;
         public Sprite coin;
         public Sprite sparkle;

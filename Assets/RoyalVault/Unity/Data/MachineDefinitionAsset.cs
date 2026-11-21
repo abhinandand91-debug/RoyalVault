@@ -67,6 +67,13 @@ namespace RoyalVault.Unity
         [Tooltip("Symbol ids the relic is picked from; empty means any regular symbol")]
         public string[] expandingSymbolPool = new string[0];
 
+        [Header("Gamble (Ruby's Last Hand)")]
+        [Tooltip("Offer double-or-nothing on base-game wins; turn off where gambles are not allowed")]
+        public bool gambleEnabled;
+        [Min(1)] public int gambleMaxRounds = 5;
+        [Tooltip("The gamble may not grow a win past this many total bets")]
+        [Min(2)] public int gambleMaxWinTotalBets = 50;
+
         [Tooltip("Version of the presets this asset was last brought up to; the builder adds new settings once")]
         [HideInInspector] public int presetVersion;
 
@@ -96,6 +103,7 @@ namespace RoyalVault.Unity
                 RandomWilds = new RandomWildSettings { ChancePerMille = randomWildChancePerMille, MinWilds = randomWildMin, MaxWilds = randomWildMax },
                 ExpandingFreeSpinSymbol = expandingFreeSpinSymbol,
                 ExpandingSymbolPool = (string[])expandingSymbolPool.Clone(),
+                Gamble = new GambleSettings { Enabled = gambleEnabled, MaxRounds = gambleMaxRounds, MaxWinTotalBets = gambleMaxWinTotalBets },
             };
             for (int i = 0; i < symbols.Length; i++)
             {
@@ -150,9 +158,12 @@ namespace RoyalVault.Unity
         }
 
         // Brings an asset made from an older preset up to date once: 1 added random wilds, 2 rebalanced line pays for them,
-        // 3 added the Sealed Relic (which replaces the free spin multiplier) and rebalanced again
+        // 3 added the Sealed Relic (which replaces the free spin multiplier) and rebalanced again, 4 added the gamble
         public void ApplyPresetChanges(MachineDefinition definition)
         {
+            gambleEnabled = definition.Gamble.Enabled;
+            gambleMaxRounds = definition.Gamble.MaxRounds;
+            gambleMaxWinTotalBets = definition.Gamble.MaxWinTotalBets;
             freeSpinMultiplier = definition.FreeSpinMultiplier;
             expandingFreeSpinSymbol = definition.ExpandingFreeSpinSymbol;
             expandingSymbolPool = (string[])definition.ExpandingSymbolPool.Clone();
@@ -170,7 +181,7 @@ namespace RoyalVault.Unity
             presetVersion = CurrentPresetVersion;
         }
 
-        public const int CurrentPresetVersion = 3;
+        public const int CurrentPresetVersion = 4;
 
         // Problems with this machine; empty when it is ready to play
         public List<string> Validate()
