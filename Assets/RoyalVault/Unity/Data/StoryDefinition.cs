@@ -1,0 +1,65 @@
+using System;
+using UnityEngine;
+
+namespace RoyalVault.Unity
+{
+    /// <summary>When in the game a story scene is told.</summary>
+    public enum StoryMoment
+    {
+        /// <summary>On the loading screen, before the reels appear.</summary>
+        Intro,
+        BaseGame,
+        FreeSpins,
+        MinorJackpot,
+        MajorJackpot,
+        GrandJackpot,
+    }
+
+    /// <summary>
+    /// The game's story as data: an ordered list of scenes, each a painted backdrop with the characters standing in it,
+    /// a title and a caption, and the game moment that tells it. The loading screen plays the intro scenes; the other
+    /// moments are for later features (the seal meter, free spins, jackpots).
+    /// </summary>
+    [CreateAssetMenu(menuName = "Royal Vault/Story", fileName = "Story")]
+    public sealed class StoryDefinition : ScriptableObject
+    {
+        [Serializable]
+        public sealed class Figure
+        {
+            [Tooltip("Cut-out character art, pivoted on its feet (licensed art may be missing in a public checkout)")]
+            public Sprite sprite;
+            [Tooltip("Where the feet stand, in canvas pixels from the centre of a 1920 x 1080 screen")]
+            public Vector2 position;
+            [Tooltip("Height on screen in canvas pixels")]
+            public float height = 760f;
+            [Tooltip("Face the other way")]
+            public bool mirrored;
+        }
+
+        [Serializable]
+        public sealed class Scene
+        {
+            public string title;
+            [TextArea(2, 5)] public string caption;
+            public Sprite art;
+            public Figure[] figures = new Figure[0];
+            public StoryMoment moment;
+        }
+
+        [Tooltip("Shown above each scene's title, e.g. CHAPTER")] public string chapterLabel = "Chapter";
+        [Tooltip("Seconds each intro scene stays on screen the first time the story is told")] public float secondsPerScene = 5f;
+        public Scene[] scenes = new Scene[0];
+
+        /// <summary>The scenes told at <paramref name="moment"/>, in story order, with their chapter numbers (1-based).</summary>
+        public (Scene scene, int number)[] At(StoryMoment moment)
+        {
+            int count = 0;
+            foreach (Scene s in scenes) if (s.moment == moment) count++;
+            var result = new (Scene, int)[count];
+            int k = 0;
+            for (int i = 0; i < scenes.Length; i++)
+                if (scenes[i].moment == moment) result[k++] = (scenes[i], i + 1);
+            return result;
+        }
+    }
+}

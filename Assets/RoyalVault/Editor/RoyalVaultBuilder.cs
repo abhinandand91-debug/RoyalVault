@@ -124,6 +124,7 @@ namespace RoyalVault.EditorTools
             theme.niche = Sprite("Machine/niche");
             theme.character = AssetDatabase.LoadAssetAtPath<Sprite>(Root + "Art.Private/Characters/anubis.png");
             theme.characterAnimation = CreateCharacterAnimation(Root + "Art.Private/Characters/Anubis");
+            theme.story = CreateStory();
             theme.consoleBar = Sprite("Generated/bar");
             theme.spinButton = Sprite("UI/spin_btn");
             theme.spinButtonPressed = Sprite("UI/spin_btn_pressed");
@@ -211,6 +212,8 @@ namespace RoyalVault.EditorTools
                 return new Color(1f, 0.86f, 0.52f, a);
             });
             // the console: a lacquer gradient, a gold rule that fades at its ends, and the raised socket for spin
+            // dark at the foot of the screen, clear from 70% up: lays text over a painting
+            Write("fade", 4, 256, (x, y) => new Color(0f, 0f, 0f, Mathf.Pow(Mathf.Clamp01(1f - y / 180f), 1.4f)));
             Write("bar", 4, 256, (x, y) => Color.Lerp(new Color32(6, 6, 8, 255), new Color32(23, 21, 28, 255), y / 255f));
             Write("rule", 1024, 8, (x, y) =>
             {

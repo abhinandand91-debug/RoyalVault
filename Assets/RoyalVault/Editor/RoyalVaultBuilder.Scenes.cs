@@ -63,6 +63,42 @@ namespace RoyalVault.EditorTools
             camera.orthographic = true;
         }
 
+        /// <summary>A full-screen story scene: backdrop, up to three standing figures, a fade and the captions.</summary>
+        private static StoryCardView StoryCard(string name, Transform parent, ThemeDefinition theme)
+        {
+            RectTransform rect = UiFactory.Stretch(name, parent);
+            var group = rect.gameObject.AddComponent<CanvasGroup>();
+            group.alpha = 0f;
+
+            Image art = Stretch("Art", rect, null);
+            var fitter = art.gameObject.AddComponent<AspectRatioFitter>();
+            fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            fitter.aspectRatio = 1.5f;
+
+            var figures = new Image[3];
+            for (int i = 0; i < figures.Length; i++)
+            {
+                figures[i] = UiFactory.Image("Figure " + (i + 1), rect, null, Vector2.zero, new Vector2(300, 760));
+                figures[i].rectTransform.pivot = new Vector2(0.5f, 0f);
+                figures[i].gameObject.SetActive(false);
+            }
+
+            Image fade = Stretch("Fade", rect, AssetDatabase.LoadAssetAtPath<Sprite>(Generated + "fade.png"));
+            fade.color = new Color(1f, 1f, 1f, 0.95f);
+
+            TextMeshProUGUI chapter = UiFactory.Text("Chapter", rect, theme.labelFont, "CHAPTER I", 18, theme.gold, new Vector2(0, -222), new Vector2(900, 28),
+                                                     TextAlignmentOptions.Center, 40);
+            TextMeshProUGUI title = UiFactory.Text("Title", rect, theme.headingFont, "Title", 52, theme.paleGold, new Vector2(0, -276), new Vector2(1100, 70));
+            TextMeshProUGUI caption = UiFactory.Text("Caption", rect, theme.bodyFont, "Caption", 30, new Color(0.9f, 0.86f, 0.8f, 1f),
+                                                     new Vector2(0, -358), new Vector2(880, 96), TextAlignmentOptions.Top);
+            caption.textWrappingMode = TextWrappingModes.Normal;
+            caption.lineSpacing = -6f;
+
+            var view = rect.gameObject.AddComponent<StoryCardView>();
+            view.Setup(group, art, figures, chapter, title, caption);
+            return view;
+        }
+
         /// <summary>The loading screen: the vault behind, the logo, a slim gold bar with a bright leading tip.</summary>
         private static void BuildBootScene(ThemeDefinition theme)
         {
@@ -85,20 +121,37 @@ namespace RoyalVault.EditorTools
             fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fitter.aspectRatio = 16f / 9f;
             Stretch("Vignette", t, theme.vignette);
-            RectTransform dust = UiFactory.Stretch("Gold Dust", t);
 
-            Image halo = UiFactory.Image("Halo", t, theme.glow, new Vector2(0, 110), new Vector2(1300, 520));
-            halo.color = new Color(1f, 0.75f, 0.35f, 0.22f);
-            Image logo = UiFactory.Image("Logo", t, theme.logo, new Vector2(0, 110), new Vector2(760, 270));
+            // with a story, its scenes fill the screen and the logo and bar make room for the captions
+            bool told = theme.story != null && theme.story.At(StoryMoment.Intro).Length > 0;
+            StoryCardView[] cards = told ? new[] { StoryCard("Story Card A", t, theme), StoryCard("Story Card B", t, theme) } : new StoryCardView[0];
+            RectTransform dust = UiFactory.Stretch("Gold Dust", t);
+            RectTransform chromeRect = UiFactory.Stretch("Story Chrome", t);
+            var chrome = chromeRect.gameObject.AddComponent<CanvasGroup>();
+            Image topFade = Stretch("Top Fade", chromeRect, AssetDatabase.LoadAssetAtPath<Sprite>(Generated + "fade.png"));
+            topFade.rectTransform.anchorMin = new Vector2(0f, 1f);
+            topFade.rectTransform.anchorMax = new Vector2(1f, 1f);
+            topFade.rectTransform.sizeDelta = new Vector2(0f, 340f);
+            topFade.rectTransform.anchoredPosition = new Vector2(0f, -170f);
+            topFade.rectTransform.localScale = new Vector3(1f, -1f, 1f);
+            topFade.color = new Color(1f, 1f, 1f, 0.75f);
+
+            Vector2 logoAt = told ? new Vector2(0, 430) : new Vector2(0, 110);
+            Vector2 logoSize = told ? new Vector2(400, 142) : new Vector2(760, 270);
+            Image halo = UiFactory.Image("Halo", t, theme.glow, logoAt, logoSize * new Vector2(1.7f, 1.9f));
+            halo.color = new Color(1f, 0.75f, 0.35f, told ? 0.16f : 0.22f);
+            Image logo = UiFactory.Image("Logo", t, theme.logo, logoAt, logoSize);
             logo.preserveAspect = true;
 
             // the bar: the gold track, the fill inside it, a light sweeping along the fill and a bright tip
-            Image track = UiFactory.Image("Bar", t, theme.levelBar, new Vector2(0, -120), new Vector2(780, 64));
+            float barY = told ? -452f : -120f;
+            Image track = UiFactory.Image("Bar", t, theme.levelBar, new Vector2(0, barY), new Vector2(told ? 620 : 780, told ? 50 : 64));
             track.type = Image.Type.Sliced;
             track.pixelsPerUnitMultiplier = 131f / 64f;
-            RectTransform fillArea = UiFactory.Rect("Fill Area", track.transform, Vector2.zero, new Vector2(734, 22));
+            Vector2 fillSize = told ? new Vector2(584, 17) : new Vector2(734, 22);
+            RectTransform fillArea = UiFactory.Rect("Fill Area", track.transform, Vector2.zero, fillSize);
             fillArea.gameObject.AddComponent<RectMask2D>();
-            Image fill = UiFactory.Image("Fill", fillArea, theme.levelFill, Vector2.zero, new Vector2(734, 22));
+            Image fill = UiFactory.Image("Fill", fillArea, theme.levelFill, Vector2.zero, fillSize);
             fill.type = Image.Type.Filled;
             fill.fillMethod = Image.FillMethod.Horizontal;
             fill.fillOrigin = 0;
@@ -107,11 +160,15 @@ namespace RoyalVault.EditorTools
             Image tip = UiFactory.Image("Tip", track.transform, theme.glow, Vector2.zero, new Vector2(70, 70));
             tip.color = new Color(1f, 0.93f, 0.7f, 0.9f);
 
-            TextMeshProUGUI percent = UiFactory.Text("Percent", t, theme.headingFont, "0%", 26, theme.paleGold, new Vector2(0, -178), new Vector2(200, 40));
-            TextMeshProUGUI tipText = UiFactory.Text("Tip Text", t, theme.labelFont, "", 19, theme.dimGold, new Vector2(0, -222), new Vector2(900, 30), TextAlignmentOptions.Center, 30);
+            TextMeshProUGUI percent = told
+                ? UiFactory.Text("Percent", t, theme.headingFont, "0%", 20, theme.paleGold, new Vector2(370, barY), new Vector2(90, 30), TextAlignmentOptions.Left)
+                : UiFactory.Text("Percent", t, theme.headingFont, "0%", 26, theme.paleGold, new Vector2(0, -178), new Vector2(200, 40));
+            TextMeshProUGUI tipText = UiFactory.Text("Tip Text", t, theme.labelFont, "", told ? 15 : 19, theme.dimGold,
+                                                     new Vector2(0, told ? -498 : -222), new Vector2(900, 30), TextAlignmentOptions.Center, 30);
 
             var screen = root.AddComponent<LoadingScreen>();
             screen.Setup(group, logo.rectTransform, fillArea, fill, tip.rectTransform, shine.rectTransform, percent, tipText, dust, theme.glow, theme.loadingTips);
+            screen.SetupStory(told ? theme.story : null, cards, chrome);
 
             var entry = new GameObject("AppEntry").AddComponent<AppEntry>();
             entry.Setup(screen, "Game");

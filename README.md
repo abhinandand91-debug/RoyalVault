@@ -24,6 +24,18 @@ procedurally instead.
 |---|---|---|
 | ![Idle](docs/screenshots/02_idle.jpg) | ![Action](docs/screenshots/15_guardians_act.jpg) | ![Celebrating](docs/screenshots/14_guardians_celebrate.jpg) |
 
+## The story
+
+**Gold Rush to the Pharaoh's Vault.** A prospector, Cole Harlan, and a sharpshooter, Ruby Vance, follow a map out of
+the Wild West into a buried pyramid, where the Anubis guardians judge whether they leave rich. The story is data: a
+`StoryDefinition` ScriptableObject holds six scenes (backdrop, characters, title, caption) and the game moment that
+tells each one. The loading screen tells the intro (chapters I and II) the first time the game starts, with a slow
+camera push and the captions rising in; a click moves on, and later starts show only the last intro scene.
+
+| Chapter I | Chapter II |
+|---|---|
+| ![The Card Game](docs/screenshots/01_loading.jpg) | ![Across the Sea of Sand](docs/screenshots/00_story_scene_2.jpg) |
+
 ## Running it
 
 - Unity **6000.3.10f1** (Unity 6.3). Open the project, open `Assets/RoyalVault/Scenes/Boot.unity` and press Play.
@@ -94,6 +106,8 @@ Reel strips and pays were tuned by simulation and are checked by the tests (1,00
 - The Anubis guardians are licensed art (Retro Style Games, Crowns of Kemet) and are **not** in this repository
   (`Assets/RoyalVault/Art.Private` is git-ignored, including their baked animation frames). Without them the game
   runs with empty niches.
+- The story's prospector and sharpshooter are licensed art as well and live in `Art.Private`; without them the story
+  is told over the painted backdrops alone. The backdrops (`Art/Story`) were painted for this game with Figma AI.
 
 ## Licence
 

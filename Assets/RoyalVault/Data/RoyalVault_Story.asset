@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ca82306f42e54d638844a748e4e97ae, type: 3}
+  m_Name: RoyalVault_Story
+  m_EditorClassIdentifier: RoyalVault.Unity::RoyalVault.Unity.StoryDefinition
+  chapterLabel: Chapter
+  secondsPerScene: 5
+  scenes:
+  - title: The Card Game
+    caption: Midnight in a frontier saloon. Ruby Vance wins the last hand, and a
+      torn map drawn in her grandfather's hand.
+    art: {fileID: 21300000, guid: 83f98296eb90f4b7d9d8486738cf853d, type: 3}
+    figures:
+    - sprite: {fileID: 21300000, guid: 1acc24b4a052d48b0916e912a26893bd, type: 3}
+      position: {x: -640, y: -610}
+      height: 900
+      mirrored: 0
+    - sprite: {fileID: 21300000, guid: 236d7f3561b9c4fbfa4aab51aa8da0fe, type: 3}
+      position: {x: 650, y: -600}
+      height: 830
+      mirrored: 1
+    moment: 0
+  - title: Across the Sea of Sand
+    caption: Weeks later she and Cole Harlan stand on a dune at dusk. The tip of
+      a buried pyramid catches the last light.
+    art: {fileID: 21300000, guid: d3be81c222bc1488f9a3795bb2f1bfe4, type: 3}
+    figures:
+    - sprite: {fileID: 21300000, guid: 236d7f3561b9c4fbfa4aab51aa8da0fe, type: 3}
+      position: {x: -780, y: -590}
+      height: 720
+      mirrored: 0
+    - sprite: {fileID: 21300000, guid: 1acc24b4a052d48b0916e912a26893bd, type: 3}
+      position: {x: -560, y: -600}
+      height: 770
+      mirrored: 0
+    moment: 0
+  - title: The Buried Door
+    caption: Cole digs; Ruby keeps watch. A golden seal bars the door, and every
+      Vault Seal cracks it a little more.
+    art: {fileID: 21300000, guid: 50f56e86ae1c24880857732d8473a7af, type: 3}
+    figures: []
+    moment: 1
+  - title: Hall of the Guardians
+    caption: The seal breaks. Two Anubis statues open their eyes, blue fire in their
+      hands. Prove you are not thieves.
+    art: {fileID: 21300000, guid: 1c632747b494344e489317e60cda1350, type: 3}
+    figures: []
+    moment: 2
+  - title: The Treasury
+    caption: Behind the guardians lie three chambers. Crowns on the reels open them
+      one by one.
+    art: {fileID: 21300000, guid: 9dc3a16dc72f14bdf9b0d062dc236cb9, type: 3}
+    figures: []
+    moment: 4
+  - title: The Pharaoh's Crown
+    caption: 'Beside the crown lies her grandfather''s hat. The guardians bow: the
+      worthy may leave with the gold.'
+    art: {fileID: 21300000, guid: 9e192530716f244658c7c837fc418648, type: 3}
+    figures: []
+    moment: 5

@@ -76,6 +76,9 @@ namespace RoyalVault.Tests
             UseTarget(1920, 1080);
             yield return new WaitForSeconds(1.3f);
             yield return Shot("01_loading");
+            // the story's intro: the second scene follows the first
+            yield return new WaitForSeconds(5f);
+            yield return Shot("00_story_scene_2");
 
             // the game scene arrives on its own
             yield return WaitFor(() => SceneManager.GetActiveScene().name == "Game");

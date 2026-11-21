@@ -9,6 +9,10 @@ namespace RoyalVault.Unity
     /// <summary>
     /// The boot screen: the logo over the vault, a slim gold progress bar whose bright tip leads the fill, a light that
     /// sweeps along the gold, the percentage, rotating lines of text and gold dust drifting upwards.
+    ///
+    /// With a <see cref="StoryDefinition"/> the screen also tells the story's intro: its scenes play full screen behind
+    /// the bar, cross-fading from one to the next, and a click or key moves on. The whole intro is told the first time;
+    /// after that only its last scene shows while the game loads.
     /// </summary>
     public sealed class LoadingScreen : MonoBehaviour
     {
@@ -23,6 +27,20 @@ namespace RoyalVault.Unity
         [SerializeField] private RectTransform dustLayer;
         [SerializeField] private Sprite dustSprite;
         [SerializeField] private string[] tips = new string[0];
+        [Header("Story")]
+        [SerializeField] private StoryDefinition story;
+        [SerializeField] private StoryCardView[] cards = new StoryCardView[0];
+        [SerializeField] private CanvasGroup storyChrome;
+
+        private const string IntroSeenKey = "royalvault.story.intro.seen";
+        private bool skip;
+
+        /// <summary>How long the story wants the screen kept up (0 when there is no story to tell).</summary>
+        public float StorySeconds { get; private set; }
+        /// <summary>True once the story has been told, or when there is none.</summary>
+        public bool StoryDone { get; private set; } = true;
+        /// <summary>True when the player chose to skip the rest of the story.</summary>
+        public bool Skipped { get; private set; }
 
         private readonly List<RectTransform> dust = new List<RectTransform>();
         private float shown;
@@ -45,11 +63,59 @@ namespace RoyalVault.Unity
             tips = tipLines;
         }
 
+        public void SetupStory(StoryDefinition storyAsset, StoryCardView[] storyCards, CanvasGroup chrome)
+        {
+            story = storyAsset;
+            cards = storyCards;
+            storyChrome = chrome;
+        }
+
         private void Start()
         {
             SetProgress(0f);
             for (int i = 0; i < 26; i++) dust.Add(UiFactory.Image("Dust", dustLayer, dustSprite, RandomDustPosition(true), Vector2.one * Random.Range(10f, 30f)).rectTransform);
-            if (tips.Length > 0) StartCoroutine(RotateTips());
+            var intro = story != null ? story.At(StoryMoment.Intro) : new (StoryDefinition.Scene, int)[0];
+            foreach (StoryCardView card in cards) card.Group.alpha = 0f;
+            if (intro.Length > 0 && cards.Length > 0)
+            {
+                bool seen = PlayerPrefs.GetInt(IntroSeenKey, 0) == 1;
+                StoryDone = false;
+                StorySeconds = seen ? 0f : intro.Length * story.secondsPerScene;
+                tipText.text = seen ? "" : "CLICK TO CONTINUE";
+                StartCoroutine(TellIntro(intro, seen));
+            }
+            else if (tips.Length > 0) StartCoroutine(RotateTips());
+            if (storyChrome != null) storyChrome.alpha = intro.Length > 0 ? 1f : 0f;
+        }
+
+        private IEnumerator TellIntro((StoryDefinition.Scene scene, int number)[] intro, bool seen)
+        {
+            int first = seen ? intro.Length - 1 : 0;
+            StoryCardView previous = null;
+            for (int i = first; i < intro.Length; i++)
+            {
+                StoryCardView card = cards[i % cards.Length];
+                // the incoming card goes just above the outgoing one (both stay under the logo and the bar)
+                if (previous != null && previous != card && card.transform.GetSiblingIndex() < previous.transform.GetSiblingIndex())
+                    card.transform.SetSiblingIndex(previous.transform.GetSiblingIndex());
+                card.Show(intro[i].scene, intro[i].number, story.chapterLabel, story.secondsPerScene);
+                StoryCardView fading = previous;
+                StartCoroutine(Tween.Run(previous == null ? 0.6f : 0.9f, k =>
+                {
+                    card.Group.alpha = k;
+                    if (fading != null && fading != card) fading.Group.alpha = 1f - k;
+                }, Ease.InOutSine));
+                previous = card;
+                if (i == intro.Length - 1) PlayerPrefs.SetInt(IntroSeenKey, 1);
+                if (seen) break;
+
+                skip = false;
+                float t = 0f;
+                while (t < story.secondsPerScene && !skip) { t += Time.deltaTime; yield return null; }
+                if (skip && i == intro.Length - 1) Skipped = true;
+            }
+            tipText.text = "";
+            StoryDone = true;
         }
 
         /// <summary>Shows 0..1 of the loading done.</summary>
@@ -71,6 +137,8 @@ namespace RoyalVault.Unity
         private void Update()
         {
             float time = Time.time;
+            if (!StoryDone && (Input.GetMouseButtonDown(0) || Input.anyKeyDown)) skip = true;
+            if (!StoryDone && tipText.text.Length > 0) tipText.alpha = 0.45f + 0.35f * Mathf.Sin(time * 2.4f);
             // the logo breathes a little light
             logo.localScale = Vector3.one * (1f + 0.012f * Mathf.Sin(time * 1.6f));
             // a soft light sweeps along the filled gold every two seconds

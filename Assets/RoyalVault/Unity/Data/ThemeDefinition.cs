@@ -34,6 +34,7 @@ namespace RoyalVault.Unity
         [Tooltip("Optional baked animation for the character; without it the still art breathes procedurally")] public CharacterAnimation characterAnimation;
         public Color characterMagic = new Color(0.35f, 0.75f, 1f, 1f);
         [Tooltip("Additive material for glows and particles")] public Material additive;
+        [Tooltip("Optional story told on the loading screen and at game moments")] public StoryDefinition story;
 
         [Header("Interface")]
         public Sprite consoleBar;
