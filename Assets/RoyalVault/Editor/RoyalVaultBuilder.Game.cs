@@ -629,21 +629,21 @@ namespace RoyalVault.EditorTools
             return view;
         }
 
-        // The chapter's story card laid out inside the panel: a masked art window above the words
+        // The chapter's story card laid out inside the frame's opening (1052 x 501 around y = 15): art above the words
         private static StoryCardView ChapterStory(Transform panel, ThemeDefinition theme)
         {
             RectTransform rect = UiFactory.Rect("Story", panel, Vector2.zero, new Vector2(1320, 820));
             var group = rect.gameObject.AddComponent<CanvasGroup>();
-            RectTransform window = UiFactory.Rect("Art Window", rect, new Vector2(0, 118), new Vector2(1060, 400));
+            RectTransform window = UiFactory.Rect("Art Window", rect, new Vector2(0, 96), new Vector2(1012, 300));
             window.gameObject.AddComponent<RectMask2D>();
             Image art = Stretch("Art", window, null);
             var fitter = art.gameObject.AddComponent<AspectRatioFitter>();
             fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fitter.aspectRatio = 1.5f;
 
-            TextMeshProUGUI chapter = UiFactory.Text("Chapter", rect, theme.labelFont, "CHAPTER III", 17, theme.gold, new Vector2(0, -118), new Vector2(900, 28), TextAlignmentOptions.Center, 40);
-            TextMeshProUGUI title = UiFactory.Text("Title", rect, theme.headingFont, "Title", 46, theme.paleGold, new Vector2(0, -164), new Vector2(1000, 64));
-            TextMeshProUGUI caption = UiFactory.Text("Caption", rect, theme.bodyFont, "", 29, new Color(0.9f, 0.86f, 0.8f, 1f), new Vector2(0, -250), new Vector2(960, 100), TextAlignmentOptions.Top);
+            TextMeshProUGUI chapter = UiFactory.Text("Chapter", rect, theme.labelFont, "CHAPTER III", 17, theme.gold, new Vector2(0, -74), new Vector2(900, 28), TextAlignmentOptions.Center, 40);
+            TextMeshProUGUI title = UiFactory.Text("Title", rect, theme.headingFont, "Title", 44, theme.paleGold, new Vector2(0, -114), new Vector2(980, 56));
+            TextMeshProUGUI caption = UiFactory.Text("Caption", rect, theme.bodyFont, "", 28, new Color(0.9f, 0.86f, 0.8f, 1f), new Vector2(0, -185), new Vector2(960, 70), TextAlignmentOptions.Top);
             caption.textWrappingMode = TextWrappingModes.Normal;
             var typewriter = caption.gameObject.AddComponent<TypewriterText>();
 
