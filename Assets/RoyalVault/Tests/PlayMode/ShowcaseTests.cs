@@ -180,5 +180,54 @@ namespace RoyalVault.Tests
             yield return WaitFor(() => game.Flow.State != SpinState.Spinning);
             Assert.AreEqual(0, machine.AnticipatedReels.Count, label);
         }
+
+        // The first stops (searched in order) whose grid wins nothing
+        public static int[] LosingStops(GameBootstrap game)
+        {
+            for (int seed = 0; seed < 5000; seed++)
+            {
+                var stops = new int[game.Machine.Reels];
+                for (int reel = 0; reel < stops.Length; reel++)
+                {
+                    stops[reel] = (seed * (7 + reel * 3)) % game.Machine.Strips[reel].Length;
+                }
+
+                if (!game.Engine.Evaluate(stops, 1).IsWin)
+                {
+                    return stops;
+                }
+            }
+
+            Assert.Fail("no losing stops found");
+            return null;
+        }
+
+        [UnityTest, Timeout(120000)]
+        public IEnumerator GuardiansFireBurnsWildsIntoTheLandedReels()
+        {
+            yield return LoadGame();
+            var game = Object.FindFirstObjectByType<GameBootstrap>();
+            var machine = Object.FindFirstObjectByType<MachineView>();
+            SpinOutcome paid = null;
+            game.Flow.SpinPaid += context =>
+            {
+                paid = context.Outcome;
+            };
+
+            yield return WaitFor(() => game.Flow.State == SpinState.Idle);
+            game.ForceNextStops(LosingStops(game));
+            game.ForceGuardianFire();
+            Assert.IsTrue(game.Flow.RequestSpin());
+            yield return WaitFor(() => paid != null, 30f);
+
+            int wild = game.Machine.FirstIndexOfKind(SymbolKind.Wild);
+            Assert.That(paid.AddedWilds.Count, Is.InRange(game.Machine.RandomWilds.MinWilds, game.Machine.RandomWilds.MaxWilds));
+            foreach (GridPosition cell in paid.AddedWilds)
+            {
+                Assert.AreEqual(wild, machine.SymbolAt(cell).SymbolIndex, "cell " + cell + " shows the wild");
+            }
+
+            PlayerPrefs.DeleteAll();
+        }
     }
 }

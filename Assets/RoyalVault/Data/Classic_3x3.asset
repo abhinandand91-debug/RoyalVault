@@ -79,6 +79,10 @@ MonoBehaviour:
     contributionPercent: 0.8
   freeSpinMultiplier: 2
   winTierMultipliers: 0a0000001900000032000000
+  randomWildChancePerMille: 0
+  randomWildMin: 2
+  randomWildMax: 4
+  presetVersion: 1
   lineBets: 0100000002000000050000000a000000190000003200000064000000
   defaultLineBetIndex: 2
   startBalance: 20000

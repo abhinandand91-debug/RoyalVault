@@ -176,5 +176,12 @@ namespace RoyalVault.Unity
                 sound.StartLoop(SoundCue.CoinShowerLoop);
             }
         }
+
+        // Guardian's Fire: each flame thrown, and each symbol it burns into a wild
+        public void ListenTo(GuardianFireView fire)
+        {
+            fire.Thrown += () => sound.Play(SoundCue.FlameThrow, 0.7f);
+            fire.Burned += () => sound.Play(SoundCue.FlameClash, 0.55f);
+        }
     }
 }

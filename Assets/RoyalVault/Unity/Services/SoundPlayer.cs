@@ -8,6 +8,8 @@ namespace RoyalVault.Unity
     public sealed class SoundPlayer : MonoBehaviour
     {
         private const string MutedKey = "royalvault.sound.muted";
+        // the editor keeps its own setting and starts silent, so working on the game is quiet; builds start with sound
+        private const string EditorMutedKey = "royalvault.sound.muted.editor";
         private const int Channels = 10;
         private const int HistoryLength = 64;
 
@@ -24,16 +26,27 @@ namespace RoyalVault.Unity
 
         public SoundBank Bank => bank;
 
+        private static string Key
+        {
+            get
+            {
+                return Application.isEditor ? EditorMutedKey : MutedKey;
+            }
+        }
+
         // The cues played most recently, oldest first (for tests and debugging; silent cues count too)
         public IReadOnlyList<SoundCue> History => history;
 
         // True when the player has turned the sound off (kept between sessions)
         public static bool Muted
         {
-            get => PlayerPrefs.GetInt(MutedKey, 0) == 1;
+            get
+            {
+                return PlayerPrefs.GetInt(Key, Application.isEditor ? 1 : 0) == 1;
+            }
             set
             {
-                PlayerPrefs.SetInt(MutedKey, value ? 1 : 0);
+                PlayerPrefs.SetInt(Key, value ? 1 : 0);
                 PlayerPrefs.Save();
                 AudioListener.volume = value ? 0f : 1f;
             }

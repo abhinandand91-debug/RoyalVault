@@ -64,7 +64,14 @@ namespace RoyalVault.EditorTools
             var asset = AssetDatabase.LoadAssetAtPath<MachineDefinitionAsset>(path);
             if (asset != null)
             {
-                return asset; // keep Inspector edits
+                // keep Inspector edits, but bring in settings added since the asset was made
+                if (asset.presetVersion < MachineDefinitionAsset.CurrentPresetVersion)
+                {
+                    asset.CopyRandomWilds(preset);
+                    EditorUtility.SetDirty(asset);
+                }
+
+                return asset;
             }
 
             asset = ScriptableObject.CreateInstance<MachineDefinitionAsset>();

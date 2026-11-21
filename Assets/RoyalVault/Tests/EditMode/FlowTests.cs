@@ -11,9 +11,12 @@ namespace RoyalVault.Tests
         {
             MachineDefinition machine = MachinePresets.RoyalVault5x3();
             machine.StartBalance = balance;
+            // these tests check exact forced outcomes; random wilds have their own tests
+            machine.RandomWilds.ChancePerMille = 0;
             var session = new GameSession(machine, new MemorySaveStore());
-            var engine = new SpinEngine(machine, new SeededRandom(7));
-            return (session, new SpinFlow(session, engine, StandardFeatures.Create()), engine);
+            var random = new SeededRandom(7);
+            var engine = new SpinEngine(machine, random);
+            return (session, new SpinFlow(session, engine, StandardFeatures.Create(random)), engine);
         }
 
         private static SpinContext Play(SpinFlow flow)
@@ -151,7 +154,7 @@ namespace RoyalVault.Tests
         public void NewFeature_PlugsInWithoutChangingTheFlow()
         {
             var (session, _, engine) = Create();
-            var features = StandardFeatures.Create();
+            var features = StandardFeatures.Create(new SeededRandom(3));
             features.Add(new TripleEveryWin());
             var flow = new SpinFlow(session, engine, features);
             engine.ForcedStops = new[] { 33, 13, 48, 1, 5 };

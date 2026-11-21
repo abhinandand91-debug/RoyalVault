@@ -28,6 +28,7 @@ namespace RoyalVault.EditorTools
             ConsoleView console = Console(t, theme);
             SealMeterView sealMeter = SealMeter(console.transform, theme);
             FlameClashView flameClash = FlameClash(t, theme, machineRect);
+            GuardianFireView guardianFire = GuardianFire(t, theme);
             MessageToast toast = Toast(t, theme);
 
             // overlays, last so they draw on top
@@ -38,7 +39,7 @@ namespace RoyalVault.EditorTools
 
             var presenter = root.AddComponent<WinPresenter>();
             root.AddComponent<GameBootstrap>().Setup(machine, theme, machineView, console, jackpots, presenter, bigWin, paytable, toast, guardians,
-                                                     sealMeter, flameClash, chapterCard, coachMarks);
+                                                     sealMeter, flameClash, chapterCard, coachMarks, guardianFire);
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             Object.DestroyImmediate(root);
             return prefab;
@@ -217,6 +218,27 @@ namespace RoyalVault.EditorTools
 
             var view = layer.gameObject.AddComponent<FlameClashView>();
             view.Setup(layer, fireballs, cores, trails, flash, rings, burst, gold, machine);
+            return view;
+        }
+
+        // Guardian's Fire: flames thrown at single cells, each leaving a trail and bursting on the symbol it turns wild
+        private static GuardianFireView GuardianFire(Transform parent, ThemeDefinition theme)
+        {
+            const int flames = 4;
+            RectTransform layer = UiFactory.Stretch("Guardian Fire", parent);
+            UiFactory.NestedCanvas(layer.gameObject, false);
+            var trails = new UiParticleEmitter[flames];
+            var fireballs = new Image[flames];
+            for (int i = 0; i < flames; i++)
+            {
+                trails[i] = FireTrail(layer, theme, i);
+                (fireballs[i], _) = Fireball(layer, theme, i);
+                fireballs[i].rectTransform.sizeDelta = new Vector2(150f, 150f);
+            }
+
+            (UiParticleEmitter burst, _) = ClashBursts(layer, theme);
+            var view = layer.gameObject.AddComponent<GuardianFireView>();
+            view.Setup(layer, fireballs, trails, burst);
             return view;
         }
 

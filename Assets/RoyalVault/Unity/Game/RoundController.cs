@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using GameKit;
 using PrimeTween;
 using SlotKit;
@@ -21,6 +23,9 @@ namespace RoyalVault.Unity
         private long freeSpinRoundWin;
         private StoryDirector story;
         private readonly WaitForSeconds autoSpinPause = new WaitForSeconds(0.35f);
+        private readonly List<ILandingStep> landingSteps = new List<ILandingStep>();
+        private SpinContext landing;
+        private Action onReelsLanded;
 
         // Spins played automatically after the player starts auto play
         public int AutoPlaySpins = 25;
@@ -29,6 +34,7 @@ namespace RoyalVault.Unity
                          BigWinView bigWinView, PaytableView paytableView, MessageToast messageToast, StoryDirector storyDirector = null)
         {
             story = storyDirector;
+            onReelsLanded = OnReelsLanded;
             session = gameSession;
             flow = spinFlow;
             autoPlay = flow.Features.Get<AutoPlayFeature>();
@@ -141,7 +147,32 @@ namespace RoyalVault.Unity
             }
 
             bool fast = autoPlay.Active || context.IsFreeSpin;
-            machine.Spin(context.Outcome, fast, flow.ReelsStopped);
+            landing = context;
+            machine.Spin(context.Outcome, fast, onReelsLanded);
+        }
+
+        // Shown between the reels landing and the wins, in the order added
+        public void AddLandingStep(ILandingStep step)
+        {
+            landingSteps.Add(step);
+        }
+
+        private void OnReelsLanded()
+        {
+            StartCoroutine(PlayLandingSteps(landing));
+        }
+
+        private IEnumerator PlayLandingSteps(SpinContext context)
+        {
+            foreach (ILandingStep step in landingSteps)
+            {
+                if (step.Wants(context))
+                {
+                    yield return step.Play(context);
+                }
+            }
+
+            flow.ReelsStopped();
         }
 
         private void OnSpinPaid(SpinContext context)

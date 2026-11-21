@@ -69,6 +69,7 @@ namespace RoyalVault.Core
                 DefaultLineBetIndex = 2,
                 StartBalance = 50000,
                 FreeSpinMultiplier = 2,
+                RandomWilds = new RandomWildSettings { ChancePerMille = 6, MinWilds = 2, MaxWilds = 2 },
             };
         }
 

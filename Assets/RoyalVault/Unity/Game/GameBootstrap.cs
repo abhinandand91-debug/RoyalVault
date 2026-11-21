@@ -40,6 +40,7 @@ namespace RoyalVault.Unity
         [SerializeField] private FlameClashView flameClash;
         [SerializeField] private ChapterCardView chapterCard;
         [SerializeField] private CoachMarkView coachMarks;
+        [SerializeField] private GuardianFireView guardianFire;
 
         public GameSession Session { get; private set; }
         public SpinEngine Engine { get; private set; }
@@ -83,7 +84,8 @@ namespace RoyalVault.Unity
         public void Setup(MachineDefinitionAsset machineAsset, ThemeDefinition themeAsset, MachineView machineViewRef, ConsoleView consoleView,
                           JackpotPanelView jackpotView, WinPresenter winPresenter, BigWinView bigWinView, PaytableView paytableView,
                           MessageToast messageToast, CharacterView[] characterViews, SealMeterView sealMeterView,
-                          FlameClashView flameClashView = null, ChapterCardView chapterCardView = null, CoachMarkView coachMarkView = null)
+                          FlameClashView flameClashView = null, ChapterCardView chapterCardView = null, CoachMarkView coachMarkView = null,
+                          GuardianFireView guardianFireView = null)
         {
             machine = machineAsset;
             theme = themeAsset;
@@ -99,6 +101,7 @@ namespace RoyalVault.Unity
             flameClash = flameClashView;
             chapterCard = chapterCardView;
             coachMarks = coachMarkView;
+            guardianFire = guardianFireView;
         }
 
         private void Awake()
@@ -123,7 +126,7 @@ namespace RoyalVault.Unity
             Session = new GameSession(Machine, store);
             IRandom random = seed != 0 ? new SeededRandom(seed) : new SeededRandom();
             Engine = new SpinEngine(Machine, random);
-            Flow = new SpinFlow(Session, Engine, StandardFeatures.Create());
+            Flow = new SpinFlow(Session, Engine, StandardFeatures.Create(random));
         }
 
         private void BindViews()
@@ -146,6 +149,11 @@ namespace RoyalVault.Unity
                 sealMeter.Bind(Machine, theme, machineView, Flow, Session);
             }
 
+            if (guardianFire != null)
+            {
+                guardianFire.Bind(characters, machineView, theme.characterMagic);
+            }
+
             machineView.AnticipationStarted += reel =>
             {
                 foreach (CharacterView c in characters)
@@ -164,8 +172,14 @@ namespace RoyalVault.Unity
             var player = gameObject.AddComponent<SoundPlayer>();
             player.Setup(theme.sounds);
             Sound = gameObject.AddComponent<SoundDirector>();
-            gameObject.AddComponent<RoundController>().Bind(Session, Flow, machineView, console, presenter, bigWin, paytable, toast, Story);
+            var round = gameObject.AddComponent<RoundController>();
+            round.Bind(Session, Flow, machineView, console, presenter, bigWin, paytable, toast, Story);
             Sound.Bind(player, Machine, Session, Flow, machineView, console, bigWin, sealMeter, flameClash);
+            if (guardianFire != null)
+            {
+                round.AddLandingStep(guardianFire);
+                Sound.ListenTo(guardianFire);
+            }
             Showcase = new WinShowcase(Engine, Session, Flow, toast, () => showcaseWins, () => showcaseOrder);
         }
 
@@ -203,6 +217,12 @@ namespace RoyalVault.Unity
         public void ForceNextStops(params int[] stops)
         {
             Engine.ForcedStops = stops;
+        }
+
+        // Testing aid: the next losing base-game spin gets Guardian's Fire
+        public void ForceGuardianFire()
+        {
+            Flow.Features.Get<RandomWildsFeature>().ForceNext = true;
         }
     }
 }

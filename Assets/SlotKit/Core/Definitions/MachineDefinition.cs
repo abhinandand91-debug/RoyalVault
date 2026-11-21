@@ -37,6 +37,15 @@ namespace SlotKit
     }
 
     // Grid, symbols, strips, paylines, pays, features and bets of one machine
+    // How often a losing base-game spin is rescued with extra wilds, and how many
+    public sealed class RandomWildSettings
+    {
+        // Losing base-game spins that get wilds, per thousand
+        public int ChancePerMille;
+        public int MinWilds = 2;
+        public int MaxWilds = 4;
+    }
+
     public sealed class MachineDefinition
     {
         public string Name = "Machine";
@@ -58,6 +67,8 @@ namespace SlotKit
         public int FreeSpinMultiplier = 2;
         // Win tiers as multiples of the total bet: Big, Mega, Epic
         public int[] WinTierMultipliers = { 10, 25, 50 };
+        // Random wilds on a losing base-game spin (0 percent turns the feature off)
+        public RandomWildSettings RandomWilds = new RandomWildSettings();
 
         public int SymbolIndex(string id)
         {

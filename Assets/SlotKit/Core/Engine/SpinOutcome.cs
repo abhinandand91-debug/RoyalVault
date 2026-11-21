@@ -65,6 +65,8 @@ namespace SlotKit
         // Multiplies line and scatter wins (free spins double them)
         public int Multiplier = 1;
         public WinTier Tier;
+        // Cells a feature turned into wilds after the reels stopped (shown before the wins)
+        public readonly List<GridPosition> AddedWilds = new List<GridPosition>();
 
         public SpinOutcome(int[] stops, SymbolGrid grid, long lineBet, long totalBet)
         {
@@ -72,6 +74,15 @@ namespace SlotKit
             Grid = grid;
             LineBet = lineBet;
             TotalBet = totalBet;
+        }
+
+        // Forgets every win so the rules can evaluate a changed grid again
+        public void ClearWins()
+        {
+            LineWins.Clear();
+            Scatter = null;
+            JackpotTier = -1;
+            JackpotPositions.Clear();
         }
 
         public long LineAmount

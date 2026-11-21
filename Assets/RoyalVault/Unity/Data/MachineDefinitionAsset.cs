@@ -56,6 +56,14 @@ namespace RoyalVault.Unity
         [Min(1)] public int freeSpinMultiplier = 2;
         [Tooltip("Win tiers as multiples of the total bet: Big, Mega, Epic")] public int[] winTierMultipliers = { 10, 25, 50 };
 
+        [Header("Random wilds (Guardian's Fire)")]
+        [Tooltip("Losing base-game spins rescued with extra wilds, per thousand; 0 turns the feature off")]
+        [Range(0, 1000)] public int randomWildChancePerMille;
+        [Min(1)] public int randomWildMin = 2;
+        [Min(1)] public int randomWildMax = 2;
+        [Tooltip("Version of the presets this asset was last brought up to; the builder adds new settings once")]
+        [HideInInspector] public int presetVersion;
+
         [Header("Betting")]
         public int[] lineBets = { 1 };
         public int defaultLineBetIndex;
@@ -79,6 +87,7 @@ namespace RoyalVault.Unity
                 StartBalance = startBalance,
                 FreeSpinMultiplier = freeSpinMultiplier,
                 WinTierMultipliers = (int[])winTierMultipliers.Clone(),
+                RandomWilds = new RandomWildSettings { ChancePerMille = randomWildChancePerMille, MinWilds = randomWildMin, MaxWilds = randomWildMax },
             };
             for (int i = 0; i < symbols.Length; i++)
             {
@@ -129,7 +138,19 @@ namespace RoyalVault.Unity
             startBalance = definition.StartBalance;
             freeSpinMultiplier = definition.FreeSpinMultiplier;
             winTierMultipliers = (int[])definition.WinTierMultipliers.Clone();
+            CopyRandomWilds(definition);
         }
+
+        // Settings added after the first presets shipped; the builder copies them into older assets once
+        public void CopyRandomWilds(MachineDefinition definition)
+        {
+            randomWildChancePerMille = definition.RandomWilds.ChancePerMille;
+            randomWildMin = definition.RandomWilds.MinWilds;
+            randomWildMax = definition.RandomWilds.MaxWilds;
+            presetVersion = CurrentPresetVersion;
+        }
+
+        public const int CurrentPresetVersion = 1;
 
         // Problems with this machine; empty when it is ready to play
         public List<string> Validate()

@@ -266,6 +266,23 @@ namespace RoyalVault.Unity
             return reels[position.Reel].ViewAt(position.Row);
         }
 
+        public Vector3 CellWorldPosition(GridPosition position)
+        {
+            return transform.TransformPoint(CellCentre(position.Reel, position.Row));
+        }
+
+        // A landed symbol turns into another (a burned-in wild) with a flash and a ring of light; the next spin resets it
+        public void Burn(GridPosition position, int symbol)
+        {
+            SymbolView view = SymbolAt(position);
+            view.SetSymbol(symbol, ArtFor(symbol));
+            view.Land();
+            if (fx != null)
+            {
+                fx.Land(CellCentre(position.Reel, position.Row), cell, view.Art);
+            }
+        }
+
         // Celebrates the given cells and dims the rest of the window
         public void HighlightCells(IReadOnlyList<GridPosition> positions, float seconds)
         {

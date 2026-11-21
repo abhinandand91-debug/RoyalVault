@@ -93,6 +93,7 @@ namespace RoyalVault.Tests
             yield return Intro();
             yield return FirstVisit();
             yield return LineWin();
+            yield return GuardiansFire();
             yield return BigWins();
             yield return Jackpot();
             yield return FreeSpins();
@@ -155,6 +156,20 @@ namespace RoyalVault.Tests
             yield return Shot("04_win_lines");
             yield return new WaitForSeconds(2.2f);
             yield return Shot("05_win_cycle");
+        }
+
+        // A losing spin rescued by the guardians' flames
+        private static IEnumerator GuardiansFire()
+        {
+            yield return WaitFor(() => game.Flow.State == SpinState.Idle);
+            var fire = Object.FindFirstObjectByType<GuardianFireView>();
+            bool thrown = false;
+            fire.Thrown += () => thrown = true;
+            game.ForceNextStops(ShowcaseTests.LosingStops(game));
+            game.ForceGuardianFire();
+            Assert.IsTrue(game.Flow.RequestSpin());
+            yield return ShotWhen(() => thrown, 0.22f, "27_guardian_fire");
+            yield return ShotWhen(() => game.Flow.State != SpinState.Spinning, 0.6f, "28_guardian_fire_wilds");
         }
 
         // The flame clash opens a big win; then a mega win

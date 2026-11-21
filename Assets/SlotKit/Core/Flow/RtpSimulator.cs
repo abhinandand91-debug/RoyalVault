@@ -40,7 +40,8 @@ namespace SlotKit
             var session = new GameSession(machine, null);
             // a deep wallet so the simulation never runs dry
             session.Wallet.Credit(long.MaxValue / 4);
-            var flow = new SpinFlow(session, new SpinEngine(machine, new SeededRandom(seed)), StandardFeatures.Create());
+            var random = new SeededRandom(seed);
+            var flow = new SpinFlow(session, new SpinEngine(machine, random), StandardFeatures.Create(random));
             var report = new RtpReport();
 
             bool free = false;

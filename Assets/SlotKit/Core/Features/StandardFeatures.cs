@@ -194,10 +194,13 @@ namespace SlotKit
 
     public static class StandardFeatures
     {
-        // The features every machine in this game runs
-        public static FeaturePipeline Create()
+        // The features every machine in this game runs; random wilds draw from the same random source as the reels
+        public static FeaturePipeline Create(IRandom random)
         {
-            return new FeaturePipeline(new ISlotFeature[] { new FreeSpinsFeature(), new JackpotFeature(), new WinTierFeature(), new AutoPlayFeature() });
+            return new FeaturePipeline(new ISlotFeature[]
+            {
+                new RandomWildsFeature(random), new FreeSpinsFeature(), new JackpotFeature(), new WinTierFeature(), new AutoPlayFeature(),
+            });
         }
     }
 }
