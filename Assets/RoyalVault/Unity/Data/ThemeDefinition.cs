@@ -4,6 +4,23 @@ using UnityEngine;
 
 namespace RoyalVault.Unity
 {
+    /// <summary>How a symbol celebrates: which light and particles surround it when it wins.</summary>
+    public enum SymbolStyle
+    {
+        /// <summary>Card royals: a light sweep and a warm glow.</summary>
+        Card,
+        /// <summary>Gems: a coloured glow, a sway and twinkling stars.</summary>
+        Gem,
+        /// <summary>Treasures (gold, keys, relics): a light sweep and rising gold dust.</summary>
+        Treasure,
+        /// <summary>The wild: a big pop and flash, rotating rays, stars.</summary>
+        Wild,
+        /// <summary>The scatter: rays and sparks in the vault's blue magic.</summary>
+        Scatter,
+        /// <summary>The jackpot symbol: golden rays and jewel-coloured glints.</summary>
+        Jackpot,
+    }
+
     /// <summary>
     /// Everything a machine looks like: symbol art, machine and interface sprites, fonts, colours and the reel window.
     /// A reskin is a new theme asset; the game code and the machine stay the same.
@@ -17,6 +34,10 @@ namespace RoyalVault.Unity
             [Tooltip("Matches the symbol id in the machine definition")] public string id;
             public Sprite sprite;
             [Tooltip("Shown while the reel spins fast")] public Sprite blur;
+            [Tooltip("How it celebrates a win")] public SymbolStyle style;
+            [Tooltip("Colour of its glow and light")] public Color tint = new Color(1f, 0.85f, 0.45f, 1f);
+            [Tooltip("Optional baked win animation (for example exported from an animation tool); plays instead of the pulse")]
+            public CharacterAnimation winAnimation;
         }
 
         [Header("Symbols")]
@@ -34,6 +55,8 @@ namespace RoyalVault.Unity
         [Tooltip("Optional baked animation for the character; without it the still art breathes procedurally")] public CharacterAnimation characterAnimation;
         public Color characterMagic = new Color(0.35f, 0.75f, 1f, 1f);
         [Tooltip("Additive material for glows and particles")] public Material additive;
+        [Tooltip("Material for reel symbols (RoyalVault/UI Symbol): the shine sweep and flash")] public Material symbolMaterial;
+        [Tooltip("Rays drawn behind the grand symbols when they win")] public Sprite rays;
         [Tooltip("Optional story told on the loading screen and at game moments")] public StoryDefinition story;
         [Tooltip("Optional hero who celebrates big wins on the left (the prospector)")] public CharacterAnimation heroLeft;
         [Tooltip("Optional hero who celebrates big wins on the right (the sharpshooter, mirrored to face the centre)")] public CharacterAnimation heroRight;

@@ -16,45 +16,87 @@ MonoBehaviour:
   - id: card_10
     sprite: {fileID: 21300000, guid: 5b6e1c9435ee04909a5c10aaff188a2f, type: 3}
     blur: {fileID: 21300000, guid: ceac54ff161d34098ae741bdc3c422bd, type: 3}
+    style: 0
+    tint: {r: 1, g: 0.85, b: 0.5, a: 1}
+    winAnimation: {fileID: 0}
   - id: card_J
     sprite: {fileID: 21300000, guid: 1c909d0c874ab48b3a16135e11b43702, type: 3}
     blur: {fileID: 21300000, guid: e39d0226b67094a129e73978de82b0ba, type: 3}
+    style: 0
+    tint: {r: 1, g: 0.85, b: 0.5, a: 1}
+    winAnimation: {fileID: 0}
   - id: card_Q
     sprite: {fileID: 21300000, guid: 5e25b30f8a2f1489a8252b85c55eaaeb, type: 3}
     blur: {fileID: 21300000, guid: 09ac389c457924876bcd5fca3fb5efec, type: 3}
+    style: 0
+    tint: {r: 1, g: 0.85, b: 0.5, a: 1}
+    winAnimation: {fileID: 0}
   - id: card_K
     sprite: {fileID: 21300000, guid: 4fae616c0775d4effa440fdf63487712, type: 3}
     blur: {fileID: 21300000, guid: 268f8c5f2ec7b473a9e8a0be49f17d15, type: 3}
+    style: 0
+    tint: {r: 1, g: 0.85, b: 0.5, a: 1}
+    winAnimation: {fileID: 0}
   - id: card_A
     sprite: {fileID: 21300000, guid: 496dc8efbd3604213b5f37ae8db6f2c7, type: 3}
     blur: {fileID: 21300000, guid: 418f23839a23f4388babc9d8340ed4d2, type: 3}
+    style: 0
+    tint: {r: 1, g: 0.85, b: 0.5, a: 1}
+    winAnimation: {fileID: 0}
   - id: emerald
     sprite: {fileID: 21300000, guid: 544fbe47b15e9460b95f1d70208f5c6b, type: 3}
     blur: {fileID: 21300000, guid: 1e7aafe20878942d8978817786801428, type: 3}
+    style: 1
+    tint: {r: 0.35, g: 1, b: 0.55, a: 1}
+    winAnimation: {fileID: 0}
   - id: sapphire
     sprite: {fileID: 21300000, guid: 48a237bb5c79445129ab4fdb8d5155e8, type: 3}
     blur: {fileID: 21300000, guid: 81d94027f4c5b4f27bed2a7b179d76f3, type: 3}
+    style: 1
+    tint: {r: 0.4, g: 0.6, b: 1, a: 1}
+    winAnimation: {fileID: 0}
   - id: ruby
     sprite: {fileID: 21300000, guid: 970dd469ea3a740bfa028489ea21402b, type: 3}
     blur: {fileID: 21300000, guid: 747540495f81341dfa7b1bb8344ae991, type: 3}
+    style: 1
+    tint: {r: 1, g: 0.3, b: 0.35, a: 1}
+    winAnimation: {fileID: 0}
   - id: ankh
     sprite: {fileID: 21300000, guid: 4fadeb60d03854e6f9111c15f0027278, type: 3}
     blur: {fileID: 21300000, guid: bae417dc84008466e851898f77af556d, type: 3}
+    style: 2
+    tint: {r: 1, g: 0.8, b: 0.4, a: 1}
+    winAnimation: {fileID: 0}
   - id: gold_bars
     sprite: {fileID: 21300000, guid: e8986862e5d894ba3aee12dd0bbeeaea, type: 3}
     blur: {fileID: 21300000, guid: cbfd923b252bd4e7b867a23838285487, type: 3}
+    style: 2
+    tint: {r: 1, g: 0.8, b: 0.4, a: 1}
+    winAnimation: {fileID: 0}
   - id: vault_key
     sprite: {fileID: 21300000, guid: d4c93803849b5426ca105c4eeabe0b68, type: 3}
     blur: {fileID: 21300000, guid: 184f9be2d3b454de1aadfd352fe151e1, type: 3}
+    style: 2
+    tint: {r: 1, g: 0.8, b: 0.4, a: 1}
+    winAnimation: {fileID: 0}
   - id: wild
     sprite: {fileID: 21300000, guid: 41ffb6b5026bd4f41aacb57b12a869ee, type: 3}
     blur: {fileID: 21300000, guid: 768d709ad31c345e59169e1a48283d5e, type: 3}
+    style: 3
+    tint: {r: 0.85, g: 0.95, b: 1, a: 1}
+    winAnimation: {fileID: 0}
   - id: vault_seal
     sprite: {fileID: 21300000, guid: 67877b7cb60354defbd7a5e5670b6e4a, type: 3}
     blur: {fileID: 21300000, guid: b706ee497d49f4ff28aa4b67538ab135, type: 3}
+    style: 4
+    tint: {r: 0.4, g: 0.75, b: 1, a: 1}
+    winAnimation: {fileID: 0}
   - id: crown
     sprite: {fileID: 21300000, guid: 6c89e2fcb74a0452dab628f24dca9e81, type: 3}
     blur: {fileID: 21300000, guid: b2f6f5affc1db413dbebb9ec8d1ba438, type: 3}
+    style: 5
+    tint: {r: 1, g: 0.82, b: 0.4, a: 1}
+    winAnimation: {fileID: 0}
   background: {fileID: 21300000, guid: f720ca334f02f48eead65b45e1870f02, type: 3}
   vignette: {fileID: 21300000, guid: f872f30ee3e2d46e38ee50f334d8bed5, type: 3}
   reelFrame: {fileID: 21300000, guid: c8f46abe6ed1f49328fd5baf195a82a9, type: 3}
@@ -66,6 +108,8 @@ MonoBehaviour:
   characterAnimation: {fileID: 11400000, guid: 148c3ddcc38204ef3a7dd9333d2621ae, type: 2}
   characterMagic: {r: 0.35, g: 0.75, b: 1, a: 1}
   additive: {fileID: 2100000, guid: 87cfb5d4bd56c432b83a1803eae1b483, type: 2}
+  symbolMaterial: {fileID: 2100000, guid: 7284114aa04e14d309421c3aa0c1a3d5, type: 2}
+  rays: {fileID: 21300000, guid: 5d0cc192600e942708d3d6aabaf48c8b, type: 3}
   story: {fileID: 11400000, guid: ced7b3d86de1841f9bd3e7d24fd11d34, type: 2}
   heroLeft: {fileID: 11400000, guid: ef808432880fa41b2b25aff5bf39c723, type: 2}
   heroRight: {fileID: 11400000, guid: 0fd0465fd0bda48d39cac191605af63b, type: 2}

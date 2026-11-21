@@ -19,6 +19,8 @@ namespace RoyalVault.Unity
         private MachineDefinition machine;
         private ThemeDefinition theme;
         private ReelView[] reels;
+        private SymbolFxLayer fx;
+        private float nextGlint;
         private Vector2 cell;
         private Vector2 windowCentre;
         private float gap;
@@ -61,6 +63,9 @@ namespace RoyalVault.Unity
                 for (int row = 0; row < machine.Rows; row++)
                     UiFactory.Image("Cell", cells, theme.reelCell, CellCentre(r, row) - windowCentre, cell);
 
+            // light behind winning symbols sits on the plates, outside the reels' masks
+            RectTransform fxBack = UiFactory.Rect("Symbol Light", transform, Vector2.zero, Vector2.zero);
+
             // reels
             RectTransform reelRoot = UiFactory.Rect("Reels", transform, windowCentre, windowSize);
             reels = new ReelView[machine.Reels];
@@ -69,8 +74,14 @@ namespace RoyalVault.Unity
                 RectTransform column = UiFactory.Rect("Reel " + (r + 1), reelRoot, new Vector2(CellCentre(r, 0).x - windowCentre.x, 0f), cell);
                 reels[r] = column.gameObject.AddComponent<ReelView>();
                 int start = UnityEngine.Random.Range(0, machine.Strips[r].Length);
-                reels[r].Build(machine.Strips[r], machine.Rows, cell, gap, theme.symbolScale, theme.glow, ArtFor, start);
+                reels[r].Build(machine.Strips[r], machine.Rows, cell, gap, theme.symbolScale, theme.glow, ArtFor, start, theme.symbolMaterial);
             }
+
+            // stars, dust and sparks in front of the symbols
+            RectTransform fxFront = UiFactory.Rect("Symbol Sparkle", transform, Vector2.zero, Vector2.zero);
+            fx = fxFront.gameObject.AddComponent<SymbolFxLayer>();
+            fx.Setup(fxBack, fxFront, theme);
+            nextGlint = Time.time + 2f;
 
             paylineLayer = UiFactory.Rect("Paylines", transform, Vector2.zero, ((RectTransform)transform).rect.size);
 
@@ -113,6 +124,7 @@ namespace RoyalVault.Unity
                 float run = (fast ? 0.55f : RunSeconds) + r * (fast ? 0.1f : StopStagger);
                 reels[r].Spin(outcome.Stops[r], r * 0.05f, run, () =>
                 {
+                    LandSpecials(reel);
                     ReelStopped?.Invoke(reel);
                     stopped++;
                     if (stopped == reels.Length) onAllStopped?.Invoke();
@@ -139,7 +151,12 @@ namespace RoyalVault.Unity
             foreach (GridPosition position in positions)
             {
                 SymbolView view = SymbolAt(position);
-                if (lit.Add(view)) { view.Celebrate(seconds); celebrating.Add(view); }
+                if (lit.Add(view))
+                {
+                    view.Celebrate(seconds);
+                    celebrating.Add(view);
+                    if (fx != null) fx.Play(CellCentre(position.Reel, position.Row), cell, view.Art, seconds);
+                }
             }
             for (int r = 0; r < reels.Length; r++)
                 for (int row = 0; row < machine.Rows; row++)
@@ -176,8 +193,38 @@ namespace RoyalVault.Unity
                 for (int row = 0; row < machine.Rows; row++) reel.ViewAt(row).SetDimmed(false);
         }
 
+        /// <summary>The grand symbols (wild, scatter, jackpot) thump and ring with light as their reel lands.</summary>
+        private void LandSpecials(int reel)
+        {
+            for (int row = 0; row < machine.Rows; row++)
+            {
+                SymbolView view = reels[reel].ViewAt(row);
+                SymbolStyle style = view.Style;
+                if (view.Art == null || (style != SymbolStyle.Wild && style != SymbolStyle.Scatter && style != SymbolStyle.Jackpot)) continue;
+                view.Land();
+                if (fx != null) fx.Land(CellCentre(reel, row), cell, view.Art);
+            }
+        }
+
+        /// <summary>While the reels rest, a gem, crown or wild now and then catches the light.</summary>
+        private void Update()
+        {
+            if (reels == null || Time.time < nextGlint) return;
+            nextGlint = Time.time + UnityEngine.Random.Range(2.2f, 4.2f);
+            if (IsSpinning || celebrating.Count > 0) return;
+            var candidates = new List<SymbolView>();
+            foreach (ReelView reel in reels)
+                for (int row = 0; row < machine.Rows; row++)
+                {
+                    SymbolView view = reel.ViewAt(row);
+                    if (view.Art != null && view.Style != SymbolStyle.Card) candidates.Add(view);
+                }
+            if (candidates.Count > 0) candidates[UnityEngine.Random.Range(0, candidates.Count)].Glint();
+        }
+
         private void StopCelebrating()
         {
+            if (fx != null) fx.StopAll();
             foreach (SymbolView view in celebrating) view.StopCelebrating();
             celebrating.Clear();
         }

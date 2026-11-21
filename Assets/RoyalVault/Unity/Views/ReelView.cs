@@ -32,7 +32,7 @@ namespace RoyalVault.Unity
         public bool IsSpinning { get { return spin != null; } }
 
         public void Build(int[] reelStrip, int visibleRows, Vector2 cell, float gap, float symbolScale, Sprite glow,
-                          Func<int, ThemeDefinition.SymbolArt> symbolArt, int startTop)
+                          Func<int, ThemeDefinition.SymbolArt> symbolArt, int startTop, Material symbolMaterial = null)
         {
             strip = reelStrip;
             rows = visibleRows;
@@ -47,7 +47,7 @@ namespace RoyalVault.Unity
             // one view above and one below the window, so symbols scroll in and out smoothly
             views = new SymbolView[rows + 2];
             Vector2 symbolSize = Vector2.one * cell.y * symbolScale;
-            for (int k = 0; k < views.Length; k++) views[k] = SymbolView.Create(transform, symbolSize, glow);
+            for (int k = 0; k < views.Length; k++) views[k] = SymbolView.Create(transform, symbolSize, glow, symbolMaterial);
             position = startTop;
             Layout(false);
         }

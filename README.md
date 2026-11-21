@@ -24,6 +24,19 @@ procedurally instead.
 |---|---|---|
 | ![Idle](docs/screenshots/02_idle.jpg) | ![Action](docs/screenshots/15_guardians_act.jpg) | ![Celebrating](docs/screenshots/14_guardians_celebrate.jpg) |
 
+## Symbols that come alive
+
+Every symbol celebrates in its own way (`SymbolStyle` on the theme): card royals pop as a band of light sweeps across
+their metal, gems sway in a coloured glow with twinkling stars, treasures shed gold dust, the wild flashes with rays
+turning behind it, the seal glows with the vault's blue light and the crown glints with jewel colours. The sweep and
+flash are drawn by a small shader (`RoyalVault/UI Symbol`) so they stay inside each symbol's shape; rays, stars and
+dust come from `SymbolFxLayer`, drawn outside the reels' masks so nothing is cut at a reel's edge. The wild, seal and
+crown thump with a ring of light as they land, and at rest a gem, crown or wild catches a glint now and then. A
+symbol can also carry baked win frames (`winAnimation`, for example from a Keyframe.it or Spine export), which play
+instead of the built-in pulse.
+
+![Symbols celebrating](docs/screenshots/symbol_fx_closeup.jpg)
+
 ## The story
 
 **Gold Rush to the Pharaoh's Vault.** A prospector, Cole Harlan, and a sharpshooter, Ruby Vance, follow a map out of

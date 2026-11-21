@@ -151,6 +151,20 @@ namespace RoyalVault.Tests
             yield return Shot("14_guardians_celebrate");
             yield return new WaitForSeconds(2f);
 
+            // every symbol celebrating at once, to see each style's light (the big win stops show wilds and a seal)
+            yield return SpinTo(game, new[] { 33, 13, 48, 1, 5 });
+            yield return WaitFor(() => game.Flow.State == SpinState.Idle, 40f);
+            var machineView = Object.FindFirstObjectByType<MachineView>();
+            var all = new System.Collections.Generic.List<GridPosition>();
+            for (int r = 0; r < game.Machine.Reels; r++)
+                for (int row = 0; row < game.Machine.Rows; row++) all.Add(new GridPosition(r, row));
+            machineView.HighlightCells(all, 6f);
+            yield return new WaitForSeconds(0.5f);
+            yield return Shot("17_symbols_celebrate");
+            yield return new WaitForSeconds(0.55f);
+            yield return Shot("18_symbols_shine");
+            machineView.ClearWins();
+
             // an ultra-wide screen
             UseTarget(2560, 1080);
             yield return new WaitForSeconds(0.3f);

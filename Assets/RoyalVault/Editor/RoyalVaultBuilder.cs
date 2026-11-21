@@ -114,7 +114,15 @@ namespace RoyalVault.EditorTools
             string[] ids = { "card_10", "card_J", "card_Q", "card_K", "card_A", "emerald", "sapphire", "ruby", "ankh", "gold_bars", "vault_key", "wild", "vault_seal", "crown" };
             theme.symbols = new ThemeDefinition.SymbolArt[ids.Length];
             for (int i = 0; i < ids.Length; i++)
-                theme.symbols[i] = new ThemeDefinition.SymbolArt { id = ids[i], sprite = Sprite("Symbols/" + ids[i]), blur = Sprite("Symbols/Blur/" + ids[i]) };
+            {
+                (SymbolStyle style, Color tint) look = SymbolLook(ids[i]);
+                theme.symbols[i] = new ThemeDefinition.SymbolArt
+                {
+                    id = ids[i], sprite = Sprite("Symbols/" + ids[i]), blur = Sprite("Symbols/Blur/" + ids[i]),
+                    style = look.style, tint = look.tint,
+                    winAnimation = AssetDatabase.LoadAssetAtPath<CharacterAnimation>(Root + "Art.Private/Symbols/" + ids[i] + ".asset"),
+                };
+            }
 
             theme.background = Sprite("Machine/bg", ".jpg");
             theme.vignette = Sprite("Generated/vignette");
@@ -148,6 +156,8 @@ namespace RoyalVault.EditorTools
             theme.iconSound = Sprite("UI/Icons/icon_sound");
             theme.iconClose = Sprite("UI/Icons/icon_close");
             theme.additive = AdditiveMaterial();
+            theme.symbolMaterial = SymbolMaterial();
+            theme.rays = Sprite("Generated/rays");
             theme.displayFont = fonts.Display;
             theme.headingFont = fonts.Heading;
             theme.labelFont = fonts.Label;
@@ -156,6 +166,35 @@ namespace RoyalVault.EditorTools
             if (created) AssetDatabase.CreateAsset(theme, path);
             EditorUtility.SetDirty(theme);
             return theme;
+        }
+
+        /// <summary>How each symbol celebrates, and the colour of its light.</summary>
+        private static (SymbolStyle, Color) SymbolLook(string id)
+        {
+            switch (id)
+            {
+                case "emerald": return (SymbolStyle.Gem, new Color(0.35f, 1f, 0.55f, 1f));
+                case "sapphire": return (SymbolStyle.Gem, new Color(0.4f, 0.6f, 1f, 1f));
+                case "ruby": return (SymbolStyle.Gem, new Color(1f, 0.3f, 0.35f, 1f));
+                case "ankh":
+                case "gold_bars":
+                case "vault_key": return (SymbolStyle.Treasure, new Color(1f, 0.8f, 0.4f, 1f));
+                case "wild": return (SymbolStyle.Wild, new Color(0.85f, 0.95f, 1f, 1f));
+                case "vault_seal": return (SymbolStyle.Scatter, new Color(0.4f, 0.75f, 1f, 1f));
+                case "crown": return (SymbolStyle.Jackpot, new Color(1f, 0.82f, 0.4f, 1f));
+                default: return (SymbolStyle.Card, new Color(1f, 0.85f, 0.5f, 1f));
+            }
+        }
+
+        /// <summary>The reel symbols' material: the shine sweep and the flash (created once).</summary>
+        private static Material SymbolMaterial()
+        {
+            string path = Generated + "UISymbol.mat";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material != null) return material;
+            material = new Material(Shader.Find("RoyalVault/UI Symbol")) { name = "UISymbol" };
+            AssetDatabase.CreateAsset(material, path);
+            return material;
         }
 
         /// <summary>The additive UI material glows and particles use (created once).</summary>
