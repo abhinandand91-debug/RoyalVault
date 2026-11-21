@@ -14,7 +14,7 @@ namespace RoyalVault.Unity
         public static float InOutSine(float t) { return -(Mathf.Cos(Mathf.PI * t) - 1f) / 2f; }
     }
 
-    /// <summary>Coroutine tweens: drive any value from 0 to 1 over time with an easing curve.</summary>
+    // Coroutine tweens: drive any value from 0 to 1 over time with an easing curve
     public static class Tween
     {
         public static IEnumerator Run(float duration, Action<float> step, Func<float, float> ease = null, bool unscaled = false)
@@ -31,7 +31,7 @@ namespace RoyalVault.Unity
         }
     }
 
-    /// <summary>How credits are written everywhere in the game: 48,250 (the same in every locale).</summary>
+    // How credits are written everywhere in the game: 48,250 (the same in every locale)
     public static class NumberFormat
     {
         public static string Credits(long value)

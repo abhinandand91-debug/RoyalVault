@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>When in the game a story scene is told.</summary>
+    // When in the game a story scene is told
     public enum StoryMoment
     {
-        /// <summary>On the loading screen, before the reels appear.</summary>
+        // On the loading screen, before the reels appear
         Intro,
         BaseGame,
         FreeSpins,
@@ -15,11 +15,7 @@ namespace RoyalVault.Unity
         GrandJackpot,
     }
 
-    /// <summary>
-    /// The game's story as data: an ordered list of scenes, each a painted backdrop with the characters standing in it,
-    /// a title and a caption, and the game moment that tells it. The loading screen plays the intro scenes; the other
-    /// moments are for later features (the seal meter, free spins, jackpots).
-    /// </summary>
+    // The story's scenes and the game moment each one belongs to
     [CreateAssetMenu(menuName = "Royal Vault/Story", fileName = "Story")]
     public sealed class StoryDefinition : ScriptableObject
     {
@@ -47,7 +43,7 @@ namespace RoyalVault.Unity
             public Figure[] figures = new Figure[0];
             public StoryMoment moment;
 
-            // Beats to tell, falling back to the one-line caption.
+            // Beats to tell, falling back to the one-line caption
             public string[] Beats => lines != null && lines.Length > 0 ? lines : new[] { caption };
         }
 
@@ -57,7 +53,7 @@ namespace RoyalVault.Unity
         [Tooltip("First-visit hints: the spin button, the seal meter, the jackpots")]
         [TextArea(1, 3)] public string[] controlHints = new string[0];
 
-        // "CHAPTER III" style heading.
+        // "CHAPTER III" style heading
         public static string ChapterName(string label, int number)
         {
             string[] numerals = { "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII" };
@@ -65,7 +61,7 @@ namespace RoyalVault.Unity
             return (label + " " + roman).ToUpperInvariant();
         }
 
-        /// <summary>The scenes told at <paramref name="moment"/>, in story order, with their chapter numbers (1-based).</summary>
+        // The scenes told at moment, in story order, with their chapter numbers (1-based)
         public (Scene scene, int number)[] At(StoryMoment moment)
         {
             int count = 0;

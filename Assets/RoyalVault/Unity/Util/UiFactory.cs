@@ -4,10 +4,10 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>Small helpers to create UI objects in code (the reels are built at run time; the editor builder uses them too).</summary>
+    // Helpers that create UI objects in code
     public static class UiFactory
     {
-        /// <summary>A RectTransform centred on its parent, at <paramref name="position"/> with <paramref name="size"/>.</summary>
+        // A RectTransform centred on its parent, at position with size
         public static RectTransform Rect(string name, Transform parent, Vector2 position, Vector2 size)
         {
             var go = new GameObject(name, typeof(RectTransform));
@@ -20,7 +20,7 @@ namespace RoyalVault.Unity
             return rect;
         }
 
-        /// <summary>A RectTransform that fills its parent.</summary>
+        // A RectTransform that fills its parent
         public static RectTransform Stretch(string name, Transform parent)
         {
             RectTransform rect = Rect(name, parent, Vector2.zero, Vector2.zero);

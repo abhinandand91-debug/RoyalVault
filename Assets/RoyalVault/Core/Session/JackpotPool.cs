@@ -2,14 +2,14 @@ using System;
 
 namespace RoyalVault.Core
 {
-    /// <summary>The progressive jackpots: each tier grows by a share of every paid bet and resets to its seed when won.</summary>
+    // Progressive jackpots that grow with each bet and reset when won
     public sealed class JackpotPool
     {
         private readonly JackpotTierDefinition[] tiers;
         // values are kept in hundredths of a credit so small contributions are not lost to rounding
         private readonly long[] centi;
 
-        /// <summary>Raised with the tier index after it changes.</summary>
+        // Raised with the tier index after it changes
         public event Action<int> Changed;
 
         public JackpotPool(JackpotTierDefinition[] tiers, long[] saved = null)
@@ -33,7 +33,7 @@ namespace RoyalVault.Core
             return values;
         }
 
-        /// <summary>Adds each tier's share of a paid bet.</summary>
+        // Adds each tier's share of a paid bet
         public void Contribute(long bet)
         {
             for (int i = 0; i < tiers.Length; i++)
@@ -44,7 +44,7 @@ namespace RoyalVault.Core
             }
         }
 
-        /// <summary>Pays out a tier: returns its value and resets it to the seed.</summary>
+        // Pays out a tier: returns its value and resets it to the seed
         public long Award(int index)
         {
             long won = Value(index);

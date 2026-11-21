@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using RoyalVault.Core;
 using RoyalVault.Unity;
@@ -9,7 +10,7 @@ using UnityEngine.TestTools;
 
 namespace RoyalVault.Tests
 {
-    /// <summary>The win showcase lands every result it promises, and the reels honour every start and stop order.</summary>
+    // The win showcase lands every result it promises, and the reels honour every start and stop order
     public sealed class ShowcaseTests
     {
         private static IEnumerator WaitFor(System.Func<bool> condition, float timeout = 60f)
@@ -93,6 +94,9 @@ namespace RoyalVault.Tests
             machine.StopOrder = ReelOrder.Sequential;
             PlayerPrefs.DeleteAll();
         }
+
+        private static readonly int[] ThreeSeals = { 33, 48, 5, 22, 6 };
+
         [UnityTest, Timeout(300000)]
         public IEnumerator AnticipationWaitsOnTheReelsAfterTheSecondSeal()
         {
@@ -103,41 +107,46 @@ namespace RoyalVault.Tests
             var landedAt = new Dictionary<int, float>();
             machine.ReelStopped += reel => landedAt[reel] = Time.time;
 
-            // three seals, left to right: the reels after the second seal are anticipated, each held back
             yield return WaitFor(() => game.Flow.State == SpinState.Idle);
             sound.ClearHistory();
-            landedAt.Clear();
-            game.ForceNextStops(33, 48, 5, 22, 6);
+            game.ForceNextStops(ThreeSeals);
             Assert.IsTrue(game.Flow.RequestSpin());
             yield return WaitFor(() => landedAt.Count == game.Machine.Reels, 30f);
-            int scatter = game.Machine.FirstIndexOfKind(SymbolKind.Scatter);
-            SpinOutcome outcome = game.Engine.Evaluate(new[] { 33, 48, 5, 22, 6 }, 1);
-            int seals = 0, secondSealReel = -1;
-            for (int r = 0; r < game.Machine.Reels && secondSealReel < 0; r++)
-                for (int row = 0; row < game.Machine.Rows; row++)
-                    if (outcome.Grid[r, row] == scatter && ++seals == 2) secondSealReel = r;
-            var expected = new List<int>();
-            for (int r = secondSealReel + 1; r < game.Machine.Reels; r++) expected.Add(r);
-            CollectionAssert.AreEqual(expected, machine.AnticipatedReels, "anticipated after reel " + secondSealReel);
-            foreach (int r in expected)
-                Assert.Greater(landedAt[r] - landedAt[r - 1], 1.0f, "reel " + r + " is held back");
-            Assert.Contains(SoundCue.AnticipationLoop, (System.Collections.ICollection)new List<SoundCue>(sound.History));
-            Assert.Contains(SoundCue.AnticipationEnd, (System.Collections.ICollection)new List<SoundCue>(sound.History));
+
+            // the reels after the second seal are anticipated, each held back
+            int second = SecondSealReel(game);
+            List<int> expected = Enumerable.Range(second + 1, game.Machine.Reels - second - 1).ToList();
+            CollectionAssert.AreEqual(expected, machine.AnticipatedReels, "anticipated after reel " + second);
+            foreach (int r in expected) Assert.Greater(landedAt[r] - landedAt[r - 1], 1.0f, "reel " + r + " is held back");
+            CollectionAssert.Contains(sound.History, SoundCue.AnticipationLoop);
+            CollectionAssert.Contains(sound.History, SoundCue.AnticipationEnd);
             yield return WaitFor(() => game.Session.FreeSpins.Remaining == 0 && game.Flow.State == SpinState.Idle, 120f);
 
-            // a plain spin is not anticipated, and nothing is anticipated when every reel lands at once
-            game.ForceNextStops(19, 18, 40, 46, 23);
-            Assert.IsTrue(game.Flow.RequestSpin());
-            yield return WaitFor(() => game.Flow.State != SpinState.Spinning);
-            Assert.AreEqual(0, machine.AnticipatedReels.Count, "plain spin");
-            yield return WaitFor(() => game.Flow.State == SpinState.Idle);
+            yield return NothingAnticipated(game, machine, new[] { 19, 18, 40, 46, 23 }, "plain spin");
             machine.StopOrder = ReelOrder.AllAtOnce;
-            game.ForceNextStops(33, 48, 5, 22, 6);
-            Assert.IsTrue(game.Flow.RequestSpin());
-            yield return WaitFor(() => game.Flow.State != SpinState.Spinning);
-            Assert.AreEqual(0, machine.AnticipatedReels.Count, "all at once");
+            yield return NothingAnticipated(game, machine, ThreeSeals, "all at once");
             machine.StopOrder = ReelOrder.Sequential;
             PlayerPrefs.DeleteAll();
+        }
+
+        private static int SecondSealReel(GameBootstrap game)
+        {
+            int scatter = game.Machine.FirstIndexOfKind(SymbolKind.Scatter);
+            SpinOutcome outcome = game.Engine.Evaluate(ThreeSeals, 1);
+            int seals = 0;
+            for (int r = 0; r < game.Machine.Reels; r++)
+                for (int row = 0; row < game.Machine.Rows; row++)
+                    if (outcome.Grid[r, row] == scatter && ++seals == 2) return r;
+            return -1;
+        }
+
+        private static IEnumerator NothingAnticipated(GameBootstrap game, MachineView machine, int[] stops, string label)
+        {
+            yield return WaitFor(() => game.Flow.State == SpinState.Idle);
+            game.ForceNextStops(stops);
+            Assert.IsTrue(game.Flow.RequestSpin());
+            yield return WaitFor(() => game.Flow.State != SpinState.Spinning);
+            Assert.AreEqual(0, machine.AnticipatedReels.Count, label);
         }
     }
 }

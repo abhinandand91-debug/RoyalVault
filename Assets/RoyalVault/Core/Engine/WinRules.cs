@@ -2,16 +2,13 @@ using System.Collections.Generic;
 
 namespace RoyalVault.Core
 {
-    /// <summary>One way of winning. The evaluator runs every rule over the grid and each adds what it finds.</summary>
+    // One way of winning
     public interface IWinRule
     {
         void Evaluate(MachineDefinition machine, SpinOutcome outcome);
     }
 
-    /// <summary>
-    /// Payline wins: the longest run of one symbol from the leftmost reel along each payline, with wilds standing in
-    /// for regular symbols. A run of wilds alone pays as wilds when that is worth more.
-    /// </summary>
+    // Left-to-right payline wins, wilds substituting for regular symbols
     public sealed class PaylineRule : IWinRule
     {
         public void Evaluate(MachineDefinition machine, SpinOutcome outcome)
@@ -29,7 +26,7 @@ namespace RoyalVault.Core
             }
         }
 
-        /// <summary>The best paying run on one line of symbol ids; false when the line pays nothing.</summary>
+        // The best paying run on one line of symbol ids; false when the line pays nothing
         public static bool BestRun(MachineDefinition machine, int[] ids, out int symbol, out int count, out int pay)
         {
             symbol = -1;
@@ -59,7 +56,7 @@ namespace RoyalVault.Core
         }
     }
 
-    /// <summary>Scatter wins: enough scatters anywhere pay the total bet times a multiplier and award free spins.</summary>
+    // Scatter wins: enough scatters anywhere pay the total bet times a multiplier and award free spins
     public sealed class ScatterRule : IWinRule
     {
         public void Evaluate(MachineDefinition machine, SpinOutcome outcome)
@@ -76,7 +73,7 @@ namespace RoyalVault.Core
         }
     }
 
-    /// <summary>Jackpot wins: the highest tier whose symbol count is reached by jackpot symbols anywhere.</summary>
+    // Jackpot wins: the highest tier whose symbol count is reached by jackpot symbols anywhere
     public sealed class JackpotRule : IWinRule
     {
         public void Evaluate(MachineDefinition machine, SpinOutcome outcome)
@@ -95,7 +92,7 @@ namespace RoyalVault.Core
         }
     }
 
-    /// <summary>Runs the win rules in order; add a rule here to add a new way of winning.</summary>
+    // Runs the win rules in order; add a rule here to add a new way of winning
     public sealed class WinEvaluator
     {
         private readonly List<IWinRule> rules;
@@ -105,7 +102,7 @@ namespace RoyalVault.Core
             this.rules = new List<IWinRule>(rules);
         }
 
-        /// <summary>Paylines, scatter and jackpot: the rules every machine in this game uses.</summary>
+        // Paylines, scatter and jackpot: the rules every machine in this game uses
         public static WinEvaluator Standard()
         {
             return new WinEvaluator(new IWinRule[] { new PaylineRule(), new ScatterRule(), new JackpotRule() });

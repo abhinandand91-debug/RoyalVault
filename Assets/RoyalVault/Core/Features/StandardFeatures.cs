@@ -2,7 +2,7 @@ using System;
 
 namespace RoyalVault.Core
 {
-    /// <summary>Free spins: plays them at no cost with the machine's multiplier, and adds any won during the round.</summary>
+    // Free spins: plays them at no cost with the machine's multiplier, and adds any won during the round
     public sealed class FreeSpinsFeature : SlotFeature
     {
         public override int Order { get { return 0; } }
@@ -29,7 +29,7 @@ namespace RoyalVault.Core
         }
     }
 
-    /// <summary>Progressive jackpots: every paid bet feeds the pool; a won tier is paid out and reset.</summary>
+    // Progressive jackpots: every paid bet feeds the pool; a won tier is paid out and reset
     public sealed class JackpotFeature : SlotFeature
     {
         public override int Order { get { return 10; } }
@@ -46,7 +46,7 @@ namespace RoyalVault.Core
         }
     }
 
-    /// <summary>Labels the win against the total bet so the presentation knows how big to celebrate.</summary>
+    // Labels the win against the total bet so the presentation knows how big to celebrate
     public sealed class WinTierFeature : SlotFeature
     {
         public override int Order { get { return 50; } }
@@ -64,17 +64,17 @@ namespace RoyalVault.Core
         }
     }
 
-    /// <summary>Auto play: keeps spinning for a number of rounds, stopping early on a big win or when asked.</summary>
+    // Auto play: keeps spinning for a number of rounds, stopping early on a big win or when asked
     public sealed class AutoPlayFeature : SlotFeature
     {
         public override int Order { get { return 100; } }
 
         public int Remaining { get; private set; }
         public bool Active { get { return Remaining > 0; } }
-        /// <summary>Stop on a win of this tier or above.</summary>
+        // Stop on a win of this tier or above
         public WinTier StopOnTier = WinTier.Big;
 
-        /// <summary>Raised after auto play starts, counts down or stops.</summary>
+        // Raised after auto play starts, counts down or stops
         public event Action<AutoPlayFeature> Changed;
 
         public void Start(int spins)
@@ -108,7 +108,7 @@ namespace RoyalVault.Core
 
     public static class StandardFeatures
     {
-        /// <summary>The features every machine in this game runs.</summary>
+        // The features every machine in this game runs
         public static FeaturePipeline Create()
         {
             return new FeaturePipeline(new ISlotFeature[] { new FreeSpinsFeature(), new JackpotFeature(), new WinTierFeature(), new AutoPlayFeature() });

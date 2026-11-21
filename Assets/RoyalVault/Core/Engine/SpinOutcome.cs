@@ -2,19 +2,19 @@ using System.Collections.Generic;
 
 namespace RoyalVault.Core
 {
-    /// <summary>How a win compares to the bet; the presentation celebrates each tier differently.</summary>
+    // How a win compares to the bet; the presentation celebrates each tier differently
     public enum WinTier { None, Normal, Big, Mega, Epic }
 
-    /// <summary>A winning payline.</summary>
+    // A winning payline
     public sealed class LineWin
     {
-        /// <summary>Index into <see cref="MachineDefinition.Paylines"/>.</summary>
+        // Index into Paylines
         public readonly int Line;
         public readonly int Symbol;
         public readonly int Count;
-        /// <summary>Credits, before any multiplier.</summary>
+        // Credits, before any multiplier
         public readonly long Amount;
-        /// <summary>The winning cells, left to right.</summary>
+        // The winning cells, left to right
         public readonly List<GridPosition> Positions;
 
         public LineWin(int line, int symbol, int count, long amount, List<GridPosition> positions)
@@ -27,7 +27,7 @@ namespace RoyalVault.Core
         }
     }
 
-    /// <summary>A scatter win: credits and free spins for scatters anywhere in the window.</summary>
+    // A scatter win: credits and free spins for scatters anywhere in the window
     public sealed class ScatterWin
     {
         public readonly int Count;
@@ -44,7 +44,7 @@ namespace RoyalVault.Core
         }
     }
 
-    /// <summary>Everything about one spin. The engine decides it before any reel moves; features may adjust it.</summary>
+    // Everything about one spin
     public sealed class SpinOutcome
     {
         public readonly int[] Stops;
@@ -54,12 +54,12 @@ namespace RoyalVault.Core
 
         public readonly List<LineWin> LineWins = new List<LineWin>();
         public ScatterWin Scatter;
-        /// <summary>The jackpot tier index won (see <see cref="MachineDefinition.JackpotTiers"/>), or -1.</summary>
+        // The jackpot tier index won (see JackpotTiers), or -1
         public int JackpotTier = -1;
         public List<GridPosition> JackpotPositions = new List<GridPosition>();
-        /// <summary>Credits paid from the jackpot pool, set when the tier is awarded.</summary>
+        // Credits paid from the jackpot pool, set when the tier is awarded
         public long JackpotAmount;
-        /// <summary>Multiplies line and scatter wins (free spins double them).</summary>
+        // Multiplies line and scatter wins (free spins double them)
         public int Multiplier = 1;
         public WinTier Tier;
 
@@ -83,7 +83,7 @@ namespace RoyalVault.Core
 
         public int FreeSpinsAwarded { get { return Scatter != null ? Scatter.FreeSpins : 0; } }
 
-        /// <summary>Credits this spin pays: line and scatter wins times the multiplier, plus any jackpot.</summary>
+        // Credits this spin pays: line and scatter wins times the multiplier, plus any jackpot
         public long TotalWin
         {
             get { return (LineAmount + (Scatter != null ? Scatter.Amount : 0)) * Multiplier + JackpotAmount; }

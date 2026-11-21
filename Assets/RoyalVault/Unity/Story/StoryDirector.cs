@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace RoyalVault.Unity
 {
-    // Tells each story chapter once, at its moment in play, and walks a new player through the controls.
+    // Tells each story chapter once, at its moment in play, and walks a new player through the controls
     public sealed class StoryDirector : MonoBehaviour
     {
         [Serializable]
@@ -33,7 +33,7 @@ namespace RoyalVault.Unity
             hints = firstVisitHints ?? new Hint[0];
         }
 
-        // Turns the story off for this session and closes anything being told.
+        // Turns the story off for this session and closes anything being told
         public void Mute()
         {
             muted = true;
@@ -41,7 +41,7 @@ namespace RoyalVault.Unity
             if (coach != null) coach.CloseNow();
         }
 
-        // The first visit: the base game's chapter, then the controls.
+        // The first visit: the base game's chapter, then the controls
         public IEnumerator Welcome()
         {
             yield return TellOnce(StoryMoment.BaseGame);
@@ -53,7 +53,7 @@ namespace RoyalVault.Unity
             IsTelling = false;
         }
 
-        // Tells the chapters of a moment that this player has not seen yet.
+        // Tells the chapters of a moment that this player has not seen yet
         public IEnumerator TellOnce(StoryMoment moment)
         {
             if (story == null || card == null || muted) yield break;

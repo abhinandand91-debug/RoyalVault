@@ -4,10 +4,7 @@ using UnityEngine;
 
 namespace RoyalVault.Tests
 {
-    /// <summary>
-    /// The maths: each shipped machine is played for a million paid spins through the real flow and features, and
-    /// the return to player must stay in the target band (a change to strips or pays that breaks it fails here).
-    /// </summary>
+    // Each shipped machine must keep its RTP in the target band
     public sealed class RtpTests
     {
         [Test]

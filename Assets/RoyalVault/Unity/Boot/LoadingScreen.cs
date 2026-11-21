@@ -6,14 +6,7 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// The boot screen: the logo over the vault, a slim gold progress bar whose bright tip leads the fill, a light that
-    /// sweeps along the gold, the percentage, rotating lines of text and gold dust drifting upwards.
-    ///
-    /// With a <see cref="StoryDefinition"/> the screen also tells the story's intro: its scenes play full screen behind
-    /// the bar, cross-fading from one to the next, and a click or key moves on. The whole intro is told the first time;
-    /// after that only its last scene shows while the game loads.
-    /// </summary>
+    // Boot screen: logo, gold progress bar, rotating tips and drifting dust
     public sealed class LoadingScreen : MonoBehaviour
     {
         [SerializeField] private CanvasGroup group;
@@ -38,7 +31,7 @@ namespace RoyalVault.Unity
 
         private const string IntroSeenKey = "royalvault.story.intro.seen";
 
-        // True once the story has been told, or when there is none.
+        // True once the story has been told, or when there is none
         public bool StoryDone { get; private set; } = true;
 
         private readonly List<RectTransform> dust = new List<RectTransform>();
@@ -95,7 +88,7 @@ namespace RoyalVault.Unity
                 dust.Add(UiFactory.Image("Dust", dustLayer, dustSprite, RandomDustPosition(true), Vector2.one * Random.Range(10f, 30f)).rectTransform);
         }
 
-        // First launch: the whole intro, paced by the player, while the game loads underneath.
+        // First launch: the whole intro, paced by the player, while the game loads underneath
         private IEnumerator TellFirstTime((StoryDefinition.Scene scene, int number)[] intro)
         {
             introView.PageTurned += PlayPageSound;
@@ -105,7 +98,7 @@ namespace RoyalVault.Unity
             yield return ShowLastScene(intro);
         }
 
-        // Returning players see the last intro scene behind the bar.
+        // Returning players see the last intro scene behind the bar
         private IEnumerator ShowLastScene((StoryDefinition.Scene scene, int number)[] intro)
         {
             var last = intro[intro.Length - 1];
@@ -120,7 +113,7 @@ namespace RoyalVault.Unity
             if (sound != null) sound.Play(SoundCue.StoryPage);
         }
 
-        /// <summary>Shows 0..1 of the loading done.</summary>
+        // Shows 0..1 of the loading done
         public void SetProgress(float value)
         {
             shown = Mathf.Clamp01(value);

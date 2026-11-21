@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    // Spin medallion: idle glow and slow rays, fast rays and STOP while the reels run.
+    // Spin medallion: idle glow and slow rays, fast rays and STOP while the reels run
     public sealed class SpinButtonView : MonoBehaviour
     {
         private static readonly int ShinePos = Shader.PropertyToID("_ShinePos");
@@ -62,7 +62,7 @@ namespace RoyalVault.Unity
             Pressed?.Invoke();
         }
 
-        // Pressing while spinning lands the reels early, so the label says STOP.
+        // Pressing while spinning lands the reels early, so the label says STOP
         public void SetSpinning(bool value)
         {
             spinning = value;
@@ -105,7 +105,7 @@ namespace RoyalVault.Unity
             glow.color = WithAlpha(glow.color, Mathf.MoveTowards(glow.color.a, target, Time.deltaTime * 2f));
         }
 
-        // A band of light crosses the gold every few seconds.
+        // A band of light crosses the gold every few seconds
         private void UpdateShine()
         {
             if (shine == null) return;

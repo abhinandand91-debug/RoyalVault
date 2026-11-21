@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>Saves a session as JSON in PlayerPrefs, one key per machine.</summary>
+    // Saves a session as JSON in PlayerPrefs, one key per machine
     public sealed class PlayerPrefsSaveStore : ISaveStore
     {
         private readonly string key;
@@ -25,7 +25,7 @@ namespace RoyalVault.Unity
             PlayerPrefs.Save();
         }
 
-        /// <summary>Forgets the saved session (start over with the machine's start balance).</summary>
+        // Forgets the saved session (start over with the machine's start balance)
         public void Clear()
         {
             PlayerPrefs.DeleteKey(key);

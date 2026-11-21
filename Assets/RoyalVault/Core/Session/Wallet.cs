@@ -2,19 +2,19 @@ using System;
 
 namespace RoyalVault.Core
 {
-    /// <summary>The player's credits.</summary>
+    // The player's credits
     public sealed class Wallet
     {
         public long Balance { get; private set; }
 
-        /// <summary>Raised with the new balance after every change.</summary>
+        // Raised with the new balance after every change
         public event Action<long> Changed;
 
         public Wallet(long balance) { Balance = Math.Max(0, balance); }
 
         public bool CanAfford(long amount) { return amount <= Balance; }
 
-        /// <summary>Takes <paramref name="amount"/> if the balance covers it.</summary>
+        // Takes amount if the balance covers it
         public bool TryDebit(long amount)
         {
             if (amount < 0 || amount > Balance) return false;

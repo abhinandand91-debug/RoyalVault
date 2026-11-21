@@ -11,7 +11,7 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Tests
 {
-    // The first-launch intro, clicked through the way a player would.
+    // The first-launch intro, clicked through the way a player would
     public sealed class IntroTests
     {
         private static IEnumerator WaitFor(System.Func<bool> condition, float timeout = 30f)
@@ -21,7 +21,7 @@ namespace RoyalVault.Tests
             Assert.IsTrue(condition(), "timed out");
         }
 
-        // Clicks whatever is on top at the button's centre, as the mouse would.
+        // Clicks whatever is on top at the button's centre, as the mouse would
         private static void Click(Button button)
         {
             Assert.IsNotNull(EventSystem.current, "no EventSystem in the scene");

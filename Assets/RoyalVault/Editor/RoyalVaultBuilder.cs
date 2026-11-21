@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using RoyalVault.Core;
 using RoyalVault.Unity;
 using TMPro;
@@ -8,12 +9,7 @@ using UnityEngine.TextCore.LowLevel;
 
 namespace RoyalVault.EditorTools
 {
-    /// <summary>
-    /// One-click project setup: font assets, generated UI textures, the shipped machine presets, the theme, the game
-    /// prefab and the Boot and Game scenes. Run it from the "Royal Vault" menu after changing the art or presets; it is
-    /// also callable in batch mode (<see cref="BuildAllBatch"/>). Machine assets that already exist are left alone so
-    /// edits made in the Inspector survive.
-    /// </summary>
+    // One-click setup: fonts, textures, presets, theme, prefab and scenes
     public static partial class RoyalVaultBuilder
     {
         private const string Root = "Assets/RoyalVault/";
@@ -42,13 +38,13 @@ namespace RoyalVault.EditorTools
             Debug.Log("Royal Vault: build complete (Boot and Game scenes, RoyalVaultGame prefab, presets, theme).");
         }
 
-        /// <summary>Batch mode: Unity -batchmode -quit -executeMethod RoyalVault.EditorTools.RoyalVaultBuilder.BuildAllBatch</summary>
+        // Entry point for batch builds
         public static void BuildAllBatch()
         {
             BuildAll();
         }
 
-        /// <summary>Batch mode, first run only: imports the TextMesh Pro essentials (shaders and settings).</summary>
+        // Batch mode, first run only: imports the TextMesh Pro essentials (shaders and settings)
         public static void ImportTmpEssentialsBatch()
         {
             if (!AssetDatabase.IsValidFolder("Assets/TextMesh Pro")) AssetDatabase.ImportPackage(TmpEssentials, false);
@@ -83,7 +79,7 @@ namespace RoyalVault.EditorTools
             };
         }
 
-        /// <summary>A dynamic SDF font asset for a TTF in the Fonts folder (glyphs are added as text needs them).</summary>
+        // A dynamic SDF font asset for a TTF in the Fonts folder (glyphs are added as text needs them)
         private static TMP_FontAsset FontAsset(string name)
         {
             string path = FontPath + name + " SDF.asset";
@@ -110,32 +106,41 @@ namespace RoyalVault.EditorTools
             var theme = AssetDatabase.LoadAssetAtPath<ThemeDefinition>(path);
             bool created = theme == null;
             if (created) theme = ScriptableObject.CreateInstance<ThemeDefinition>();
+            theme.symbols = SymbolArts();
+            SetInterfaceArt(theme);
+            SetCharacters(theme);
+            SetEffects(theme);
+            theme.displayFont = fonts.Display;
+            theme.headingFont = fonts.Heading;
+            theme.labelFont = fonts.Label;
+            theme.bodyFont = fonts.Body;
+            if (created) AssetDatabase.CreateAsset(theme, path);
+            EditorUtility.SetDirty(theme);
+            return theme;
+        }
 
+        private static ThemeDefinition.SymbolArt[] SymbolArts()
+        {
             string[] ids = { "card_10", "card_J", "card_Q", "card_K", "card_A", "emerald", "sapphire", "ruby", "ankh", "gold_bars", "vault_key", "wild", "vault_seal", "crown" };
-            theme.symbols = new ThemeDefinition.SymbolArt[ids.Length];
-            for (int i = 0; i < ids.Length; i++)
+            return ids.Select(id =>
             {
-                (SymbolStyle style, Color tint) look = SymbolLook(ids[i]);
-                theme.symbols[i] = new ThemeDefinition.SymbolArt
+                (SymbolStyle style, Color tint) = SymbolLook(id);
+                return new ThemeDefinition.SymbolArt
                 {
-                    id = ids[i], sprite = Sprite("Symbols/" + ids[i]), blur = Sprite("Symbols/Blur/" + ids[i]),
-                    style = look.style, tint = look.tint,
-                    winAnimation = SymbolWinAnimation(ids[i]),
+                    id = id, sprite = Sprite("Symbols/" + id), blur = Sprite("Symbols/Blur/" + id),
+                    style = style, tint = tint, winAnimation = SymbolWinAnimation(id),
                 };
-            }
+            }).ToArray();
+        }
 
+        private static void SetInterfaceArt(ThemeDefinition theme)
+        {
             theme.background = Sprite("Machine/bg", ".jpg");
             theme.vignette = Sprite("Generated/vignette");
             theme.reelFrame = Sprite("Machine/reel_frame");
             theme.reelCell = Sprite("Machine/reel_cell");
             theme.logo = Sprite("Machine/logo");
             theme.niche = Sprite("Machine/niche");
-            theme.character = AssetDatabase.LoadAssetAtPath<Sprite>(Root + "Art.Private/Characters/anubis.png");
-            theme.characterAnimation = CreateCharacterAnimation(Root + "Art.Private/Characters/Anubis");
-            theme.story = CreateStory();
-            theme.sounds = CreateSounds();
-            theme.heroLeft = CreateCharacterAnimation(Root + "Art.Private/Characters/Cole");
-            theme.heroRight = CreateCharacterAnimation(Root + "Art.Private/Characters/Ruby");
             theme.consoleBar = Sprite("Generated/bar");
             theme.spinButton = Sprite("UI/spin_medallion");
             theme.pillButton = Sprite("Generated/pill");
@@ -155,25 +160,31 @@ namespace RoyalVault.EditorTools
             theme.iconInfo = Sprite("UI/Icons/icon_info");
             theme.iconSound = Sprite("UI/Icons/icon_sound");
             theme.iconClose = Sprite("UI/Icons/icon_close");
+            theme.rays = Sprite("Generated/rays");
+        }
+
+        private static void SetCharacters(ThemeDefinition theme)
+        {
+            theme.character = AssetDatabase.LoadAssetAtPath<Sprite>(Root + "Art.Private/Characters/anubis.png");
+            theme.characterAnimation = CreateCharacterAnimation(Root + "Art.Private/Characters/Anubis");
+            theme.story = CreateStory();
+            theme.sounds = CreateSounds();
+            theme.heroLeft = CreateCharacterAnimation(Root + "Art.Private/Characters/Cole");
+            theme.heroRight = CreateCharacterAnimation(Root + "Art.Private/Characters/Ruby");
+        }
+
+        private static void SetEffects(ThemeDefinition theme)
+        {
             theme.additive = AdditiveMaterial();
             theme.symbolMaterial = SymbolMaterial();
-            theme.rays = Sprite("Generated/rays");
             // Hovl Studio's Magic Effects FREE, when imported (git-ignored: its licence allows no redistribution)
             theme.clashImpactVfx = StorePrefab("Assets/Hovl Studio", "Electro hit");
             theme.clashSparksVfx = StorePrefab("Assets/Hovl Studio", "Sparks explode blue");
             theme.sealBreakVfx = StorePrefab("Assets/Hovl Studio", "Holy hit");
             theme.vfxScale = 170f;
-            theme.displayFont = fonts.Display;
-            theme.headingFont = fonts.Heading;
-            theme.labelFont = fonts.Label;
-            theme.bodyFont = fonts.Body;
-
-            if (created) AssetDatabase.CreateAsset(theme, path);
-            EditorUtility.SetDirty(theme);
-            return theme;
         }
 
-        /// <summary>A prefab by exact name anywhere under <paramref name="folder"/>, or null when the pack is absent.</summary>
+        // A prefab by exact name anywhere under folder, or null when the pack is absent
         private static GameObject StorePrefab(string folder, string name)
         {
             if (!AssetDatabase.IsValidFolder(folder)) return null;
@@ -186,7 +197,7 @@ namespace RoyalVault.EditorTools
             return null;
         }
 
-        /// <summary>How each symbol celebrates, and the colour of its light.</summary>
+        // How each symbol celebrates, and the colour of its light
         private static (SymbolStyle, Color) SymbolLook(string id)
         {
             switch (id)
@@ -204,7 +215,7 @@ namespace RoyalVault.EditorTools
             }
         }
 
-        /// <summary>The reel symbols' material: the shine sweep and the flash (created once).</summary>
+        // The reel symbols' material: the shine sweep and the flash (created once)
         private static Material SymbolMaterial()
         {
             string path = Generated + "UISymbol.mat";
@@ -215,7 +226,7 @@ namespace RoyalVault.EditorTools
             return material;
         }
 
-        /// <summary>The additive UI material glows and particles use (created once).</summary>
+        // The additive UI material glows and particles use (created once)
         private static Material AdditiveMaterial()
         {
             string path = Generated + "UIAdditive.mat";
@@ -235,78 +246,83 @@ namespace RoyalVault.EditorTools
         #endregion machines and theme
 
         #region generated textures
-        /// <summary>Soft shapes drawn in code: glow, payline, vignette, light rays, the console's pill and ring buttons.</summary>
+        // Soft shapes drawn in code: glow, payline, vignette, light rays, the console's pill and ring buttons
         private static void GenerateTextures()
         {
             EnsureFolder(Generated);
             Write("white", 4, 4, (x, y) => Color.white);
-            Write("glow", 256, 256, (x, y) =>
-            {
-                float d = Vector2.Distance(new Vector2(x, y), new Vector2(127.5f, 127.5f)) / 128f;
-                float a = Mathf.Pow(Mathf.Clamp01(1f - d), 2.2f);
-                return new Color(1f, 1f, 1f, a);
-            });
-            Write("line", 64, 24, (x, y) =>
-            {
-                float d = Mathf.Abs(y - 11.5f) / 12f;
-                float core = Mathf.Clamp01(1f - d * 4f);
-                float halo = Mathf.Pow(Mathf.Clamp01(1f - d), 2f) * 0.55f;
-                float a = Mathf.Max(core, halo);
-                return new Color(1f, 1f - 0.15f * (1f - core), 1f - 0.4f * (1f - core), a);
-            });
-            Write("vignette", 512, 288, (x, y) =>
-            {
-                float dx = (x - 255.5f) / 256f, dy = (y - 143.5f) / 144f;
-                float d = Mathf.Sqrt(dx * dx + dy * dy) / 1.41f;
-                float a = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.45f, 1f, d)) * 0.82f;
-                return new Color(0.01f, 0.01f, 0.015f, a);
-            });
-            Write("rays", 1024, 1024, (x, y) =>
-            {
-                Vector2 p = new Vector2(x - 511.5f, y - 511.5f);
-                float r = p.magnitude / 512f;
-                float angle = Mathf.Atan2(p.y, p.x);
-                float ray = Mathf.Pow(Mathf.Abs(Mathf.Sin(angle * 9f)), 6f);
-                float a = ray * Mathf.Clamp01(1f - r) * Mathf.Clamp01(r * 6f) * 0.55f;
-                return new Color(1f, 0.86f, 0.52f, a);
-            });
-            // the console: a lacquer gradient, a gold rule that fades at its ends, and the raised socket for spin
-            // the seal meter's cracks, one texture per stage: each adds new fractures to the ones before
+            Write("glow", 256, 256, GlowPixel);
+            Write("line", 64, 24, LinePixel);
+            Write("vignette", 512, 288, VignettePixel);
+            Write("rays", 1024, 1024, RaysPixel);
             for (int stage = 1; stage <= 3; stage++) WriteCrack(stage);
             // dark at the foot of the screen, clear from 70% up: lays text over a painting
             Write("fade", 4, 256, (x, y) => new Color(0f, 0f, 0f, Mathf.Pow(Mathf.Clamp01(1f - y / 180f), 1.4f)));
             Write("bar", 4, 256, (x, y) => Color.Lerp(new Color32(6, 6, 8, 255), new Color32(23, 21, 28, 255), y / 255f));
-            Write("rule", 1024, 8, (x, y) =>
-            {
-                float u = x / 1023f;
-                float ends = Mathf.SmoothStep(0f, 1f, Mathf.Min(u, 1f - u) * 8f);
-                float centre = Mathf.Lerp(0.72f, 1f, 1f - Mathf.Abs(u - 0.5f) * 2f);
-                Color gold = Color.Lerp(new Color32(184, 135, 59, 255), new Color32(255, 241, 193, 255), centre - 0.72f);
-                gold.a = ends * Mathf.Clamp01(1f - Mathf.Abs(y - 3.5f) / 4f);
-                return gold;
-            });
-            Write("socket", 320, 320, (x, y) =>
-            {
-                float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(160f, 160f));
-                const float radius = 122f;
-                Color glowColor = new Color(0.91f, 0.78f, 0.48f, Mathf.Pow(Mathf.Clamp01(1f - (d - radius) / 36f), 2f) * 0.28f);
-                if (d > radius + 1f) return d < radius + 36f ? glowColor : Color.clear;
-                // the gold ring is brightest at the top and fades towards the bottom
-                float top = Mathf.Clamp01((y - 40f) / 240f);
-                Color ring = Color.Lerp(new Color(0.48f, 0.33f, 0.09f, 0.25f), new Color(1f, 0.945f, 0.757f, 1f), top);
-                Color disc = new Color32(10, 9, 13, 255);
-                float edge = Mathf.Clamp01(radius + 1f - d);
-                Color c = d > radius - 2.5f ? ring : disc;
-                c.a *= edge;
-                return c;
-            });
+            Write("rule", 1024, 8, RulePixel);
+            Write("socket", 320, 320, SocketPixel);
             Color fill = new Color32(18, 17, 24, 255), stroke = new Color32(184, 135, 59, 255);
             Write("pill", 256, 128, (x, y) => RoundedRect(x, y, 256, 128, 63.5f, fill, stroke, 3f));
             Write("ring", 128, 128, (x, y) => RoundedRect(x, y, 128, 128, 63.5f, new Color32(28, 24, 32, 255), new Color32(232, 199, 122, 255), 3f));
             AssetDatabase.Refresh();
         }
 
-        /// <summary>A rounded rectangle with a stroke, antialiased.</summary>
+        private static Color GlowPixel(int x, int y)
+        {
+            float d = Vector2.Distance(new Vector2(x, y), new Vector2(127.5f, 127.5f)) / 128f;
+            return new Color(1f, 1f, 1f, Mathf.Pow(Mathf.Clamp01(1f - d), 2.2f));
+        }
+
+        // A bright core with a warm halo, for paylines
+        private static Color LinePixel(int x, int y)
+        {
+            float d = Mathf.Abs(y - 11.5f) / 12f;
+            float core = Mathf.Clamp01(1f - d * 4f);
+            float halo = Mathf.Pow(Mathf.Clamp01(1f - d), 2f) * 0.55f;
+            return new Color(1f, 1f - 0.15f * (1f - core), 1f - 0.4f * (1f - core), Mathf.Max(core, halo));
+        }
+
+        private static Color VignettePixel(int x, int y)
+        {
+            float dx = (x - 255.5f) / 256f, dy = (y - 143.5f) / 144f;
+            float d = Mathf.Sqrt(dx * dx + dy * dy) / 1.41f;
+            return new Color(0.01f, 0.01f, 0.015f, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.45f, 1f, d)) * 0.82f);
+        }
+
+        private static Color RaysPixel(int x, int y)
+        {
+            var p = new Vector2(x - 511.5f, y - 511.5f);
+            float r = p.magnitude / 512f;
+            float ray = Mathf.Pow(Mathf.Abs(Mathf.Sin(Mathf.Atan2(p.y, p.x) * 9f)), 6f);
+            return new Color(1f, 0.86f, 0.52f, ray * Mathf.Clamp01(1f - r) * Mathf.Clamp01(r * 6f) * 0.55f);
+        }
+
+        // A gold rule, brightest in the middle, fading at its ends
+        private static Color RulePixel(int x, int y)
+        {
+            float u = x / 1023f;
+            float ends = Mathf.SmoothStep(0f, 1f, Mathf.Min(u, 1f - u) * 8f);
+            float centre = Mathf.Lerp(0.72f, 1f, 1f - Mathf.Abs(u - 0.5f) * 2f);
+            Color gold = Color.Lerp(new Color32(184, 135, 59, 255), new Color32(255, 241, 193, 255), centre - 0.72f);
+            gold.a = ends * Mathf.Clamp01(1f - Mathf.Abs(y - 3.5f) / 4f);
+            return gold;
+        }
+
+        // A dark disc in a gold ring that fades towards the bottom, with a soft glow around
+        private static Color SocketPixel(int x, int y)
+        {
+            const float radius = 122f;
+            float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(160f, 160f));
+            if (d > radius + 1f)
+                return d < radius + 36f ? new Color(0.91f, 0.78f, 0.48f, Mathf.Pow(Mathf.Clamp01(1f - (d - radius) / 36f), 2f) * 0.28f) : Color.clear;
+            float top = Mathf.Clamp01((y - 40f) / 240f);
+            Color ring = Color.Lerp(new Color(0.48f, 0.33f, 0.09f, 0.25f), new Color(1f, 0.945f, 0.757f, 1f), top);
+            Color c = d > radius - 2.5f ? ring : (Color)new Color32(10, 9, 13, 255);
+            c.a *= Mathf.Clamp01(radius + 1f - d);
+            return c;
+        }
+
+        // A rounded rectangle with a stroke, antialiased
         private static Color RoundedRect(int x, int y, int w, int h, float radius, Color fill, Color stroke, float strokeWidth)
         {
             float px = x + 0.5f, py = y + 0.5f;
@@ -319,7 +335,7 @@ namespace RoyalVault.EditorTools
             return c;
         }
 
-        /// <summary>Jagged glowing fractures running out from near the centre of a 128 x 128 seal.</summary>
+        // Jagged glowing fractures running out from near the centre of a 128 x 128 seal
         private static void WriteCrack(int stage)
         {
             var random = new System.Random(stage * 7919);

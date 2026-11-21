@@ -3,11 +3,7 @@ using UnityEngine;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// A character baked to frames: an idle loop and a one-shot action, each with the point in every frame where the
-    /// character's magic burns (so particles can follow the hand) and how strongly it burns there. The frames are
-    /// rendered from the character's skeletal animation by an offline tool; the builder fills this asset from them.
-    /// </summary>
+    // A character baked to frames: idle and action clips with the hand position per frame
     [CreateAssetMenu(menuName = "Royal Vault/Character Animation", fileName = "CharacterAnimation")]
     public sealed class CharacterAnimation : ScriptableObject
     {

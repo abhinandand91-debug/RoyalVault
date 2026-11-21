@@ -3,16 +3,12 @@ using UnityEngine;
 
 namespace RoyalVault.EditorTools
 {
-    /// <summary>
-    /// First-import settings for the game's art: UI sprites at full quality without mipmaps, 9-slice borders for the
-    /// pieces that stretch (reel frame, pills, popup, level bar), and the character pivoted on its feet. Only images
-    /// without import settings are touched, so later changes in the Inspector are kept.
-    /// </summary>
+    // First-import settings for the game's sprites
     public sealed class ArtImporter : AssetPostprocessor
     {
         private const string Art = "Assets/RoyalVault/Art";
 
-        /// <summary>Licensed audio: music streams from disk, effects load decompressed so they start instantly.</summary>
+        // Licensed audio: music streams from disk, effects load decompressed so they start instantly
         private void OnPreprocessAudio()
         {
             if (!assetPath.StartsWith(Art + ".Private/Audio") || !assetImporter.importSettingsMissing) return;

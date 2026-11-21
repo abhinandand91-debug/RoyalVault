@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>A short message above the console (not enough credits, and so on) that fades away.</summary>
+    // A short message above the console (not enough credits, and so on) that fades away
     public sealed class MessageToast : MonoBehaviour
     {
         [SerializeField] private CanvasGroup group;

@@ -2,7 +2,7 @@ using System;
 
 namespace RoyalVault.Core
 {
-    /// <summary>What is saved between sessions.</summary>
+    // What is saved between sessions
     [Serializable]
     public sealed class SaveData
     {
@@ -12,16 +12,16 @@ namespace RoyalVault.Core
         public int freeSpins;
     }
 
-    /// <summary>Where the session is saved; the game uses PlayerPrefs, tests use memory.</summary>
+    // Where the session is saved; the game uses PlayerPrefs, tests use memory
     public interface ISaveStore
     {
-        /// <summary>The saved data, or null when nothing has been saved yet.</summary>
+        // The saved data, or null when nothing has been saved yet
         SaveData Load();
 
         void Save(SaveData data);
     }
 
-    /// <summary>An <see cref="ISaveStore"/> that keeps the data in memory (tests, demos).</summary>
+    // An ISaveStore that keeps the data in memory (tests, demos)
     public sealed class MemorySaveStore : ISaveStore
     {
         public SaveData Data;
@@ -31,7 +31,7 @@ namespace RoyalVault.Core
         public void Save(SaveData data) { Data = data; }
     }
 
-    /// <summary>One player's state on one machine: credits, bet, jackpots and free spins.</summary>
+    // One player's state on one machine: credits, bet, jackpots and free spins
     public sealed class GameSession
     {
         private readonly ISaveStore store;

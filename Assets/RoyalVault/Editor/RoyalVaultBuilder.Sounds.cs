@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using RoyalVault.Unity;
 using UnityEditor;
 using UnityEngine;
@@ -9,20 +10,10 @@ namespace RoyalVault.EditorTools
 {
     public static partial class RoyalVaultBuilder
     {
-        /// <summary>Where licensed audio goes (git-ignored with the rest of Art.Private).</summary>
+        // Where licensed audio goes (git-ignored with the rest of Art.Private)
         private const string AudioFolder = Root + "Art.Private/Audio";
 
-        /// <summary>
-        /// The sound bank, with an entry for every cue. Clips dropped into <c>Art.Private/Audio</c> (any sub-folder) are
-        /// filled in by name, so a sound pack only needs renaming, not wiring:
-        /// <list type="bullet">
-        /// <item><c>Music_Loading…</c>, <c>Music_Base…</c>, <c>Music_FreeSpins…</c> are the music loops;</item>
-        /// <item>a file starting with a cue's name is one of that cue's variations, e.g. <c>ReelStop_01.wav</c>,
-        /// <c>ReelStop_02.wav</c>, <c>BigWin.wav</c>, <c>SealCrack_a.ogg</c>.</item>
-        /// </list>
-        /// Clips already assigned by hand in the Inspector are kept; only empty cues are filled (and slots whose file
-        /// was deleted are cleared first).
-        /// </summary>
+        // The sound bank, with an entry for every cue
         private static SoundBank CreateSounds()
         {
             string path = DataPath + "RoyalVault_Sounds.asset";
@@ -30,55 +21,67 @@ namespace RoyalVault.EditorTools
             bool created = bank == null;
             if (created) bank = ScriptableObject.CreateInstance<SoundBank>();
             bank.EnsureAllCues();
-            // drop slots whose files were deleted, so those cues can be filled again
-            foreach (SoundBank.Sound sound in bank.sounds)
-                if (sound.clips != null) sound.clips = System.Array.FindAll(sound.clips, c => c != null);
-            // a music slot whose file is gone compares equal to null; assigning null clears the stale reference
-            if (bank.loadingMusic == null) bank.loadingMusic = null;
-            if (bank.baseGameMusic == null) bank.baseGameMusic = null;
-            if (bank.freeSpinsMusic == null) bank.freeSpinsMusic = null;
-
-            if (AssetDatabase.IsValidFolder(AudioFolder))
-            {
-                var found = new Dictionary<SoundCue, List<AudioClip>>();
-                // longest names first, so "ReelSpinLoop" is never taken for "ReelStop" or the like
-                var cues = new List<SoundCue>((SoundCue[])Enum.GetValues(typeof(SoundCue)));
-                cues.Sort((a, b) => b.ToString().Length.CompareTo(a.ToString().Length));
-
-                foreach (string guid in AssetDatabase.FindAssets("t:AudioClip", new[] { AudioFolder }))
-                {
-                    string file = AssetDatabase.GUIDToAssetPath(guid);
-                    var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(file);
-                    string name = Path.GetFileNameWithoutExtension(file);
-                    if (name.StartsWith("Music_Loading", StringComparison.OrdinalIgnoreCase)) { if (bank.loadingMusic == null) bank.loadingMusic = clip; continue; }
-                    if (name.StartsWith("Music_FreeSpins", StringComparison.OrdinalIgnoreCase)) { if (bank.freeSpinsMusic == null) bank.freeSpinsMusic = clip; continue; }
-                    if (name.StartsWith("Music_Base", StringComparison.OrdinalIgnoreCase)) { if (bank.baseGameMusic == null) bank.baseGameMusic = clip; continue; }
-                    foreach (SoundCue cue in cues)
-                    {
-                        if (!name.StartsWith(cue.ToString(), StringComparison.OrdinalIgnoreCase)) continue;
-                        if (!found.TryGetValue(cue, out List<AudioClip> list)) found[cue] = list = new List<AudioClip>();
-                        list.Add(clip);
-                        break;
-                    }
-                }
-                foreach (SoundBank.Sound sound in bank.sounds)
-                {
-                    if (sound.HasClips || !found.TryGetValue(sound.cue, out List<AudioClip> clips)) continue;
-                    sound.clips = clips.ToArray();
-                    // a starting mix for a newly filled cue; later Inspector changes are kept
-                    (sound.volume, sound.pitchVariance) = StartingMix(sound.cue);
-                }
-            }
-
+            DropMissing(bank);
+            if (AssetDatabase.IsValidFolder(AudioFolder)) FillFromFolder(bank);
             if (created) AssetDatabase.CreateAsset(bank, path);
             EditorUtility.SetDirty(bank);
             return bank;
         }
 
-        /// <summary>
-        /// Where a cue starts in the mix: interface and loops sit under the action, wins and the seal on top. Jingles and
-        /// transitions keep their pitch (shifting them would put them out of tune); clicks and stops vary a little.
-        /// </summary>
+        // Clears clips whose files were deleted, so those slots can be filled again
+        private static void DropMissing(SoundBank bank)
+        {
+            foreach (SoundBank.Sound sound in bank.sounds)
+                if (sound.clips != null) sound.clips = Array.FindAll(sound.clips, c => c != null);
+            // a destroyed clip only compares equal to null; assigning null clears it for real
+            if (bank.loadingMusic == null) bank.loadingMusic = null;
+            if (bank.baseGameMusic == null) bank.baseGameMusic = null;
+            if (bank.freeSpinsMusic == null) bank.freeSpinsMusic = null;
+        }
+
+        // Matches files to cues by name prefix and fills the empty slots
+        private static void FillFromFolder(SoundBank bank)
+        {
+            var found = new Dictionary<SoundCue, List<AudioClip>>();
+            foreach (string guid in AssetDatabase.FindAssets("t:AudioClip", new[] { AudioFolder }))
+            {
+                string file = AssetDatabase.GUIDToAssetPath(guid);
+                var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(file);
+                string name = Path.GetFileNameWithoutExtension(file);
+                if (TakeMusic(bank, name, clip) || !CueFor(name, out SoundCue cue)) continue;
+                if (!found.TryGetValue(cue, out List<AudioClip> list)) found[cue] = list = new List<AudioClip>();
+                list.Add(clip);
+            }
+            foreach (SoundBank.Sound sound in bank.sounds)
+            {
+                if (sound.HasClips || !found.TryGetValue(sound.cue, out List<AudioClip> clips)) continue;
+                sound.clips = clips.ToArray();
+                (sound.volume, sound.pitchVariance) = StartingMix(sound.cue); // Inspector changes are kept later
+            }
+        }
+
+        private static bool TakeMusic(SoundBank bank, string name, AudioClip clip)
+        {
+            bool Is(string prefix) => name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+            if (Is("Music_Loading")) { if (bank.loadingMusic == null) bank.loadingMusic = clip; return true; }
+            if (Is("Music_FreeSpins")) { if (bank.freeSpinsMusic == null) bank.freeSpinsMusic = clip; return true; }
+            if (Is("Music_Base")) { if (bank.baseGameMusic == null) bank.baseGameMusic = clip; return true; }
+            return false;
+        }
+
+        // Longest names first, so "ReelSpinLoop" is never taken for "ReelStop"
+        private static readonly SoundCue[] CuesByLength =
+            ((SoundCue[])Enum.GetValues(typeof(SoundCue))).OrderByDescending(c => c.ToString().Length).ToArray();
+
+        private static bool CueFor(string name, out SoundCue cue)
+        {
+            foreach (SoundCue c in CuesByLength)
+                if (name.StartsWith(c.ToString(), StringComparison.OrdinalIgnoreCase)) { cue = c; return true; }
+            cue = default;
+            return false;
+        }
+
+        // Where a cue starts in the mix: interface and loops sit under the action, wins and the seal on top
         private static (float volume, float pitchVariance) StartingMix(SoundCue cue)
         {
             switch (cue)

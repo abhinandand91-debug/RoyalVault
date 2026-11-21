@@ -2,7 +2,7 @@ using System;
 
 namespace RoyalVault.Core
 {
-    /// <summary>The bet: a line bet picked from the machine's levels, played on every payline.</summary>
+    // The bet: a line bet picked from the machine's levels, played on every payline
     public sealed class BetModel
     {
         private readonly MachineDefinition machine;
@@ -14,7 +14,7 @@ namespace RoyalVault.Core
         public bool IsMin { get { return LevelIndex == 0; } }
         public bool IsMax { get { return LevelIndex == machine.LineBets.Length - 1; } }
 
-        /// <summary>Raised after the bet changes.</summary>
+        // Raised after the bet changes
         public event Action<BetModel> Changed;
 
         public BetModel(MachineDefinition machine, int levelIndex)

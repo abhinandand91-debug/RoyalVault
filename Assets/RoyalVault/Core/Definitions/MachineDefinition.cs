@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace RoyalVault.Core
 {
-    /// <summary>Scatter award: <see cref="Count"/> or more scatters anywhere pay the total bet times a multiplier and free spins.</summary>
+    // Scatter award: Count or more scatters anywhere pay the total bet times a multiplier and free spins
     public sealed class ScatterAward
     {
         public readonly int Count;
@@ -17,14 +17,14 @@ namespace RoyalVault.Core
         }
     }
 
-    /// <summary>A progressive jackpot tier (Minor, Major, Grand), won by <see cref="SymbolCount"/> jackpot symbols anywhere.</summary>
+    // A progressive jackpot tier (Minor, Major, Grand), won by SymbolCount jackpot symbols anywhere
     public sealed class JackpotTierDefinition
     {
         public readonly string Name;
         public readonly int SymbolCount;
-        /// <summary>The value the tier starts at and resets to after it is won.</summary>
+        // The value the tier starts at and resets to after it is won
         public readonly long Seed;
-        /// <summary>Share of every paid bet added to this tier, in percent.</summary>
+        // Share of every paid bet added to this tier, in percent
         public readonly double ContributionPercent;
 
         public JackpotTierDefinition(string name, int symbolCount, long seed, double contributionPercent)
@@ -36,30 +36,27 @@ namespace RoyalVault.Core
         }
     }
 
-    /// <summary>
-    /// Everything that makes one slot machine: grid size, symbols, reel strips, paylines, pays, scatter and
-    /// jackpot rules, bets and feature settings. It is plain data, so a 3x3 machine is just another definition.
-    /// </summary>
+    // Grid, symbols, strips, paylines, pays, features and bets of one machine
     public sealed class MachineDefinition
     {
         public string Name = "Machine";
         public int Reels = 5;
         public int Rows = 3;
         public SymbolDefinition[] Symbols = new SymbolDefinition[0];
-        /// <summary>One strip of symbol indices per reel; a reel shows <see cref="Rows"/> consecutive entries.</summary>
+        // One strip of symbol indices per reel; a reel shows Rows consecutive entries
         public int[][] Strips = new int[0][];
-        /// <summary>For each payline, the row (0 = top) it crosses on each reel.</summary>
+        // For each payline, the row (0 = top) it crosses on each reel
         public int[][] Paylines = new int[0][];
         public ScatterAward[] ScatterAwards = new ScatterAward[0];
-        /// <summary>Jackpot tiers, smallest first.</summary>
+        // Jackpot tiers, smallest first
         public JackpotTierDefinition[] JackpotTiers = new JackpotTierDefinition[0];
-        /// <summary>The line bets the player can choose from.</summary>
+        // The line bets the player can choose from
         public int[] LineBets = { 1 };
         public int DefaultLineBetIndex;
         public long StartBalance = 50000;
-        /// <summary>Wins during free spins are multiplied by this.</summary>
+        // Wins during free spins are multiplied by this
         public int FreeSpinMultiplier = 2;
-        /// <summary>Win tiers as multiples of the total bet: Big, Mega, Epic.</summary>
+        // Win tiers as multiples of the total bet: Big, Mega, Epic
         public int[] WinTierMultipliers = { 10, 25, 50 };
 
         public int SymbolIndex(string id)
@@ -76,7 +73,7 @@ namespace RoyalVault.Core
             return -1;
         }
 
-        /// <summary>Problems that would stop the machine from working; empty when the definition is sound.</summary>
+        // Problems that would stop the machine from working; empty when the definition is sound
         public List<string> Validate()
         {
             var errors = new List<string>();

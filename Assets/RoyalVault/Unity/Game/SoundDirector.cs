@@ -3,12 +3,7 @@ using UnityEngine;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// Decides what the game sounds like. It listens to what already happens (the console's buttons, the spin flow,
-    /// each reel landing, the seal cracking, celebrations opening and closing, free spins starting and ending) and asks
-    /// the <see cref="SoundPlayer"/> for the matching <see cref="SoundCue"/>. The views know nothing about sound.
-    /// It also owns the sound button: a mute that is kept between sessions.
-    /// </summary>
+    // Decides what the game sounds like
     public sealed class SoundDirector : MonoBehaviour
     {
         private SoundPlayer sound;
@@ -102,8 +97,7 @@ namespace RoyalVault.Unity
         private void OnReelStopped(int reel)
         {
             if (outcome == null) return;
-            // each landing is a touch higher than the one before, so the stops build towards the last; reels that
-            // land together (all at once) make one stop, not a pile of them
+            // each stop a touch higher; reels landing in the same frame make one sound
             if (Time.frameCount != lastStopFrame) sound.Play(SoundCue.ReelStop, 1f, 1f + 0.03f * landed);
             lastStopFrame = Time.frameCount;
             landed++;

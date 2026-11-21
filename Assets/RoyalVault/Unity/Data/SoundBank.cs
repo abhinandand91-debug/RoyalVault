@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>Every moment in the game that can make a sound.</summary>
+    // Every moment in the game that can make a sound
     public enum SoundCue
     {
         // interface
@@ -39,12 +39,7 @@ namespace RoyalVault.Unity
         FlameClash,
     }
 
-    /// <summary>
-    /// The game's sounds as data: for each <see cref="SoundCue"/> one or more clips (a random one plays, for variety),
-    /// its volume and how much its pitch may vary, plus the music loops. An empty cue is simply silent, so the game
-    /// runs with any part of the bank filled. Clips dropped into <c>Art.Private/Audio</c> are filled in by the builder
-    /// (see the file-name rules in RoyalVaultBuilder.Sounds.cs).
-    /// </summary>
+    // Clips, volume and pitch spread for each sound cue, plus the music loops
     [CreateAssetMenu(menuName = "Royal Vault/Sound Bank", fileName = "SoundBank")]
     public sealed class SoundBank : ScriptableObject
     {
@@ -57,7 +52,7 @@ namespace RoyalVault.Unity
             [Tooltip("Random pitch change either way, so repeated sounds don't feel mechanical")]
             [Range(0f, 0.3f)] public float pitchVariance = 0.03f;
 
-            /// <summary>True when at least one clip is really there (a deleted file leaves an empty slot behind).</summary>
+            // True when at least one clip is really there (a deleted file leaves an empty slot behind)
             public bool HasClips
             {
                 get
@@ -68,7 +63,7 @@ namespace RoyalVault.Unity
                 }
             }
 
-            /// <summary>A random clip of the ones that are there, or null.</summary>
+            // A random clip of the ones that are there, or null
             public AudioClip Pick()
             {
                 if (!HasClips) return null;
@@ -89,7 +84,7 @@ namespace RoyalVault.Unity
         [Range(0f, 1f)] public float effectsVolume = 1f;
         public Sound[] sounds = new Sound[0];
 
-        /// <summary>The entry for <paramref name="cue"/>, or null when the bank has none.</summary>
+        // The entry for cue, or null when the bank has none
         public Sound Find(SoundCue cue)
         {
             if (sounds == null) return null;
@@ -98,7 +93,7 @@ namespace RoyalVault.Unity
             return null;
         }
 
-        /// <summary>Makes sure every cue has an entry (empty ones stay silent), in the order of the enum.</summary>
+        // Makes sure every cue has an entry (empty ones stay silent), in the order of the enum
         public void EnsureAllCues()
         {
             Array cues = Enum.GetValues(typeof(SoundCue));

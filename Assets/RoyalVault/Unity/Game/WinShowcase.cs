@@ -4,32 +4,26 @@ using RoyalVault.Core;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>A kind of result the showcase can land.</summary>
+    // A kind of result the showcase can land
     public enum ShowcaseWin
     {
-        /// <summary>A line win below the big win threshold.</summary>
+        // A line win below the big win threshold
         LineWin,
         BigWin,
         MegaWin,
         EpicWin,
-        /// <summary>The first jackpot tier (fewest crowns).</summary>
+        // The first jackpot tier (fewest crowns)
         MinorJackpot,
-        /// <summary>The second jackpot tier.</summary>
+        // The second jackpot tier
         MajorJackpot,
-        /// <summary>The third jackpot tier (most crowns).</summary>
+        // The third jackpot tier (most crowns)
         GrandJackpot,
-        /// <summary>Enough seals for free spins.</summary>
+        // Enough seals for free spins
         FreeSpins,
         NoWin,
     }
 
-    /// <summary>
-    /// A testing aid that makes every paid spin land the next result in a list, so each celebration, effect and sound
-    /// can be checked without waiting for luck. It does not fake anything: for each kind it searches for reel stops
-    /// whose real outcome (evaluated by the engine, by the normal rules) is that kind, and forces the next spin there.
-    /// Free spins play out at random; the list carries on after the round. Kinds the machine cannot produce (a
-    /// 3 x 3 machine has no Grand jackpot) are skipped.
-    /// </summary>
+    // Testing aid: each paid spin lands the next result in the list
     public sealed class WinShowcase
     {
         private const int SearchTries = 600000;
@@ -43,7 +37,7 @@ namespace RoyalVault.Unity
         private readonly Random random = new Random(20261121);
         private int next;
 
-        /// <summary>The result forced for the next spin, if any.</summary>
+        // The result forced for the next spin, if any
         public ShowcaseWin? Armed { get; private set; }
 
         public WinShowcase(SpinEngine spinEngine, GameSession gameSession, SpinFlow flow, MessageToast messageToast,
@@ -59,7 +53,7 @@ namespace RoyalVault.Unity
             Arm();
         }
 
-        /// <summary>Forces the next result in the list onto the next paid spin (nothing during free spins).</summary>
+        // Forces the next result in the list onto the next paid spin (nothing during free spins)
         public void Arm()
         {
             // only clear stops the showcase set itself (tests force their own)
@@ -81,7 +75,7 @@ namespace RoyalVault.Unity
             }
         }
 
-        /// <summary>Reel stops that really produce <paramref name="kind"/>, or null when the machine cannot.</summary>
+        // Reel stops that really produce kind, or null when the machine cannot
         public int[] StopsFor(ShowcaseWin kind)
         {
             if (found.TryGetValue(kind, out int[] cached)) return cached;
@@ -97,7 +91,7 @@ namespace RoyalVault.Unity
             return result;
         }
 
-        /// <summary>Whether an outcome (before features) is the given kind of result.</summary>
+        // Whether an outcome (before features) is the given kind of result
         public static bool Matches(ShowcaseWin kind, SpinOutcome outcome, MachineDefinition machine)
         {
             bool freeSpins = outcome.FreeSpinsAwarded > 0;

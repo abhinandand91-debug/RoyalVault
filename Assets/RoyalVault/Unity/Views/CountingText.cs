@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>A number that rolls smoothly towards its target value instead of jumping.</summary>
+    // A number that rolls smoothly towards its target value instead of jumping
     [RequireComponent(typeof(TextMeshProUGUI))]
     public sealed class CountingText : MonoBehaviour
     {
@@ -16,7 +16,7 @@ namespace RoyalVault.Unity
 
         private void Awake() { label = GetComponent<TextMeshProUGUI>(); }
 
-        /// <summary>Rolls to <paramref name="value"/> over <paramref name="seconds"/> (0 = at once).</summary>
+        // Rolls to value over seconds (0 = at once)
         public void Set(long value, float seconds = 0f)
         {
             if (label == null) label = GetComponent<TextMeshProUGUI>();
@@ -30,7 +30,7 @@ namespace RoyalVault.Unity
             speed = System.Math.Abs(value - shown) / seconds;
         }
 
-        /// <summary>Starts from <paramref name="from"/> and rolls to <paramref name="to"/>.</summary>
+        // Starts from from and rolls to to
         public void Roll(long from, long to, float seconds)
         {
             shown = from;

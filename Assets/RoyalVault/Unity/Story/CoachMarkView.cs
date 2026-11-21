@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    // Dims everything except one control, rings it with light and explains it in a bubble.
+    // Dims everything except one control, rings it with light and explains it in a bubble
     public sealed class CoachMarkView : MonoBehaviour
     {
         [SerializeField] private CanvasGroup group;
@@ -41,7 +41,7 @@ namespace RoyalVault.Unity
         public void Advance() => advance = true;
         public void CloseNow() => closeNow = true;
 
-        // Spotlights the target and waits for a tap; above = bubble over the target, otherwise below it.
+        // Spotlights the target and waits for a tap; above = bubble over the target, otherwise below it
         public IEnumerator Show(RectTransform target, string text, bool above)
         {
             closeNow = false;
@@ -58,7 +58,7 @@ namespace RoyalVault.Unity
             Hide();
         }
 
-        // Four shades around the target leave a clear window over it.
+        // Four shades around the target leave a clear window over it
         private Rect Spotlight(RectTransform target)
         {
             Rect hole = LocalRect(target);

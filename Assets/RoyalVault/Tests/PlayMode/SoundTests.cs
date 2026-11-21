@@ -9,10 +9,7 @@ using UnityEngine.TestTools;
 
 namespace RoyalVault.Tests
 {
-    /// <summary>
-    /// The sound plumbing, checked without listening: the player records every cue it is asked for (silent ones too),
-    /// so forced spins show which moments reach the sound director.
-    /// </summary>
+    // Checks which cues each spin asks the sound player for
     public sealed class SoundTests
     {
         private static IEnumerator WaitFor(System.Func<bool> condition, float timeout = 30f)

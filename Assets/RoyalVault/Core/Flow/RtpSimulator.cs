@@ -1,6 +1,6 @@
 namespace RoyalVault.Core
 {
-    /// <summary>What a long simulated session paid back.</summary>
+    // What a long simulated session paid back
     public sealed class RtpReport
     {
         public long Spins;
@@ -10,7 +10,7 @@ namespace RoyalVault.Core
         public long FreeSpinRounds;
         public long Jackpots;
 
-        /// <summary>Return to player, in percent of everything wagered.</summary>
+        // Return to player, in percent of everything wagered
         public double Rtp { get { return Wagered == 0 ? 0 : 100.0 * Returned / Wagered; } }
         public double HitRate { get { return Spins == 0 ? 0 : 100.0 * Hits / Spins; } }
 
@@ -20,10 +20,7 @@ namespace RoyalVault.Core
         }
     }
 
-    /// <summary>
-    /// Plays a machine through the real spin flow and features for many spins with a fixed seed and reports the
-    /// return to player. Used by the tests and the machine asset's inspector to check the maths.
-    /// </summary>
+    // Plays many seeded spins through the real flow and reports the RTP
     public static class RtpSimulator
     {
         public static RtpReport Run(MachineDefinition machine, long paidSpins, int seed = 1)

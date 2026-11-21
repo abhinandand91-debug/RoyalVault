@@ -9,17 +9,13 @@ using UnityEngine.TestTools;
 
 namespace RoyalVault.Tests
 {
-    /// <summary>
-    /// Opt-in visual check of every screen: set ROYALVAULT_SHOTS to a folder and run the PlayMode tests with graphics,
-    /// e.g. Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter CaptureScreens.
-    /// It boots the game for real, then forces known reel stops for each kind of win.
-    /// </summary>
+    // Captures every screen when ROYALVAULT_SHOTS names a folder
     public sealed class ScreenshotTests
     {
         private static string folder;
         private static RenderTexture target;
 
-        /// <summary>Batch mode has no game view: draw the overlay canvases through the camera into a texture.</summary>
+        // Batch mode has no game view: draw the overlay canvases through the camera into a texture
         private static void UseTarget(int width, int height)
         {
             target = new RenderTexture(width, height, 24);
@@ -56,7 +52,7 @@ namespace RoyalVault.Tests
             while (!condition() && t < timeout) { t += Time.deltaTime; yield return null; }
         }
 
-        // Taps through the story until the condition holds.
+        // Taps through the story until the condition holds
         private static IEnumerator AdvanceUntil(StoryIntroView intro, System.Func<bool> condition)
         {
             for (int i = 0; i < 40 && !condition(); i++) { intro.Advance(); yield return new WaitForSeconds(0.35f); }
@@ -70,6 +66,10 @@ namespace RoyalVault.Tests
             Assert.IsTrue(game.Flow.RequestSpin());
         }
 
+        private static GameBootstrap game;
+
+        private static bool Celebrating() => Object.FindFirstObjectByType<BigWinView>(FindObjectsInactive.Include).IsShowing;
+
         [UnityTest, Timeout(600000)]
         public IEnumerator CaptureScreens()
         {
@@ -77,8 +77,22 @@ namespace RoyalVault.Tests
             Assume.That(folder, Is.Not.Null.And.Not.Empty);
             Directory.CreateDirectory(folder);
             PlayerPrefs.DeleteAll();
+            yield return Intro();
+            yield return FirstVisit();
+            yield return LineWin();
+            yield return BigWins();
+            yield return Jackpot();
+            yield return FreeSpins();
+            yield return Paytable();
+            yield return GuardiansAndSymbols();
+            yield return Showcase();
+            yield return OtherLayouts();
+            PlayerPrefs.DeleteAll();
+        }
 
-            // first launch: the story intro, told beat by beat, then Enter the Vault
+        // First launch: the story told beat by beat, then Enter the Vault
+        private static IEnumerator Intro()
+        {
             yield return SceneManager.LoadSceneAsync("Boot");
             UseTarget(1920, 1080);
             var intro = Object.FindFirstObjectByType<StoryIntroView>();
@@ -92,14 +106,15 @@ namespace RoyalVault.Tests
             yield return new WaitForSeconds(0.6f);
             yield return Shot("01b_story_enter");
             intro.Enter();
-
-            // the game scene arrives on its own
             yield return WaitFor(() => SceneManager.GetActiveScene().name == "Game");
             yield return null;
             UseTarget(1920, 1080);
-            var game = Object.FindFirstObjectByType<GameBootstrap>();
+            game = Object.FindFirstObjectByType<GameBootstrap>();
+        }
 
-            // the first visit: chapter III over the game, then the hints
+        // Chapter III over the game, then the hints
+        private static IEnumerator FirstVisit()
+        {
             var chapter = Object.FindFirstObjectByType<ChapterCardView>();
             yield return WaitFor(() => chapter.IsShowing);
             yield return new WaitForSeconds(2.6f);
@@ -111,8 +126,10 @@ namespace RoyalVault.Tests
             game.Story.Mute();
             yield return new WaitForSeconds(0.6f);
             yield return Shot("02_idle");
+        }
 
-            // a spin in motion, then a line win being shown
+        private static IEnumerator LineWin()
+        {
             yield return SpinTo(game, new[] { 19, 18, 40, 46, 23 });
             yield return new WaitForSeconds(0.7f);
             yield return Shot("03_spinning");
@@ -121,8 +138,11 @@ namespace RoyalVault.Tests
             yield return Shot("04_win_lines");
             yield return new WaitForSeconds(2.2f);
             yield return Shot("05_win_cycle");
+        }
 
-            // a big win and a mega win: first the guardians hurl their flames and they clash in the centre
+        // The flame clash opens a big win; then a mega win
+        private static IEnumerator BigWins()
+        {
             var clash = Object.FindFirstObjectByType<FlameClashView>();
             bool thrown = false, clashed = false;
             clash.Thrown += () => thrown = true;
@@ -134,60 +154,59 @@ namespace RoyalVault.Tests
             yield return WaitFor(() => clashed);
             yield return new WaitForSeconds(0.1f);
             yield return Shot("23_flame_clash");
-            yield return WaitFor(() => Object.FindFirstObjectByType<BigWinView>(FindObjectsInactive.Include).IsShowing);
-            yield return new WaitForSeconds(2.2f);
-            yield return Shot("06_big_win");
-            yield return WaitFor(() => game.Flow.State == SpinState.Idle, 30f);
-            yield return SpinTo(game, new[] { 43, 9, 48, 5, 25 });
-            yield return WaitFor(() => Object.FindFirstObjectByType<BigWinView>(FindObjectsInactive.Include).IsShowing);
-            yield return new WaitForSeconds(2.5f);
-            yield return Shot("07_mega_win");
-            yield return WaitFor(() => game.Flow.State == SpinState.Idle, 30f);
+            yield return Celebration(null, "06_big_win", 2.2f);
+            yield return Celebration(new[] { 43, 9, 48, 5, 25 }, "07_mega_win", 2.5f);
+        }
 
-            // the jackpot
-            yield return SpinTo(game, new[] { 12, 27, 3, 7, 46 });
-            yield return WaitFor(() => Object.FindFirstObjectByType<BigWinView>(FindObjectsInactive.Include).IsShowing);
-            yield return new WaitForSeconds(2.5f);
-            yield return Shot("08_jackpot");
-            yield return WaitFor(() => game.Flow.State == SpinState.Idle, 30f);
+        private static IEnumerator Jackpot() => Celebration(new[] { 12, 27, 3, 7, 46 }, "08_jackpot", 2.5f);
 
-            // free spins: the award card, then a free spin with the counter in the console
+        // Spins to stops (unless already spun), shoots the celebration and waits for the machine to settle
+        private static IEnumerator Celebration(int[] stops, string shot, float delay)
+        {
+            if (stops != null) yield return SpinTo(game, stops);
+            yield return WaitFor(Celebrating);
+            yield return new WaitForSeconds(delay);
+            yield return Shot(shot);
+            yield return WaitFor(() => game.Flow.State == SpinState.Idle, 30f);
+        }
+
+        // Anticipation, the seal cracking and breaking, the award and a free spin
+        private static IEnumerator FreeSpins()
+        {
             bool anticipating = false;
             Object.FindFirstObjectByType<MachineView>().AnticipationStarted += reel => anticipating = true;
             yield return SpinTo(game, new[] { 33, 48, 5, 22, 6 });
-            // two seals down: the last reels are anticipated in a column of light
-            yield return WaitFor(() => anticipating);
-            yield return new WaitForSeconds(0.7f);
-            yield return Shot("21_anticipation");
-            // the seal meter cracks as the seals land
+            yield return ShotWhen(() => anticipating, 0.7f, "21_anticipation");
             var seal = Object.FindFirstObjectByType<SealMeterView>();
-            yield return WaitFor(() => seal.Count >= 2);
-            yield return new WaitForSeconds(0.25f);
-            yield return Shot("16_seal_cracking");
-            // the third seal shatters it
-            yield return WaitFor(() => seal.IsOpen);
-            yield return new WaitForSeconds(0.25f);
-            yield return Shot("24_seal_break");
-            yield return WaitFor(() => Object.FindFirstObjectByType<BigWinView>(FindObjectsInactive.Include).IsShowing);
-            yield return new WaitForSeconds(0.9f);
-            yield return Shot("09_free_spins_awarded");
+            yield return ShotWhen(() => seal.Count >= 2, 0.25f, "16_seal_cracking");
+            yield return ShotWhen(() => seal.IsOpen, 0.25f, "24_seal_break");
+            yield return ShotWhen(Celebrating, 0.9f, "09_free_spins_awarded");
             yield return WaitFor(() => game.Session.FreeSpins.Played > 0, 30f);
-            yield return WaitFor(() => game.Flow.State != SpinState.Spinning, 30f);
-            yield return new WaitForSeconds(0.4f);
-            yield return Shot("10_free_spin");
-            // let the round finish quickly
-            var celebration = Object.FindFirstObjectByType<BigWinView>(FindObjectsInactive.Include);
-            while (game.Session.FreeSpins.Remaining > 0 || game.Flow.State != SpinState.Idle || celebration.IsShowing) yield return null;
+            yield return ShotWhen(() => game.Flow.State != SpinState.Spinning, 0.4f, "10_free_spin");
+            while (game.Session.FreeSpins.Remaining > 0 || game.Flow.State != SpinState.Idle || Celebrating()) yield return null;
             yield return new WaitForSeconds(0.5f);
+        }
 
-            // the pay table
-            Object.FindFirstObjectByType<PaytableView>(FindObjectsInactive.Include).Open();
+        private static IEnumerator ShotWhen(System.Func<bool> condition, float delay, string shot)
+        {
+            yield return WaitFor(condition, 30f);
+            yield return new WaitForSeconds(delay);
+            yield return Shot(shot);
+        }
+
+        private static IEnumerator Paytable()
+        {
+            var paytable = Object.FindFirstObjectByType<PaytableView>(FindObjectsInactive.Include);
+            paytable.Open();
             yield return new WaitForSeconds(0.5f);
             yield return Shot("11_paytable");
-            Object.FindFirstObjectByType<PaytableView>(FindObjectsInactive.Include).Close();
+            paytable.Close();
             yield return new WaitForSeconds(0.4f);
+        }
 
-            // the guardians' celebration on their own (in play it sits under the big win overlay)
+        // The guardians' celebration on its own, then every symbol celebrating at once
+        private static IEnumerator GuardiansAndSymbols()
+        {
             foreach (CharacterView guardian in Object.FindObjectsByType<CharacterView>(FindObjectsSortMode.None)) guardian.Celebrate();
             yield return new WaitForSeconds(0.45f);
             yield return Shot("15_guardians_act");
@@ -195,7 +214,6 @@ namespace RoyalVault.Tests
             yield return Shot("14_guardians_celebrate");
             yield return new WaitForSeconds(2f);
 
-            // every symbol celebrating at once, to see each style's light (the big win stops show wilds and a seal)
             yield return SpinTo(game, new[] { 33, 13, 48, 1, 5 });
             yield return WaitFor(() => game.Flow.State == SpinState.Idle, 40f);
             var machineView = Object.FindFirstObjectByType<MachineView>();
@@ -208,33 +226,36 @@ namespace RoyalVault.Tests
             yield return new WaitForSeconds(0.55f);
             yield return Shot("18_symbols_shine");
             machineView.ClearWins();
+        }
 
-            // the showcase lands the rarest celebrations: an epic win and the grand jackpot
+        // The rarest celebrations, landed by the showcase
+        private static IEnumerator Showcase()
+        {
             game.ShowcaseOrder = new[] { ShowcaseWin.EpicWin, ShowcaseWin.GrandJackpot };
             game.ShowcaseWins = true;
             foreach (string name in new[] { "19_epic_win", "20_grand_jackpot" })
             {
                 yield return WaitFor(() => game.Flow.State == SpinState.Idle, 40f);
                 Assert.IsTrue(game.Flow.RequestSpin());
-                yield return WaitFor(() => Object.FindFirstObjectByType<BigWinView>(FindObjectsInactive.Include).IsShowing, 30f);
+                yield return WaitFor(Celebrating, 30f);
                 yield return new WaitForSeconds(2.5f);
                 yield return Shot(name);
                 yield return WaitFor(() => game.Flow.State == SpinState.Idle, 40f);
             }
             game.ShowcaseWins = false;
+        }
 
-            // an ultra-wide screen
+        // An ultra-wide screen, and the same prefab with the 3 x 3 machine
+        private static IEnumerator OtherLayouts()
+        {
             UseTarget(2560, 1080);
             yield return new WaitForSeconds(0.3f);
             yield return Shot("12_ultrawide");
-
-            // the same prefab with the 3 x 3 machine
             yield return SceneManager.LoadSceneAsync("Game_Classic3x3");
             yield return null;
             UseTarget(1920, 1080);
             yield return new WaitForSeconds(0.6f);
             yield return Shot("13_classic_3x3");
-            PlayerPrefs.DeleteAll();
         }
     }
 }

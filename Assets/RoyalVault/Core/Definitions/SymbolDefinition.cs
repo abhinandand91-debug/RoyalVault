@@ -1,25 +1,25 @@
 namespace RoyalVault.Core
 {
-    /// <summary>What a symbol does on the reels.</summary>
+    // What a symbol does on the reels
     public enum SymbolKind
     {
-        /// <summary>Pays on a payline, left to right.</summary>
+        // Pays on a payline, left to right
         Regular,
-        /// <summary>Stands in for regular symbols on a payline; also pays on its own.</summary>
+        // Stands in for regular symbols on a payline; also pays on its own
         Wild,
-        /// <summary>Pays and awards free spins wherever it lands.</summary>
+        // Pays and awards free spins wherever it lands
         Scatter,
-        /// <summary>Wins a progressive jackpot tier when enough land anywhere.</summary>
+        // Wins a progressive jackpot tier when enough land anywhere
         Jackpot,
     }
 
-    /// <summary>One symbol of a machine.</summary>
+    // One symbol of a machine
     public sealed class SymbolDefinition
     {
-        /// <summary>Stable name, also the key a theme uses to find the symbol's art (for example "ruby").</summary>
+        // Stable name, also the key a theme uses to find the symbol's art (for example "ruby")
         public readonly string Id;
         public readonly SymbolKind Kind;
-        /// <summary>Line pay by number of matching symbols: Pays[3] is three of a kind. Multiplies the line bet.</summary>
+        // Line pay by number of matching symbols: Pays[3] is three of a kind
         public readonly int[] Pays;
 
         public SymbolDefinition(string id, SymbolKind kind, int[] pays = null)
@@ -29,7 +29,7 @@ namespace RoyalVault.Core
             Pays = pays ?? new int[0];
         }
 
-        /// <summary>The line pay for <paramref name="count"/> of this symbol, or 0.</summary>
+        // The line pay for count of this symbol, or 0
         public int PayFor(int count)
         {
             return count >= 0 && count < Pays.Length ? Pays[count] : 0;

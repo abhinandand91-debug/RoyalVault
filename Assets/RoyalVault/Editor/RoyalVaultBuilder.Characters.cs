@@ -23,14 +23,10 @@ namespace RoyalVault.EditorTools
             public TrackClip action;
         }
 
-        /// <summary>Height the still character art is shown at; the baked frames are sized so the figure matches it.</summary>
+        // Height the still character art is shown at; the baked frames are sized so the figure matches it
         private const float FigureHeight = 705f;
 
-        /// <summary>
-        /// Fills a <see cref="CharacterAnimation"/> next to baked character frames (idle_000.png..., action_000.png...
-        /// and a track file with the hand path). Returns null when the folder is absent, as in a public checkout.
-        /// The asset is saved beside the folder unless <paramref name="assetPath"/> names another place.
-        /// </summary>
+        // Fills a CharacterAnimation next to baked character frames (idle_000.png..., action_000.png..
         private static CharacterAnimation CreateCharacterAnimation(string folder, string assetPath = null)
         {
             string name = Path.GetFileName(folder).ToLowerInvariant();
@@ -54,11 +50,7 @@ namespace RoyalVault.EditorTools
             return asset;
         }
 
-        /// <summary>
-        /// A symbol's baked win frames: built from Art.Private/Symbols/&lt;Name&gt;/ (frames and a track file, named
-        /// like the symbol in any case) into Art.Private/Symbols/&lt;id&gt;.asset. Null for symbols without frames, and
-        /// in a public checkout, where they keep the built-in pulse.
-        /// </summary>
+        // A symbol's baked win frames from Art.Private/Symbols/<id>
         private static CharacterAnimation SymbolWinAnimation(string id)
         {
             string symbols = Root + "Art.Private/Symbols";
@@ -88,12 +80,7 @@ namespace RoyalVault.EditorTools
             return clip;
         }
 
-        /// <summary>
-        /// The story "Gold Rush to the Pharaoh's Vault": six scenes from a frontier saloon to the Pharaoh's crown. The
-        /// painted backdrops are public; the prospector and the sharpshooter are licensed art and stay out of the
-        /// repository, so a public checkout tells the story over the paintings alone.
-        /// </summary>
-        // Each chapter told in short beats, and the first-visit hints.
+        // Each chapter's beats and the first-visit hints
         private static void SetBeats(StoryDefinition story)
         {
             string[][] beats =
@@ -131,43 +118,48 @@ namespace RoyalVault.EditorTools
             var story = AssetDatabase.LoadAssetAtPath<StoryDefinition>(path);
             bool created = story == null;
             if (created) story = ScriptableObject.CreateInstance<StoryDefinition>();
-
-            Sprite cowboy = AssetDatabase.LoadAssetAtPath<Sprite>(Root + "Art.Private/Characters/Heroes/cowboy.png");
-            Sprite cowgirl = AssetDatabase.LoadAssetAtPath<Sprite>(Root + "Art.Private/Characters/Heroes/cowgirl.png");
-            StoryDefinition.Figure Hero(Sprite sprite, float x, float y, float height, bool mirrored = false) =>
-                new StoryDefinition.Figure { sprite = sprite, position = new Vector2(x, y), height = height, mirrored = mirrored };
-            StoryDefinition.Scene Scene(int n, string title, string caption, StoryMoment moment, params StoryDefinition.Figure[] figures) =>
-                new StoryDefinition.Scene { title = title, caption = caption, art = Sprite("Story/scene_" + n, ".jpg"), moment = moment,
-                                            figures = System.Array.FindAll(figures, f => f.sprite != null) };
-
             story.chapterLabel = "Chapter";
             story.secondsPerScene = 5f;
-            story.scenes = new[]
-            {
-                Scene(1, "The Card Game",
-                      "Midnight in a frontier saloon. Ruby Vance wins the last hand, and a torn map drawn in her grandfather's hand.",
-                      StoryMoment.Intro, Hero(cowgirl, -640f, -610f, 900f), Hero(cowboy, 650f, -600f, 830f, true)),
-                Scene(2, "Across the Sea of Sand",
-                      "Weeks later she and Cole Harlan stand on a dune at dusk. The tip of a buried pyramid catches the last light.",
-                      StoryMoment.Intro, Hero(cowboy, -780f, -590f, 720f), Hero(cowgirl, -560f, -600f, 770f)),
-                Scene(3, "The Buried Door",
-                      "Cole digs; Ruby keeps watch. A golden seal bars the door, and every Vault Seal cracks it a little more.",
-                      StoryMoment.BaseGame),
-                Scene(4, "Hall of the Guardians",
-                      "The seal breaks. Two Anubis statues open their eyes, blue fire in their hands. Prove you are not thieves.",
-                      StoryMoment.FreeSpins),
-                Scene(5, "The Treasury",
-                      "Behind the guardians lie three chambers. Crowns on the reels open them one by one.",
-                      StoryMoment.MajorJackpot),
-                Scene(6, "The Pharaoh's Crown",
-                      "Beside the crown lies her grandfather's hat. The guardians bow: the worthy may leave with the gold.",
-                      StoryMoment.GrandJackpot),
-            };
-
+            story.scenes = StoryScenes();
             SetBeats(story);
             if (created) AssetDatabase.CreateAsset(story, path);
             EditorUtility.SetDirty(story);
             return story;
         }
+
+        private static StoryDefinition.Scene[] StoryScenes()
+        {
+            Sprite cowboy = AssetDatabase.LoadAssetAtPath<Sprite>(Root + "Art.Private/Characters/Heroes/cowboy.png");
+            Sprite cowgirl = AssetDatabase.LoadAssetAtPath<Sprite>(Root + "Art.Private/Characters/Heroes/cowgirl.png");
+            return new[]
+            {
+                StoryScene(1, "The Card Game",
+                      "Midnight in a frontier saloon. Ruby Vance wins the last hand, and a torn map drawn in her grandfather's hand.",
+                      StoryMoment.Intro, StoryFigure(cowgirl, -640f, -610f, 900f), StoryFigure(cowboy, 650f, -600f, 830f, true)),
+                StoryScene(2, "Across the Sea of Sand",
+                      "Weeks later she and Cole Harlan stand on a dune at dusk. The tip of a buried pyramid catches the last light.",
+                      StoryMoment.Intro, StoryFigure(cowboy, -780f, -590f, 720f), StoryFigure(cowgirl, -560f, -600f, 770f)),
+                StoryScene(3, "The Buried Door",
+                      "Cole digs; Ruby keeps watch. A golden seal bars the door, and every Vault Seal cracks it a little more.",
+                      StoryMoment.BaseGame),
+                StoryScene(4, "Hall of the Guardians",
+                      "The seal breaks. Two Anubis statues open their eyes, blue fire in their hands. Prove you are not thieves.",
+                      StoryMoment.FreeSpins),
+                StoryScene(5, "The Treasury",
+                      "Behind the guardians lie three chambers. Crowns on the reels open them one by one.",
+                      StoryMoment.MajorJackpot),
+                StoryScene(6, "The Pharaoh's Crown",
+                      "Beside the crown lies her grandfather's hat. The guardians bow: the worthy may leave with the gold.",
+                      StoryMoment.GrandJackpot),
+            };
+        }
+
+        private static StoryDefinition.Figure StoryFigure(Sprite sprite, float x, float y, float height, bool mirrored = false) =>
+            new StoryDefinition.Figure { sprite = sprite, position = new Vector2(x, y), height = height, mirrored = mirrored };
+
+        // A figure without its (licensed) sprite is left out
+        private static StoryDefinition.Scene StoryScene(int n, string title, string caption, StoryMoment moment, params StoryDefinition.Figure[] figures) =>
+            new StoryDefinition.Scene { title = title, caption = caption, art = Sprite("Story/scene_" + n, ".jpg"), moment = moment,
+                                        figures = System.Array.FindAll(figures, f => f.sprite != null) };
     }
 }

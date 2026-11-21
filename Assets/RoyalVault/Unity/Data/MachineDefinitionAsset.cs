@@ -5,11 +5,7 @@ using UnityEngine;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// A slot machine as an editable asset: grid size, symbols, reel strips, paylines, pays, scatter and jackpot rules
-    /// and bets. The game turns it into a Core <see cref="MachineDefinition"/>; drop a different asset on the game
-    /// prefab to play a different machine (the 5x3 Royal Vault or the 3x3 Classic).
-    /// </summary>
+    // A slot machine as an editable asset
     [CreateAssetMenu(menuName = "Royal Vault/Machine Definition", fileName = "Machine")]
     public sealed class MachineDefinitionAsset : ScriptableObject
     {
@@ -65,7 +61,7 @@ namespace RoyalVault.Unity
         public int defaultLineBetIndex;
         public long startBalance = 50000;
 
-        /// <summary>The Core definition this asset describes.</summary>
+        // The Core definition this asset describes
         public MachineDefinition ToDefinition()
         {
             var definition = new MachineDefinition
@@ -96,7 +92,7 @@ namespace RoyalVault.Unity
             return definition;
         }
 
-        /// <summary>Fills this asset from a Core definition (used to create the shipped presets).</summary>
+        // Fills this asset from a Core definition (used to create the shipped presets)
         public void CopyFrom(MachineDefinition definition)
         {
             machineName = definition.Name;
@@ -129,7 +125,7 @@ namespace RoyalVault.Unity
             winTierMultipliers = (int[])definition.WinTierMultipliers.Clone();
         }
 
-        /// <summary>Problems with this machine; empty when it is ready to play.</summary>
+        // Problems with this machine; empty when it is ready to play
         public List<string> Validate() { return ToDefinition().Validate(); }
 
         private static int[][] Rows(IntRow[] rowsIn)

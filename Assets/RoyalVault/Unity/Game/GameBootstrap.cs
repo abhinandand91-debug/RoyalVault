@@ -3,13 +3,7 @@ using UnityEngine;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// The game's single entry point and composition root. It reads the machine and theme assets, creates the Core
-    /// objects (session, engine, features, flow) and hands them to the views. Nothing else in the game sets itself up:
-    /// there are no singletons, and the views only receive what they need here.
-    ///
-    /// Drop the RoyalVaultGame prefab into any scene, assign a machine and a theme, and press Play.
-    /// </summary>
+    // The game's single entry point and composition root
     public sealed class GameBootstrap : MonoBehaviour
     {
         [Header("What to play")]
@@ -53,11 +47,11 @@ namespace RoyalVault.Unity
         public WinShowcase Showcase { get; private set; }
         public StoryDirector Story { get; private set; }
 
-        /// <summary>Turns the win showcase on or off (it can also be ticked in the Inspector while playing).</summary>
+        // Turns the win showcase on or off (it can also be ticked in the Inspector while playing)
         public bool ShowcaseWins { get => showcaseWins; set { showcaseWins = value; Showcase?.Arm(); } }
         public ShowcaseWin[] ShowcaseOrder { get => showcaseOrder; set { showcaseOrder = value; Showcase?.Arm(); } }
 
-        /// <summary>The machine to play, set before the object wakes (the boot scene or a test may choose).</summary>
+        // The machine to play, set before the object wakes (the boot scene or a test may choose)
         public MachineDefinitionAsset MachineAsset { get { return machine; } set { machine = value; } }
 
         public void Setup(MachineDefinitionAsset machineAsset, ThemeDefinition themeAsset, MachineView machineViewRef, ConsoleView consoleView,
@@ -91,33 +85,42 @@ namespace RoyalVault.Unity
                 enabled = false;
                 return;
             }
+            CreateCore();
+            BindViews();
+            BindRound();
+        }
 
-            // core
-            // the showcase pays out on purpose, so its credits are not saved
+        private void CreateCore()
+        {
+            // showcase credits are never saved
             ISaveStore store = saveProgress && !showcaseWins ? new PlayerPrefsSaveStore(Machine.Name) : (ISaveStore)new MemorySaveStore();
             Session = new GameSession(Machine, store);
             IRandom random = seed != 0 ? new SeededRandom(seed) : new SeededRandom();
             Engine = new SpinEngine(Machine, random);
-            FeaturePipeline features = StandardFeatures.Create();
-            Flow = new SpinFlow(Session, Engine, features);
+            Flow = new SpinFlow(Session, Engine, StandardFeatures.Create());
+        }
 
-            // presentation
+        private void BindViews()
+        {
             machineView.Build(Machine, theme);
             jackpots.Bind(Session.Jackpots);
             paytable.Build(Machine, theme);
-            for (int i = 0; i < characters.Length; i++) characters[i].Bind(theme.character, theme.characterEffectAnchor, theme.characterMagic, theme.characterAnimation);
+            foreach (CharacterView c in characters) c.Bind(theme.character, theme.characterEffectAnchor, theme.characterMagic, theme.characterAnimation);
             if (flameClash != null)
             {
                 flameClash.Bind(characters, theme.characterMagic);
                 flameClash.SetStoreEffects(theme.clashImpactVfx, theme.clashSparksVfx, theme.vfxScale);
             }
+            if (sealMeter != null) sealMeter.Bind(Machine, theme, machineView, Flow, Session);
+            machineView.AnticipationStarted += reel => { foreach (CharacterView c in characters) c.Surge(); };
+        }
+
+        // Story, presenter, round and sound; sound listens, the views stay silent
+        private void BindRound()
+        {
             Story = gameObject.AddComponent<StoryDirector>();
             Story.Bind(theme.story, chapterCard, coachMarks, FirstVisitHints());
             presenter.Bind(machineView, console, bigWin, jackpots, characters, flameClash, Story);
-            // the guardians' flames flare each time a reel is anticipated
-            machineView.AnticipationStarted += reel => { foreach (CharacterView c in characters) c.Surge(); };
-            if (sealMeter != null) sealMeter.Bind(Machine, theme, machineView, Flow, Session);
-            // sound listens to everything above; the views stay silent themselves
             var player = gameObject.AddComponent<SoundPlayer>();
             player.Setup(theme.sounds);
             Sound = gameObject.AddComponent<SoundDirector>();
@@ -126,7 +129,7 @@ namespace RoyalVault.Unity
             Showcase = new WinShowcase(Engine, Session, Flow, toast, () => showcaseWins, () => showcaseOrder);
         }
 
-        // Spin button, seal meter and jackpots, with the story's hint for each.
+        // Spin button, seal meter and jackpots, with the story's hint for each
         private StoryDirector.Hint[] FirstVisitHints()
         {
             string[] texts = theme.story != null ? theme.story.controlHints : new string[0];
@@ -137,7 +140,7 @@ namespace RoyalVault.Unity
             return hints;
         }
 
-        /// <summary>Ticking or unticking the showcase in the Inspector while playing takes effect on the next spin.</summary>
+        // Ticking or unticking the showcase in the Inspector while playing takes effect on the next spin
         private void OnValidate()
         {
             if (!Application.isPlaying || Showcase == null) return;
@@ -145,7 +148,7 @@ namespace RoyalVault.Unity
             if (showcaseWins != armed) Showcase.Arm();
         }
 
-        /// <summary>Testing aid: the next spin stops at these reel positions.</summary>
+        // Testing aid: the next spin stops at these reel positions
         public void ForceNextStops(params int[] stops)
         {
             Engine.ForcedStops = stops;

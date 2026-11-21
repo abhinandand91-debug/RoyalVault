@@ -6,10 +6,7 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// The control console: balance and win readouts, the bet stepper, auto play, spin, menu and sound. It only shows
-    /// state and reports what the player pressed; the round controller decides what happens.
-    /// </summary>
+    // The control console: balance and win readouts, the bet stepper, auto play, spin, menu and sound
     public sealed class ConsoleView : MonoBehaviour
     {
         [SerializeField] private CountingText balance;
@@ -64,7 +61,7 @@ namespace RoyalVault.Unity
 
         public void SetBalance(long value, float seconds = 0f) { balance.Set(value, seconds); }
 
-        /// <summary>Rolls the win readout up from 0.</summary>
+        // Rolls the win readout up from 0
         public void ShowWin(long value, float seconds) { win.Roll(0, value, seconds); }
 
         public void ClearWin() { win.Set(0); }
@@ -76,7 +73,7 @@ namespace RoyalVault.Unity
             betPlus.interactable = !bet.IsMax;
         }
 
-        /// <summary>During free spins the WIN caption shows the spins played and the multiplier.</summary>
+        // During free spins the WIN caption shows the spins played and the multiplier
         public void SetFreeSpins(FreeSpinState state, int multiplier)
         {
             winLabel.text = state.Active ? $"FREE SPIN {Mathf.Max(1, state.Played)} / {state.Total}   ×{multiplier}" : "WIN";
@@ -87,7 +84,7 @@ namespace RoyalVault.Unity
             autoLabel.text = active ? "STOP  " + remaining : "AUTO";
         }
 
-        /// <summary>Which controls the player may use right now.</summary>
+        // Which controls the player may use right now
         public void SetControls(bool betting, bool spinning, BetModel bet)
         {
             betMinus.interactable = betting && !bet.IsMin;

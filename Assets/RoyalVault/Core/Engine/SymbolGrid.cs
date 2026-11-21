@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace RoyalVault.Core
 {
-    /// <summary>A cell of the grid: reel (column, 0 = left) and row (0 = top).</summary>
+    // A cell of the grid: reel (column, 0 = left) and row (0 = top)
     public struct GridPosition
     {
         public readonly int Reel;
@@ -17,7 +17,7 @@ namespace RoyalVault.Core
         public override string ToString() { return $"({Reel},{Row})"; }
     }
 
-    /// <summary>The symbols showing in the window after a spin, as symbol indices.</summary>
+    // The symbols showing in the window after a spin, as symbol indices
     public sealed class SymbolGrid
     {
         private readonly int[,] cells;
@@ -38,7 +38,7 @@ namespace RoyalVault.Core
             set { cells[reel, row] = value; }
         }
 
-        /// <summary>Every cell holding <paramref name="symbol"/>.</summary>
+        // Every cell holding symbol
         public List<GridPosition> PositionsOf(int symbol)
         {
             var found = new List<GridPosition>();
@@ -48,10 +48,7 @@ namespace RoyalVault.Core
             return found;
         }
 
-        /// <summary>
-        /// The grid for these reel stops: reel <c>r</c> shows its strip from <c>stops[r]</c> downwards, wrapping
-        /// around the end of the strip.
-        /// </summary>
+        // The visible grid for these stops, wrapping around each strip
         public static SymbolGrid FromStops(MachineDefinition machine, int[] stops)
         {
             var grid = new SymbolGrid(machine.Reels, machine.Rows);

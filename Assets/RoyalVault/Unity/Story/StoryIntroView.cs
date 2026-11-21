@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    // Letterboxed story told beat by beat at the player's pace, ending on an "enter" button.
+    // Letterboxed story told beat by beat at the player's pace, ending on an "enter" button
     public sealed class StoryIntroView : MonoBehaviour
     {
         [SerializeField] private CanvasGroup group;

@@ -4,11 +4,7 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// A light particle system that draws inside a UI canvas (Unity's ParticleSystem does not render in an overlay
-    /// canvas). Particles are pooled images that rise, drift, swirl, grow or shrink and fade; the emitter runs
-    /// continuously at <see cref="Rate"/> and can also fire one-off bursts.
-    /// </summary>
+    // Lightweight particles drawn inside a UI canvas
     public sealed class UiParticleEmitter : MonoBehaviour
     {
         private struct Particle
@@ -54,7 +50,7 @@ namespace RoyalVault.Unity
         private float pending;
         private float burstSpeed = 1f;
 
-        /// <summary>Multiplies the continuous rate (a flare: set above 1 for a moment).</summary>
+        // Multiplies the continuous rate (a flare: set above 1 for a moment)
         public float Intensity { get; set; } = 1f;
 
         private void Update()
@@ -91,7 +87,7 @@ namespace RoyalVault.Unity
             }
         }
 
-        /// <summary>Fires <paramref name="count"/> particles at once, <paramref name="speed"/> times faster than usual.</summary>
+        // Fires count particles at once, speed times faster than usual
         public void Burst(int count, float speed = 2.5f)
         {
             burstSpeed = speed;
@@ -99,7 +95,7 @@ namespace RoyalVault.Unity
             burstSpeed = 1f;
         }
 
-        /// <summary>Removes every live particle.</summary>
+        // Removes every live particle
         public void Clear()
         {
             foreach (Particle p in live) { p.Rect.gameObject.SetActive(false); pool.Push(p); }

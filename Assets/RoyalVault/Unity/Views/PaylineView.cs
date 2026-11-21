@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>A winning payline drawn as a glowing gold line through its cells, with the amount on a badge.</summary>
+    // A winning payline drawn as a glowing gold line through its cells, with the amount on a badge
     public sealed class PaylineView : MonoBehaviour
     {
         private readonly List<Image> segments = new List<Image>();
@@ -28,7 +28,7 @@ namespace RoyalVault.Unity
             return view;
         }
 
-        /// <summary>Shows the line through <paramref name="points"/> (local positions) with an amount, or none when it is 0.</summary>
+        // Shows the line through points (local positions) with an amount, or none when it is 0
         public void Show(IList<Vector2> points, long win, Color color)
         {
             gameObject.SetActive(true);

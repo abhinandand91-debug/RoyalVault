@@ -4,19 +4,15 @@ namespace RoyalVault.Core
 {
     public enum SpinState
     {
-        /// <summary>Waiting for the player.</summary>
+        // Waiting for the player
         Idle,
-        /// <summary>The outcome is decided and the reels are moving.</summary>
+        // The outcome is decided and the reels are moving
         Spinning,
-        /// <summary>The win is paid and being shown.</summary>
+        // The win is paid and being shown
         Presenting,
     }
 
-    /// <summary>
-    /// Runs one spin from request to payout and tells the presentation what happens through events. It never waits
-    /// on animations itself: the presentation calls <see cref="ReelsStopped"/> when the reels have landed and
-    /// <see cref="PresentationDone"/> when the win has been shown.
-    /// </summary>
+    // Runs one spin from request to payout and tells the presentation what happens through events
     public sealed class SpinFlow
     {
         private readonly GameSession session;
@@ -28,13 +24,13 @@ namespace RoyalVault.Core
         public SpinContext Current { get { return current; } }
         public FeaturePipeline Features { get { return features; } }
 
-        /// <summary>The outcome is decided and the reels should start.</summary>
+        // The outcome is decided and the reels should start
         public event Action<SpinContext> SpinStarted;
-        /// <summary>The spin did not happen; the context's <see cref="SpinContext.Rejection"/> says why.</summary>
+        // The spin did not happen; the context's Rejection says why
         public event Action<SpinContext> SpinRejected;
-        /// <summary>The win has been credited and should be shown.</summary>
+        // The win has been credited and should be shown
         public event Action<SpinContext> SpinPaid;
-        /// <summary>The spin is over; <see cref="SpinContext.ContinueAutomatically"/> says whether another follows.</summary>
+        // The spin is over; ContinueAutomatically says whether another follows
         public event Action<SpinContext> SpinFinished;
 
         public SpinFlow(GameSession session, SpinEngine engine, FeaturePipeline features)
@@ -44,7 +40,7 @@ namespace RoyalVault.Core
             this.features = features;
         }
 
-        /// <summary>Starts a spin if the machine is idle and the features and wallet allow it.</summary>
+        // Starts a spin if the machine is idle and the features and wallet allow it
         public bool RequestSpin()
         {
             if (State != SpinState.Idle) return false;
@@ -68,7 +64,7 @@ namespace RoyalVault.Core
             return true;
         }
 
-        /// <summary>Called by the presentation when every reel has landed: pays the win.</summary>
+        // Called by the presentation when every reel has landed: pays the win
         public void ReelsStopped()
         {
             if (State != SpinState.Spinning) return;
@@ -79,7 +75,7 @@ namespace RoyalVault.Core
             SpinPaid?.Invoke(current);
         }
 
-        /// <summary>Called by the presentation when the win has been shown: the machine is idle again.</summary>
+        // Called by the presentation when the win has been shown: the machine is idle again
         public void PresentationDone()
         {
             if (State != SpinState.Presenting) return;

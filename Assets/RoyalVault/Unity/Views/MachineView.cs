@@ -6,19 +6,14 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// The reels inside their frame. It builds itself for any grid (5 x 3, 3 x 3, ...): the cells are sized to fit the
-    /// theme's reel area, the reels are centred, and the 9-slice frame wraps whatever size results. It spins the reels
-    /// to the stops the engine chose and highlights winning cells and lines.
-    /// </summary>
-    /// <summary>The order the reels start or stop in.</summary>
+    // The reels inside their frame
     public enum ReelOrder
     {
-        /// <summary>One after another, left to right.</summary>
+        // One after another, left to right
         Sequential,
-        /// <summary>One after another, in a new random order every spin.</summary>
+        // One after another, in a new random order every spin
         Random,
-        /// <summary>Every reel together.</summary>
+        // Every reel together
         AllAtOnce,
     }
 
@@ -74,7 +69,7 @@ namespace RoyalVault.Unity
         public ReelOrder StartOrder { get => startOrder; set => startOrder = value; }
         public ReelOrder StopOrder { get => stopOrder; set => stopOrder = value; }
 
-        /// <summary>The window the reels occupy, in this view's local space.</summary>
+        // The window the reels occupy, in this view's local space
         public Rect Window { get; private set; }
 
         public void Build(MachineDefinition definition, ThemeDefinition themeDefinition)
@@ -83,26 +78,43 @@ namespace RoyalVault.Unity
             theme = themeDefinition;
             for (int i = transform.childCount - 1; i >= 0; i--) Destroy(transform.GetChild(i).gameObject);
 
-            // the largest cell that fits the reel area, then the window around the cells
+            Vector2 windowSize = FitWindow();
+            BuildCells(windowSize);
+            RectTransform fxBack = UiFactory.Rect("Symbol Light", transform, Vector2.zero, Vector2.zero);
+            BuildReels(windowSize);
+            fxFrontLayer = UiFactory.Rect("Symbol Sparkle", transform, Vector2.zero, Vector2.zero);
+            fx = fxFrontLayer.gameObject.AddComponent<SymbolFxLayer>();
+            fx.Setup(fxBack, fxFrontLayer, theme);
+            BuildAnticipation(windowSize);
+            nextGlint = Time.time + 2f;
+            paylineLayer = UiFactory.Rect("Paylines", transform, Vector2.zero, ((RectTransform)transform).rect.size);
+            BuildFrame(windowSize);
+        }
+
+        // The largest cell that fits the reel area, and the window around the cells
+        private Vector2 FitWindow()
+        {
             Rect area = theme.reelArea;
             gap = theme.cellGap;
             float cellHeight = Mathf.Min((area.height - (machine.Rows - 1) * gap) / machine.Rows,
                                          (area.width - (machine.Reels - 1) * gap) / machine.Reels / theme.cellAspect);
             cell = new Vector2(cellHeight * theme.cellAspect, cellHeight);
-            var windowSize = new Vector2(machine.Reels * cell.x + (machine.Reels - 1) * gap, machine.Rows * cell.y + (machine.Rows - 1) * gap);
+            var size = new Vector2(machine.Reels * cell.x + (machine.Reels - 1) * gap, machine.Rows * cell.y + (machine.Rows - 1) * gap);
             windowCentre = area.center;
-            Window = new Rect(windowCentre - windowSize * 0.5f, windowSize);
+            Window = new Rect(windowCentre - size * 0.5f, size);
+            return size;
+        }
 
-            // cell plates behind the reels
+        private void BuildCells(Vector2 windowSize)
+        {
             RectTransform cells = UiFactory.Rect("Cells", transform, windowCentre, windowSize);
             for (int r = 0; r < machine.Reels; r++)
                 for (int row = 0; row < machine.Rows; row++)
                     UiFactory.Image("Cell", cells, theme.reelCell, CellCentre(r, row) - windowCentre, cell);
+        }
 
-            // light behind winning symbols sits on the plates, outside the reels' masks
-            RectTransform fxBack = UiFactory.Rect("Symbol Light", transform, Vector2.zero, Vector2.zero);
-
-            // reels
+        private void BuildReels(Vector2 windowSize)
+        {
             RectTransform reelRoot = UiFactory.Rect("Reels", transform, windowCentre, windowSize);
             reels = new ReelView[machine.Reels];
             for (int r = 0; r < machine.Reels; r++)
@@ -112,27 +124,18 @@ namespace RoyalVault.Unity
                 int start = UnityEngine.Random.Range(0, machine.Strips[r].Length);
                 reels[r].Build(machine.Strips[r], machine.Rows, cell, gap, theme.symbolScale, theme.glow, ArtFor, start, theme.symbolMaterial);
             }
+        }
 
-            // stars, dust and sparks in front of the symbols
-            RectTransform fxFront = UiFactory.Rect("Symbol Sparkle", transform, Vector2.zero, Vector2.zero);
-            fx = fxFront.gameObject.AddComponent<SymbolFxLayer>();
-            fx.Setup(fxBack, fxFront, theme);
-            fxFrontLayer = fxFront;
-            BuildAnticipation(windowSize);
-            nextGlint = Time.time + 2f;
-
-            paylineLayer = UiFactory.Rect("Paylines", transform, Vector2.zero, ((RectTransform)transform).rect.size);
-
-            // the frame wraps the window; its corners keep their size whatever the window's
+        // The frame wraps the window; its corners keep their size
+        private void BuildFrame(Vector2 windowSize)
+        {
             Image frame = UiFactory.Image("Frame", transform, theme.reelFrame, windowCentre, windowSize);
             frame.type = Image.Type.Sliced;
             frame.pixelsPerUnitMultiplier = 1f / theme.frameBorderScale;
-            if (theme.reelFrame != null)
-            {
-                Vector4 b = theme.reelFrame.border * theme.frameBorderScale; // left, bottom, right, top
-                frame.rectTransform.sizeDelta = windowSize + new Vector2(b.x + b.z, b.y + b.w);
-                frame.rectTransform.anchoredPosition = windowCentre + new Vector2((b.z - b.x) * 0.5f, (b.w - b.y) * 0.5f);
-            }
+            if (theme.reelFrame == null) return;
+            Vector4 b = theme.reelFrame.border * theme.frameBorderScale; // left, bottom, right, top
+            frame.rectTransform.sizeDelta = windowSize + new Vector2(b.x + b.z, b.y + b.w);
+            frame.rectTransform.anchoredPosition = windowCentre + new Vector2((b.z - b.x) * 0.5f, (b.w - b.y) * 0.5f);
         }
 
         private ThemeDefinition.SymbolArt ArtFor(int symbol)
@@ -140,7 +143,7 @@ namespace RoyalVault.Unity
             return theme.Symbol(machine.Symbols[symbol].Id);
         }
 
-        /// <summary>Centre of a cell in this view's local space.</summary>
+        // Centre of a cell in this view's local space
         public Vector2 CellCentre(int reel, int row)
         {
             float x = Window.xMin + cell.x * 0.5f + reel * (cell.x + gap);
@@ -148,16 +151,16 @@ namespace RoyalVault.Unity
             return new Vector2(x, y);
         }
 
-        /// <summary>A reel has landed (its index, 0 = leftmost), in the order set by <see cref="StopOrder"/>.</summary>
+        // A reel has landed (its index, 0 = leftmost), in the order set by StopOrder
         public event Action<int> ReelStopped;
-        /// <summary>The last reel of a spin has landed.</summary>
+        // The last reel of a spin has landed
         public event Action AllReelsStopped;
-        /// <summary>Anticipation began (or moved on) and this reel is the one being waited for.</summary>
+        // Anticipation began (or moved on) and this reel is the one being waited for
         public event Action<int> AnticipationStarted;
-        /// <summary>The last anticipating reel has landed.</summary>
+        // The last anticipating reel has landed
         public event Action AnticipationEnded;
 
-        /// <summary>The reels the last spin anticipated, in the order they landed.</summary>
+        // The reels the last spin anticipated, in the order they landed
         public IReadOnlyList<int> AnticipatedReels => anticipated;
 
         private readonly List<int> anticipated = new List<int>();
@@ -167,9 +170,7 @@ namespace RoyalVault.Unity
         private int awaited = -1;
         private float awaitedSince;
 
-        /// <summary>
-        /// Each reel's place in the given order: 0 for the first, 1 for the next... (all 0 when all at once).
-        /// </summary>
+        // Each reel's place in the given order: 0 for the first, 1 for the next..
         private int[] Ranks(ReelOrder order)
         {
             var ranks = new int[reels.Length];
@@ -183,7 +184,7 @@ namespace RoyalVault.Unity
             return ranks;
         }
 
-        /// <summary>Spins every reel to the outcome's stops in the start and stop orders, and calls back when the last one lands.</summary>
+        // Spins every reel to the outcome's stops and calls back when the last one lands
         public void Spin(SpinOutcome outcome, bool fast, Action onAllStopped)
         {
             ClearWins();
@@ -198,8 +199,7 @@ namespace RoyalVault.Unity
             {
                 int reel = r;
                 float delay = starts[r] * startGap;
-                // landing times follow the stop order whatever the start order: every reel lands at the same moment
-                // after the last one started, plus its place in the stop order (and any anticipation before it)
+                // landings follow the stop order, whatever the start order
                 float landAt = lastStart + baseRun + stops[r] * gapBetweenStops + extra[r];
                 float run = Mathf.Max(0.3f, landAt - delay);
                 reels[r].Spin(outcome.Stops[r], delay, run, () =>
@@ -214,7 +214,7 @@ namespace RoyalVault.Unity
             }
         }
 
-        /// <summary>Lands all reels quickly.</summary>
+        // Lands all reels quickly
         public void Hurry()
         {
             foreach (ReelView reel in reels) reel.Hurry();
@@ -225,7 +225,7 @@ namespace RoyalVault.Unity
             return reels[position.Reel].ViewAt(position.Row);
         }
 
-        /// <summary>Celebrates the given cells and dims the rest of the window.</summary>
+        // Celebrates the given cells and dims the rest of the window
         public void HighlightCells(IEnumerable<GridPosition> positions, float seconds)
         {
             StopCelebrating();
@@ -248,7 +248,7 @@ namespace RoyalVault.Unity
                 }
         }
 
-        /// <summary>Draws payline <paramref name="line"/> across the whole window, with an amount badge.</summary>
+        // Draws payline line across the whole window, with an amount badge
         public void ShowLine(int line, long amount, int slot)
         {
             while (paylines.Count <= slot) paylines.Add(PaylineView.Create(paylineLayer, theme));
@@ -279,11 +279,7 @@ namespace RoyalVault.Unity
         private bool[] anticipating = new bool[0];
         private bool[] landedThisSpin = new bool[0];
 
-        /// <summary>
-        /// Walks the reels in landing order counting the seals and crowns that will have landed; once they are one short
-        /// of free spins or of the smallest jackpot, every reel still to land waits a little longer than the one before.
-        /// Only what has landed counts, never what is still to come, so anticipation can end in a miss.
-        /// </summary>
+        // Slows the remaining reels once one more seal or crown would trigger a feature
         private float[] PlanAnticipation(SpinOutcome outcome, int[] stopRanks, bool fast)
         {
             int n = reels.Length;
@@ -325,7 +321,7 @@ namespace RoyalVault.Unity
             return extra;
         }
 
-        /// <summary>After a landing: the light leaves that reel and moves to the next reel still being waited for.</summary>
+        // After a landing: the light leaves that reel and moves to the next reel still being waited for
         private void AnticipateNext(int landedReel)
         {
             if (landedThisSpin.Length != reels.Length) return;
@@ -350,65 +346,74 @@ namespace RoyalVault.Unity
             }
         }
 
-        /// <summary>
-        /// Per reel, hidden until that reel is anticipated: a frame of light around the reel's column, a warm glow over
-        /// it (in front of the symbols, so the waiting reel itself brightens) and sparks rising up it.
-        /// </summary>
+        // Light frame, glow and sparks over a reel while it is anticipated
         private void BuildAnticipation(Vector2 windowSize)
         {
             columns = new CanvasGroup[reels.Length];
             columnSparks = new UiParticleEmitter[reels.Length];
-            var gold = new Color(1f, 0.82f, 0.45f, 1f);
             for (int r = 0; r < reels.Length; r++)
             {
-                Vector2 centre = new Vector2(CellCentre(r, 0).x, windowCentre.y);
-                Vector2 size = new Vector2(cell.x + gap, windowSize.y + gap);
-                RectTransform holder = UiFactory.Rect("Anticipation " + (r + 1), fxFrontLayer, centre, size);
-                var group = holder.gameObject.AddComponent<CanvasGroup>();
-                group.alpha = 0f;
-                group.blocksRaycasts = false;
-                columns[r] = group;
-
-                // the glow washes over the whole reel; the frame is four bars of light with soft halos
-                Image wash = UiFactory.Image("Glow", holder, theme.glow, Vector2.zero, new Vector2(size.x * 1.5f, size.y * 1.15f));
-                wash.material = theme.additive;
-                wash.color = new Color(gold.r, gold.g, gold.b, 0.45f);
-                const float bar = 6f;
-                Vector2[] at = { new Vector2(-size.x * 0.5f, 0f), new Vector2(size.x * 0.5f, 0f), new Vector2(0f, size.y * 0.5f), new Vector2(0f, -size.y * 0.5f) };
-                Vector2[] dims = { new Vector2(bar, size.y + bar), new Vector2(bar, size.y + bar), new Vector2(size.x + bar, bar), new Vector2(size.x + bar, bar) };
-                for (int k = 0; k < 4; k++)
-                {
-                    Image halo = UiFactory.Image("Halo", holder, theme.glow, at[k], dims[k] + Vector2.one * 46f);
-                    halo.material = theme.additive;
-                    halo.color = new Color(gold.r, gold.g, gold.b, 0.55f);
-                    halo.type = Image.Type.Simple;
-                    Image line = UiFactory.Image("Edge", holder, theme.white, at[k], dims[k]);
-                    line.material = theme.additive;
-                    line.color = new Color(1f, 0.93f, 0.7f, 0.95f);
-                }
-
-                RectTransform rect = UiFactory.Rect("Anticipation Sparks " + (r + 1), fxFrontLayer, centre - new Vector2(0f, windowSize.y * 0.5f), Vector2.one * 10f);
-                var sparks = rect.gameObject.AddComponent<UiParticleEmitter>();
-                sparks.Sprite = theme.sparkle;
-                sparks.Material = theme.additive;
-                sparks.Rate = 26f;
-                sparks.LifeRange = new Vector2(0.8f, 1.5f);
-                sparks.SizeRange = new Vector2(10f, 22f);
-                sparks.EndSize = 0.2f;
-                sparks.Area = new Vector2(cell.x * 0.9f, 10f);
-                sparks.VelocityMin = new Vector2(-15f, 220f);
-                sparks.VelocityMax = new Vector2(15f, 420f);
-                sparks.Swirl = 20f;
-                sparks.SwirlFrequency = 3f;
-                sparks.MaxParticles = 60;
-                sparks.StartColor = new Color(1f, 0.9f, 0.6f, 1f);
-                sparks.EndColor = new Color(1f, 0.6f, 0.2f, 0f);
-                sparks.Intensity = 0f;
-                columnSparks[r] = sparks;
+                var centre = new Vector2(CellCentre(r, 0).x, windowCentre.y);
+                var size = new Vector2(cell.x + gap, windowSize.y + gap);
+                columns[r] = AnticipationColumn(r, centre, size);
+                columnSparks[r] = ColumnSparks(r, centre - new Vector2(0f, windowSize.y * 0.5f));
             }
         }
 
-        /// <summary>The grand symbols (wild, scatter, jackpot) thump and ring with light as their reel lands.</summary>
+        private CanvasGroup AnticipationColumn(int reel, Vector2 centre, Vector2 size)
+        {
+            RectTransform holder = UiFactory.Rect("Anticipation " + (reel + 1), fxFrontLayer, centre, size);
+            var group = holder.gameObject.AddComponent<CanvasGroup>();
+            group.alpha = 0f;
+            group.blocksRaycasts = false;
+            Image wash = UiFactory.Image("Glow", holder, theme.glow, Vector2.zero, new Vector2(size.x * 1.5f, size.y * 1.15f));
+            wash.material = theme.additive;
+            wash.color = new Color(1f, 0.82f, 0.45f, 0.45f);
+            LightFrame(holder, size);
+            return group;
+        }
+
+        // Four bars of light with soft halos
+        private void LightFrame(RectTransform holder, Vector2 size)
+        {
+            const float bar = 6f;
+            Vector2[] at = { new Vector2(-size.x * 0.5f, 0f), new Vector2(size.x * 0.5f, 0f), new Vector2(0f, size.y * 0.5f), new Vector2(0f, -size.y * 0.5f) };
+            Vector2[] dims = { new Vector2(bar, size.y + bar), new Vector2(bar, size.y + bar), new Vector2(size.x + bar, bar), new Vector2(size.x + bar, bar) };
+            for (int k = 0; k < 4; k++)
+            {
+                Image halo = UiFactory.Image("Halo", holder, theme.glow, at[k], dims[k] + Vector2.one * 46f);
+                halo.material = theme.additive;
+                halo.color = new Color(1f, 0.82f, 0.45f, 0.55f);
+                halo.type = Image.Type.Simple;
+                Image line = UiFactory.Image("Edge", holder, theme.white, at[k], dims[k]);
+                line.material = theme.additive;
+                line.color = new Color(1f, 0.93f, 0.7f, 0.95f);
+            }
+        }
+
+        private UiParticleEmitter ColumnSparks(int reel, Vector2 bottom)
+        {
+            RectTransform rect = UiFactory.Rect("Anticipation Sparks " + (reel + 1), fxFrontLayer, bottom, Vector2.one * 10f);
+            var sparks = rect.gameObject.AddComponent<UiParticleEmitter>();
+            sparks.Sprite = theme.sparkle;
+            sparks.Material = theme.additive;
+            sparks.Rate = 26f;
+            sparks.LifeRange = new Vector2(0.8f, 1.5f);
+            sparks.SizeRange = new Vector2(10f, 22f);
+            sparks.EndSize = 0.2f;
+            sparks.Area = new Vector2(cell.x * 0.9f, 10f);
+            sparks.VelocityMin = new Vector2(-15f, 220f);
+            sparks.VelocityMax = new Vector2(15f, 420f);
+            sparks.Swirl = 20f;
+            sparks.SwirlFrequency = 3f;
+            sparks.MaxParticles = 60;
+            sparks.StartColor = new Color(1f, 0.9f, 0.6f, 1f);
+            sparks.EndColor = new Color(1f, 0.6f, 0.2f, 0f);
+            sparks.Intensity = 0f;
+            return sparks;
+        }
+
+        // The grand symbols (wild, scatter, jackpot) thump and ring with light as their reel lands
         private void LandSpecials(int reel)
         {
             for (int row = 0; row < machine.Rows; row++)
@@ -421,7 +426,7 @@ namespace RoyalVault.Unity
             }
         }
 
-        /// <summary>While the reels rest, a gem, crown or wild now and then catches the light.</summary>
+        // While the reels rest, a gem, crown or wild now and then catches the light
         private void Update()
         {
             // the awaited reel's frame of light swells in and throbs; the others fade out

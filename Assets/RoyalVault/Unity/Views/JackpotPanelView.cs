@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>The jackpot plaques: the top tier in the centre, the next ones left and right, values counting live.</summary>
+    // The jackpot plaques: the top tier in the centre, the next ones left and right, values counting live
     public sealed class JackpotPanelView : MonoBehaviour
     {
         [SerializeField, Tooltip("Centre, left, right")] private Image[] plaques = new Image[0];
@@ -56,7 +56,7 @@ namespace RoyalVault.Unity
             if (slot >= 0) values[slot].Set(pool.Value(tier), 0.6f);
         }
 
-        /// <summary>Flashes the plaque of a tier that was just won.</summary>
+        // Flashes the plaque of a tier that was just won
         public void Celebrate(int tier)
         {
             if (tier < 0 || tier >= slotOfTier.Length || slotOfTier[tier] < 0) return;

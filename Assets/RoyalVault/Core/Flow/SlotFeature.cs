@@ -2,17 +2,17 @@ using System.Collections.Generic;
 
 namespace RoyalVault.Core
 {
-    /// <summary>One spin as it moves through the flow; features read and change it at each hook.</summary>
+    // One spin as it moves through the flow; features read and change it at each hook
     public sealed class SpinContext
     {
         public readonly GameSession Session;
-        /// <summary>Credits this spin costs; features may change it (a free spin costs nothing).</summary>
+        // Credits this spin costs; features may change it (a free spin costs nothing)
         public long Cost;
         public bool IsFreeSpin;
-        /// <summary>Set by a feature to stop the spin from happening, with a reason the player sees.</summary>
+        // Set by a feature to stop the spin from happening, with a reason the player sees
         public string Rejection;
         public SpinOutcome Outcome;
-        /// <summary>Set by a feature when another spin should follow on its own (free spins, auto play).</summary>
+        // Set by a feature when another spin should follow on its own (free spins, auto play)
         public bool ContinueAutomatically;
 
         public SpinContext(GameSession session, long cost)
@@ -24,26 +24,22 @@ namespace RoyalVault.Core
         public bool Rejected { get { return Rejection != null; } }
     }
 
-    /// <summary>
-    /// A plug-in that joins the spin flow. Features run in <see cref="Order"/> at three points: before the spin is
-    /// paid for, once the outcome is decided, and after it has been paid. New gameplay is added as a new feature;
-    /// the engine and flow stay as they are.
-    /// </summary>
+    // A plug-in that joins the spin flow
     public interface ISlotFeature
     {
         int Order { get; }
 
-        /// <summary>Before the bet is taken: may set the cost, mark a free spin or reject the spin.</summary>
+        // Before the bet is taken: may set the cost, mark a free spin or reject the spin
         void OnSpinRequested(SpinContext context);
 
-        /// <summary>The outcome is decided but not shown: may change multipliers, awards or the outcome itself.</summary>
+        // The outcome is decided but not shown: may change multipliers, awards or the outcome itself
         void OnOutcome(SpinContext context);
 
-        /// <summary>The win has been credited: may ask for another spin.</summary>
+        // The win has been credited: may ask for another spin
         void OnPaid(SpinContext context);
     }
 
-    /// <summary>Convenience base: override only the hooks a feature needs.</summary>
+    // Convenience base: override only the hooks a feature needs
     public abstract class SlotFeature : ISlotFeature
     {
         public virtual int Order { get { return 0; } }
@@ -52,7 +48,7 @@ namespace RoyalVault.Core
         public virtual void OnPaid(SpinContext context) { }
     }
 
-    /// <summary>Runs the registered features in order at each hook.</summary>
+    // Runs the registered features in order at each hook
     public sealed class FeaturePipeline
     {
         private readonly List<ISlotFeature> features = new List<ISlotFeature>();

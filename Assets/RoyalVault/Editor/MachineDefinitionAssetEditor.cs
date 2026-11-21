@@ -6,10 +6,7 @@ using UnityEngine;
 
 namespace RoyalVault.EditorTools
 {
-    /// <summary>
-    /// Inspector for machine assets: shows what is wrong with the machine (if anything) and simulates a million paid
-    /// spins through the real spin flow to report the return to player before you ship a change to the maths.
-    /// </summary>
+    // Machine inspector: validation and a one-click RTP simulation
     [CustomEditor(typeof(MachineDefinitionAsset))]
     public sealed class MachineDefinitionAssetEditor : UnityEditor.Editor
     {

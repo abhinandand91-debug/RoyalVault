@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace RoyalVault.Unity
 {
-    // Reveals a TextMeshPro line letter by letter; Complete() shows the rest at once.
+    // Reveals a TextMeshPro line letter by letter; Complete() shows the rest at once
     [RequireComponent(typeof(TMP_Text))]
     public sealed class TypewriterText : MonoBehaviour
     {

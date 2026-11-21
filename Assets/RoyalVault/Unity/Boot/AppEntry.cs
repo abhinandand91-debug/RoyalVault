@@ -4,12 +4,7 @@ using UnityEngine.SceneManagement;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// Where the application starts (the Boot scene, first in the build). It sets up the app, shows the loading
-    /// screen while the Game scene loads in the background, and switches to the game when it is ready. The bar moves
-    /// smoothly and the screen stays up for a short minimum time, so loading never flickers. The first time, the
-    /// screen stays up while it tells the story's intro (the player can click through it).
-    /// </summary>
+    // Where the application starts (the Boot scene, first in the build)
     public sealed class AppEntry : MonoBehaviour
     {
         [SerializeField] private LoadingScreen loadingScreen;

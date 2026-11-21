@@ -4,11 +4,7 @@ using UnityEngine;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// Plays a <see cref="SoundBank"/>: one-shot effects on a small pool of channels, looping effects that start and
-    /// stop by cue, and music on two channels that cross-fade into each other. Mute is the player's choice, kept
-    /// between sessions and shared by every scene. Each scene has its own player; there is no global sound object.
-    /// </summary>
+    // Plays one-shots on a channel pool, cue loops and cross-faded music
     public sealed class SoundPlayer : MonoBehaviour
     {
         private const string MutedKey = "royalvault.sound.muted";
@@ -28,10 +24,10 @@ namespace RoyalVault.Unity
 
         public SoundBank Bank => bank;
 
-        /// <summary>The cues played most recently, oldest first (for tests and debugging; silent cues count too).</summary>
+        // The cues played most recently, oldest first (for tests and debugging; silent cues count too)
         public IReadOnlyList<SoundCue> History => history;
 
-        /// <summary>True when the player has turned the sound off (kept between sessions).</summary>
+        // True when the player has turned the sound off (kept between sessions)
         public static bool Muted
         {
             get => PlayerPrefs.GetInt(MutedKey, 0) == 1;
@@ -43,7 +39,7 @@ namespace RoyalVault.Unity
             }
         }
 
-        /// <summary>Forgets the cues played so far (tests count one moment at a time).</summary>
+        // Forgets the cues played so far (tests count one moment at a time)
         public void ClearHistory() => history.Clear();
 
         public void Setup(SoundBank soundBank)
@@ -70,7 +66,7 @@ namespace RoyalVault.Unity
             return source;
         }
 
-        /// <summary>Plays <paramref name="cue"/> once. <paramref name="pitch"/> scales the pitch (rising reel stops).</summary>
+        // Plays cue once
         public void Play(SoundCue cue, float volume = 1f, float pitch = 1f)
         {
             Remember(cue);
@@ -84,7 +80,7 @@ namespace RoyalVault.Unity
             source.Play();
         }
 
-        /// <summary>Starts a looping cue (reels spinning, coins pouring); calling it again while it plays does nothing.</summary>
+        // Starts a looping cue (reels spinning, coins pouring); calling it again while it plays does nothing
         public void StartLoop(SoundCue cue)
         {
             if (loops.TryGetValue(cue, out AudioSource playing) && playing != null && playing.isPlaying) return;
@@ -102,7 +98,7 @@ namespace RoyalVault.Unity
             source.Play();
         }
 
-        /// <summary>Stops a looping cue, fading it out over <paramref name="seconds"/>.</summary>
+        // Stops a looping cue, fading it out over seconds
         public void StopLoop(SoundCue cue, float seconds = 0.15f)
         {
             if (!loops.TryGetValue(cue, out AudioSource source) || source == null || !source.isPlaying) return;
@@ -121,7 +117,7 @@ namespace RoyalVault.Unity
             source.volume = from;
         }
 
-        /// <summary>Cross-fades to <paramref name="clip"/> (null fades the music out). The same clip keeps playing.</summary>
+        // Cross-fades to clip (null fades the music out)
         public void PlayMusic(AudioClip clip, float seconds = -1f)
         {
             if (bank == null) return;

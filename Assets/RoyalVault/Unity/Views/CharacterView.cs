@@ -4,14 +4,7 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// A guardian beside the reels. With a baked <see cref="CharacterAnimation"/> it plays its idle loop and, on big
-    /// wins and now and then on its own, its action: it lowers its hand and calls up a blue flame. The particle flame,
-    /// embers and glow follow the hand frame by frame. Without the animation the still art breathes and sways.
-    /// A warm aura glows behind it and gold dust drifts past; on big wins it rises in a flash of light and gold sparks
-    /// spray from its hand. When the theme has no character art (the licensed figure is not in a public checkout) the
-    /// whole guardian hides itself.
-    /// </summary>
+    // A guardian beside the reels
     public sealed class CharacterView : MonoBehaviour
     {
         [SerializeField] private Image image;
@@ -59,10 +52,7 @@ namespace RoyalVault.Unity
             dust = dustEmitter;
         }
 
-        /// <summary>
-        /// Shows <paramref name="sprite"/>; <paramref name="effectAnchor"/> is where the magic burns, as a share of the
-        /// art (0,0 = bottom left of the unmirrored figure).
-        /// </summary>
+        // effectAnchor is where the magic burns, as a share of the art
         public void Bind(Sprite sprite, Vector2 effectAnchor, Color magic, CharacterAnimation baked = null)
         {
             motion = baked != null && baked.IsValid ? baked : null;
@@ -88,17 +78,13 @@ namespace RoyalVault.Unity
             nextSurge = Time.time + 3f + phase;
         }
 
-        /// <summary>True from the moment a throw's flame is up in the hand until it has been thrown.</summary>
+        // True from the moment a throw's flame is up in the hand until it has been thrown
         public bool ReadyToThrow { get; private set; }
 
-        /// <summary>Where the magic burns, in world space (the fireball leaves from here).</summary>
+        // Where the magic burns, in world space (the fireball leaves from here)
         public Vector3 HandPosition => hand != null ? hand.position : transform.position;
 
-        /// <summary>
-        /// The guardian winds up to hurl its flame at the reels: it leans and steps towards them and calls up the flame
-        /// (its baked action, when it has one). <see cref="ReadyToThrow"/> turns true when the flame is up in the hand;
-        /// call <see cref="Release"/> as the fireball leaves, and the guardian recoils and settles back.
-        /// </summary>
+        // Leans towards the reels and calls up the flame
         public void WindUp()
         {
             if (!isActiveAndEnabled) return;
@@ -106,7 +92,7 @@ namespace RoyalVault.Unity
             throwing = StartCoroutine(WindUpRoutine());
         }
 
-        /// <summary>The flame leaves the hand: a recoil, a flash in the hand, then back to rest.</summary>
+        // The flame leaves the hand: a recoil, a flash in the hand, then back to rest
         public void Release()
         {
             ReadyToThrow = false;
@@ -120,7 +106,7 @@ namespace RoyalVault.Unity
             ReadyToThrow = false;
             if (motion != null && !IsActing) Act();
             float t = 0f;
-            // lean in over the first moment, then hold until the flame is up (the action's summon, or a short beat)
+            // lean in, then hold until the flame is up
             while (true)
             {
                 t += Time.deltaTime;
@@ -143,7 +129,7 @@ namespace RoyalVault.Unity
             throwing = null;
         }
 
-        /// <summary>The hand's flame flares up and throws embers (the guardians watch the reels being anticipated).</summary>
+        // The hand's flame flares up and throws embers (the guardians watch the reels being anticipated)
         public void Surge()
         {
             if (!isActiveAndEnabled || hand == null) return;
@@ -151,10 +137,10 @@ namespace RoyalVault.Unity
             embers.Burst(10, 1.6f);
         }
 
-        /// <summary>True while the one-shot action plays.</summary>
+        // True while the one-shot action plays
         public bool IsActing => motion != null && clip == motion.action;
 
-        /// <summary>Plays the action once (the guardian calls up its flame), then returns to the idle loop.</summary>
+        // Plays the action once (the guardian calls up its flame), then returns to the idle loop
         public void Act()
         {
             if (motion == null || !motion.action.IsValid) return;
@@ -170,7 +156,7 @@ namespace RoyalVault.Unity
             hand.anchoredPosition = new Vector2((share.x - 0.5f) * size.x * mirror, share.y * size.y);
         }
 
-        /// <summary>Shows the current frame of the baked animation and moves the hand effects with it.</summary>
+        // Shows the current frame of the baked animation and moves the hand effects with it
         private void Animate()
         {
             clipTime += Time.deltaTime;
@@ -196,30 +182,35 @@ namespace RoyalVault.Unity
         {
             float time = Time.time + phase;
             float breath = Mathf.Sin(time * 1.4f) * 0.5f + 0.5f;
-            float sign = Mathf.Sign(image.rectTransform.localScale.x);
+            Pose(time, breath);
+            if (hand == null) return;
+            FlareNow();
+            Burn(time, breath);
+        }
 
-            // a throw leans the figure towards the reels and steps it in (mirrored guardians lean the other way)
-            if (!homeKnown) { figureHome = image.rectTransform.anchoredPosition; homeKnown = true; }
-            image.rectTransform.anchoredPosition = figureHome + new Vector2(sign * 34f * lunge, 6f * lunge);
+        // Leans towards the reels on a throw; the still art also breathes and sways
+        private void Pose(float time, float breath)
+        {
+            RectTransform r = image.rectTransform;
+            float sign = Mathf.Sign(r.localScale.x);
+            if (!homeKnown) { figureHome = r.anchoredPosition; homeKnown = true; }
+            r.anchoredPosition = figureHome + new Vector2(sign * 34f * lunge, 6f * lunge);
             float lean = -sign * 6f * lunge;
-
             if (motion != null)
             {
-                // the frames carry the breathing; only the celebration lift is added
-                image.rectTransform.localScale = new Vector3(sign * (1f + lift * 0.03f + lunge * 0.04f), 1f + lift * 0.03f + lunge * 0.04f, 1f);
-                image.rectTransform.localRotation = Quaternion.Euler(0f, 0f, lean);
+                float grow = 1f + lift * 0.03f + lunge * 0.04f;
+                r.localScale = new Vector3(sign * grow, grow, 1f);
+                r.localRotation = Quaternion.Euler(0f, 0f, lean);
                 Animate();
+                return;
             }
-            else
-            {
-                // a slow breath from the feet and the faintest sway
-                image.rectTransform.localScale = new Vector3(sign * (1f + lift * 0.04f), 1f + 0.012f * breath + lift * 0.05f, 1f);
-                image.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(time * 0.6f) * 0.35f + lean);
-            }
+            r.localScale = new Vector3(sign * (1f + lift * 0.04f), 1f + 0.012f * breath + lift * 0.05f, 1f);
+            r.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(time * 0.6f) * 0.35f + lean);
+        }
 
-            if (hand == null) return;
-
-            // the flame surges every few seconds
+        // The flame flares up every few seconds
+        private void FlareNow()
+        {
             if (Time.time >= nextSurge)
             {
                 nextSurge = Time.time + Random.Range(5f, 9f);
@@ -227,18 +218,19 @@ namespace RoyalVault.Unity
                 embers.Burst(8, 1.4f);
             }
             surge = Mathf.MoveTowards(surge, 0f, Time.deltaTime * 1.3f);
+        }
+
+        private void Burn(float time, float breath)
+        {
             float baseFlame = motion != null ? 0.45f : 1f;
             flame.Intensity = flameWeight * (baseFlame + surge * 2f + lift * 3f);
             embers.Intensity = flameWeight;
-
             float flicker = (0.55f + 0.2f * Mathf.PerlinNoise(time * 7f, phase) + surge * 0.35f + lift * 0.4f) * flameWeight;
             Color g = handGlow.color;
             handGlow.color = new Color(g.r, g.g, g.b, Mathf.Clamp01(flicker));
             handGlow.rectTransform.localScale = Vector3.one * (1f + 0.15f * Mathf.Sin(time * 9f) + surge * 0.5f + lift * 0.8f);
-
-            float glow = 0.12f + 0.06f * breath + lift * 0.45f;
             Color a = aura.color;
-            aura.color = new Color(a.r, a.g, a.b, glow);
+            aura.color = new Color(a.r, a.g, a.b, 0.12f + 0.06f * breath + lift * 0.45f);
         }
 
         public void Celebrate()

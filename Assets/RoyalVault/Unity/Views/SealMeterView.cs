@@ -5,12 +5,7 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// The story's golden seal on the vault door, set in the console. As the reels land, every Vault Seal (the scatter)
-    /// cracks it a little more: light leaks through the cracks, sparks fly and a pip lights. When enough seals land
-    /// for free spins the seal shatters and the vault stays open, glowing blue, for the whole round; the next paid spin
-    /// mends it. It only shows what the spin already decided, so it never changes the game's maths.
-    /// </summary>
+    // The story's golden seal on the vault door, set in the console
     public sealed class SealMeterView : MonoBehaviour
     {
         [SerializeField] private RectTransform seal;
@@ -36,14 +31,14 @@ namespace RoyalVault.Unity
         private float shake;
         private Coroutine routine;
 
-        /// <summary>A seal landed and cracked the seal further (the stage, 1 = first crack).</summary>
+        // A seal landed and cracked the seal further (the stage, 1 = first crack)
         public event System.Action<int> Cracked;
-        /// <summary>Enough seals landed: the seal breaks and the vault opens.</summary>
+        // Enough seals landed: the seal breaks and the vault opens
         public event System.Action Broke;
 
-        /// <summary>Seals counted this spin.</summary>
+        // Seals counted this spin
         public int Count => lit;
-        /// <summary>True while the seal is broken and the vault is open (a free spin round).</summary>
+        // True while the seal is broken and the vault is open (a free spin round)
         public bool IsOpen => open;
 
         public void Setup(RectTransform sealRect, Image faceImage, Image[] crackImages, Image[] pipImages, Image glowImage, Image magicImage,
@@ -145,7 +140,7 @@ namespace RoyalVault.Unity
             yield return Tween.Run(0.35f, k => { seal.localScale = Vector3.one * (1.18f - 0.18f * k); face.color = Color.Lerp(Color.white * 1.3f, to, k); }, Ease.OutCubic);
         }
 
-        /// <summary>The seal bursts: a flash, the face breaks away and the vault's blue light pours out.</summary>
+        // The seal bursts: a flash, the face breaks away and the vault's blue light pours out
         private IEnumerator Shatter()
         {
             sparks.StartColor = new Color(1f, 0.95f, 0.8f, 1f);
@@ -171,7 +166,7 @@ namespace RoyalVault.Unity
             if (instant) seal.localScale = Vector3.one;
         }
 
-        /// <summary>Back to a whole, dim seal with no seals counted.</summary>
+        // Back to a whole, dim seal with no seals counted
         private void Mend(bool instant)
         {
             open = false;

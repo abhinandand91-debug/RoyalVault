@@ -1,16 +1,13 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// The guardians' flame clash, played before a big win is announced: both Anubis lean in and call up their flame,
-    /// hurl it at the reels, and the two fireballs arc in and meet at the centre of the screen in a burst of light (a
-    /// flash, shockwave rings, a spray of blue and gold sparks and a jolt through the machine). Without guardians (the
-    /// licensed art is not in a public checkout) the fireballs leave from the niches.
-    /// </summary>
+    // Both guardians hurl flames that meet over the reels before a big win
     public sealed class FlameClashView : MonoBehaviour
     {
         [SerializeField] private RectTransform layer;
@@ -34,12 +31,12 @@ namespace RoyalVault.Unity
         private GameObject impactVfx;
         private GameObject sparksVfx;
         private float vfxScale = 90f;
-        private System.Collections.Generic.List<(Transform guardian, int index)> lifted;
+        private List<(Transform guardian, int index)> lifted;
         private Vector2[] fallbackStarts = { new Vector2(-700f, 250f), new Vector2(700f, 250f) };
 
-        /// <summary>The fireballs leave the guardians' hands.</summary>
+        // The fireballs leave the guardians' hands
         public event Action Thrown;
-        /// <summary>The fireballs meet in the centre.</summary>
+        // The fireballs meet in the centre
         public event Action Clashed;
 
         public bool PlayOnBigWins { get => playOnBigWins; set => playOnBigWins = value; }
@@ -59,7 +56,7 @@ namespace RoyalVault.Unity
             shakeTarget = shake;
         }
 
-        /// <summary>Optional store particle effects played where the flames meet (see <see cref="UiVfx"/>).</summary>
+        // Optional store particle effects played where the flames meet (see UiVfx)
         public void SetStoreEffects(GameObject impact, GameObject sparks, float scale)
         {
             impactVfx = impact;
@@ -82,23 +79,33 @@ namespace RoyalVault.Unity
             foreach (UiParticleEmitter t in trails) t.Intensity = 0f;
         }
 
-        /// <summary>The whole clash: wind-up, throw, flight and the burst where the flames meet.</summary>
+        // The whole clash: wind-up, throw, flight and the burst where the flames meet
         public IEnumerator Play()
         {
             IsPlaying = true;
-            var active = new System.Collections.Generic.List<CharacterView>();
-            foreach (CharacterView g in guardians) if (g != null && g.isActiveAndEnabled) active.Add(g);
-
-            // the guardians lean in over the reel frame, so for the throw they are drawn above the machine
-            // (an interrupted clash would have left them there: put them back first)
+            List<CharacterView> active = guardians.Where(g => g != null && g.isActiveAndEnabled).ToList();
             if (lifted != null) Restore(lifted);
             lifted = RaiseAboveMachine(active);
 
-            // wind-up: both lean in and call up their flame; throw when both are ready
-            foreach (CharacterView g in active) g.WindUp();
-            float wait = 0f;
-            while (wait < 1.8f && active.Exists(g => !g.ReadyToThrow)) { wait += Time.deltaTime; yield return null; }
+            yield return WindUp(active);
+            Vector2[] starts = Throw(active);
+            yield return Fly(starts);
+            yield return Clash(starts.Length);
 
+            Restore(lifted);
+            lifted = null;
+            IsPlaying = false;
+        }
+
+        private static IEnumerator WindUp(List<CharacterView> active)
+        {
+            foreach (CharacterView g in active) g.WindUp();
+            for (float t = 0f; t < 1.8f && active.Exists(g => !g.ReadyToThrow); t += Time.deltaTime) yield return null;
+        }
+
+        // Releases the flames and returns where each ball starts, left one first
+        private Vector2[] Throw(List<CharacterView> active)
+        {
             int count = Mathf.Min(2, fireballs.Length);
             var starts = new Vector2[count];
             for (int i = 0; i < count; i++)
@@ -106,67 +113,76 @@ namespace RoyalVault.Unity
                 starts[i] = i < active.Count ? (Vector2)layer.InverseTransformPoint(active[i].HandPosition) : fallbackStarts[i];
                 if (i < active.Count) active[i].Release();
             }
-            // the left guardian's ball comes from the left: order the starts by x
             if (count == 2 && starts[0].x > starts[1].x) (starts[0], starts[1]) = (starts[1], starts[0]);
             Thrown?.Invoke();
+            return starts;
+        }
 
-            // flight: an arc that rises a little, accelerating into the centre, with a trail of sparks behind
-            for (int i = 0; i < count; i++)
-            {
-                fireballs[i].gameObject.SetActive(true);
-                fireballs[i].color = new Color(magic.r, magic.g, magic.b, 0.95f);
-                trails[i].StartColor = new Color(Mathf.Lerp(magic.r, 1f, 0.6f), Mathf.Lerp(magic.g, 1f, 0.6f), 1f, 0.95f);
-                trails[i].EndColor = new Color(magic.r, magic.g, magic.b, 0f);
-                trails[i].Intensity = 1f;
-            }
-            float t = 0f;
-            while (t < flightSeconds)
+        private IEnumerator Fly(Vector2[] starts)
+        {
+            for (int i = 0; i < starts.Length; i++) Light(i);
+            for (float t = 0f; t < flightSeconds;)
             {
                 t += Time.deltaTime;
                 float k = Mathf.Clamp01(t / flightSeconds);
-                float e = k * k * (1.6f - 0.6f * k); // eases in: slow off the hand, fast into the clash
-                for (int i = 0; i < count; i++)
-                {
-                    Vector2 a = starts[i];
-                    Vector2 control = Vector2.Lerp(a, meetingPoint, 0.5f) + new Vector2(0f, 170f);
-                    Vector2 p = Mathf.Pow(1f - e, 2f) * a + 2f * (1f - e) * e * control + e * e * meetingPoint;
-                    fireballs[i].rectTransform.anchoredPosition = p;
-                    float pulse = 1f + 0.12f * Mathf.Sin(t * 40f + i);
-                    fireballs[i].rectTransform.localScale = Vector3.one * Mathf.Lerp(0.7f, 1.25f, e) * pulse;
-                    cores[i].rectTransform.localScale = Vector3.one * (0.9f + 0.2f * Mathf.Sin(t * 55f));
-                    trails[i].Origin = p - ((RectTransform)trails[i].transform).anchoredPosition;
-                }
+                float e = k * k * (1.6f - 0.6f * k); // slow off the hand, fast into the clash
+                for (int i = 0; i < starts.Length; i++) PlaceBall(i, starts[i], e, t);
                 yield return null;
             }
+        }
 
-            // the clash: the balls vanish into a flash, rings blast out, sparks spray, the machine jolts
+        private void Light(int i)
+        {
+            fireballs[i].gameObject.SetActive(true);
+            fireballs[i].color = new Color(magic.r, magic.g, magic.b, 0.95f);
+            trails[i].StartColor = Whiter(0.6f, 0.95f);
+            trails[i].EndColor = new Color(magic.r, magic.g, magic.b, 0f);
+            trails[i].Intensity = 1f;
+        }
+
+        // Along a rising arc into the meeting point
+        private void PlaceBall(int i, Vector2 start, float e, float t)
+        {
+            Vector2 control = Vector2.Lerp(start, meetingPoint, 0.5f) + new Vector2(0f, 170f);
+            Vector2 p = Mathf.Pow(1f - e, 2f) * start + 2f * (1f - e) * e * control + e * e * meetingPoint;
+            fireballs[i].rectTransform.anchoredPosition = p;
+            float pulse = 1f + 0.12f * Mathf.Sin(t * 40f + i);
+            fireballs[i].rectTransform.localScale = Vector3.one * Mathf.Lerp(0.7f, 1.25f, e) * pulse;
+            cores[i].rectTransform.localScale = Vector3.one * (0.9f + 0.2f * Mathf.Sin(t * 55f));
+            trails[i].Origin = p - ((RectTransform)trails[i].transform).anchoredPosition;
+        }
+
+        private IEnumerator Clash(int count)
+        {
             for (int i = 0; i < count; i++) { fireballs[i].gameObject.SetActive(false); trails[i].Intensity = 0f; }
             Clashed?.Invoke();
             UiVfx.Play(impactVfx, layer, meetingPoint, vfxScale, 3f);
             UiVfx.Play(sparksVfx, layer, meetingPoint, vfxScale, 3f);
+            Burst();
+            StartCoroutine(Rings());
+            StartCoroutine(Shake(0.35f, 14f));
+            Color c = Whiter(0.7f, 1f);
+            yield return Tween.Run(0.08f, k => flash.color = new Color(c.r, c.g, c.b, 0.55f * k), Ease.Linear);
+            yield return Tween.Run(0.5f, k => flash.color = new Color(c.r, c.g, c.b, 0.55f * (1f - k)), Ease.OutCubic);
+        }
+
+        private void Burst()
+        {
             burst.Origin = meetingPoint - ((RectTransform)burst.transform).anchoredPosition;
             goldBurst.Origin = burst.Origin;
-            burst.StartColor = new Color(Mathf.Lerp(magic.r, 1f, 0.5f), Mathf.Lerp(magic.g, 1f, 0.5f), 1f, 1f);
+            burst.StartColor = Whiter(0.5f, 1f);
             burst.EndColor = new Color(magic.r, magic.g, magic.b, 0f);
             burst.Burst(110, 3.4f);
             goldBurst.Burst(60, 2.4f);
-            StartCoroutine(Rings());
-            StartCoroutine(Shake(0.35f, 14f));
-            yield return Tween.Run(0.08f, k => flash.color = new Color(Mathf.Lerp(magic.r, 1f, 0.7f), Mathf.Lerp(magic.g, 1f, 0.7f), 1f, 0.55f * k), Ease.Linear);
-            yield return Tween.Run(0.5f, k => flash.color = new Color(Mathf.Lerp(magic.r, 1f, 0.7f), Mathf.Lerp(magic.g, 1f, 0.7f), 1f, 0.55f * (1f - k)), Ease.OutCubic);
-            // by now they have recoiled back into their niches: return them behind the machine
-            Restore(lifted);
-            lifted = null;
-            IsPlaying = false;
         }
 
-        /// <summary>
-        /// Moves each guardian to just above the machine in the drawing order (still under this effect layer, the console
-        /// and the celebrations) and returns where each was, to put it back.
-        /// </summary>
-        private System.Collections.Generic.List<(Transform guardian, int index)> RaiseAboveMachine(System.Collections.Generic.List<CharacterView> active)
+        private Color Whiter(float amount, float alpha) =>
+            new Color(Mathf.Lerp(magic.r, 1f, amount), Mathf.Lerp(magic.g, 1f, amount), 1f, alpha);
+
+        // Draws the guardians above the machine and returns their old order
+        private List<(Transform guardian, int index)> RaiseAboveMachine(List<CharacterView> active)
         {
-            var lifted = new System.Collections.Generic.List<(Transform, int)>();
+            var lifted = new List<(Transform, int)>();
             if (shakeTarget == null) return lifted;
             Transform machine = shakeTarget;
             foreach (CharacterView g in active)
@@ -180,7 +196,7 @@ namespace RoyalVault.Unity
             return lifted;
         }
 
-        private static void Restore(System.Collections.Generic.List<(Transform guardian, int index)> lifted)
+        private static void Restore(List<(Transform guardian, int index)> lifted)
         {
             foreach ((Transform guardian, int index) in lifted) guardian.SetSiblingIndex(index);
         }
@@ -190,10 +206,10 @@ namespace RoyalVault.Unity
             for (int i = 0; i < rings.Length; i++)
             {
                 Image ring = rings[i];
-                int index = i; // each ring keeps its own number (the loop variable is shared by the closures)
+                int index = i;
                 ring.gameObject.SetActive(true);
                 ring.rectTransform.anchoredPosition = meetingPoint;
-                Color c = index == 0 ? new Color(Mathf.Lerp(magic.r, 1f, 0.5f), Mathf.Lerp(magic.g, 1f, 0.5f), 1f, 1f) : new Color(1f, 0.85f, 0.5f, 1f);
+                Color c = index == 0 ? Whiter(0.5f, 1f) : new Color(1f, 0.85f, 0.5f, 1f);
                 StartCoroutine(Tween.Run(0.7f + 0.2f * index, k =>
                 {
                     ring.rectTransform.localScale = Vector3.one * Mathf.Lerp(0.2f, 3.2f + index, Ease.OutCubic(k));

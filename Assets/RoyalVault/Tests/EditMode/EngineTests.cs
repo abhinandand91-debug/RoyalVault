@@ -4,7 +4,7 @@ using RoyalVault.Core;
 
 namespace RoyalVault.Tests
 {
-    /// <summary>The engine and win rules on a tiny hand-made machine, so every expected value is easy to check by eye.</summary>
+    // Engine and win rules on a tiny hand-made machine
     public sealed class EngineTests
     {
         // symbols: 0 = A, 1 = K, 2 = wild, 3 = scatter, 4 = crown

@@ -1,10 +1,6 @@
 namespace RoyalVault.Core
 {
-    /// <summary>
-    /// The machines that ship with the game. The reel strips and pays were tuned with a simulation for a return to
-    /// player of about 95 percent (see <see cref="RtpSimulator"/> and the RTP tests); the editor turns these into
-    /// editable assets.
-    /// </summary>
+    // The machines that ship with the game
     public static class MachinePresets
     {
         // symbol order shared by both machines (the theme maps each id to its art)
@@ -22,7 +18,7 @@ namespace RoyalVault.Core
         private static int[] Pay5(int three, int four, int five) { return new[] { 0, 0, 0, three, four, five }; }
         private static int[] Pay3(int three) { return new[] { 0, 0, 0, three }; }
 
-        /// <summary>The Royal Vault machine: 5 reels, 3 rows, 20 paylines, scatter free spins and three progressive jackpots.</summary>
+        // 5 x 3, 20 lines, free spins and three progressive jackpots
         public static MachineDefinition RoyalVault5x3()
         {
             return new MachineDefinition
@@ -65,7 +61,7 @@ namespace RoyalVault.Core
             };
         }
 
-        /// <summary>A classic 3 x 3 machine with 5 paylines, on the same symbols and theme.</summary>
+        // A classic 3 x 3 machine with 5 paylines, on the same symbols and theme
         public static MachineDefinition Classic3x3()
         {
             return new MachineDefinition

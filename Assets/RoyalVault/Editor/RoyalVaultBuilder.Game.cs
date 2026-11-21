@@ -10,64 +10,67 @@ namespace RoyalVault.EditorTools
     {
         private const string PrefabPath = Root + "Prefabs/RoyalVaultGame.prefab";
 
-        /// <summary>
-        /// The whole game as one prefab: an overlay canvas laid out on a 1920 x 1080 design (the approved Figma mockup),
-        /// with <see cref="GameBootstrap"/> on the root. The reels themselves are built at run time from the machine.
-        /// </summary>
+        // Builds the game prefab on a 1920 x 1080 canvas
         private static GameObject BuildGamePrefab(MachineDefinitionAsset machine, ThemeDefinition theme)
         {
             EnsureFolder(Root + "Prefabs");
-            var root = new GameObject("RoyalVaultGame", typeof(RectTransform));
-            Canvas canvas = root.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            var scaler = root.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
-            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
-            root.AddComponent<GraphicRaycaster>();
+            GameObject root = OverlayCanvas("RoyalVaultGame");
             Transform t = root.transform;
-
-            // backdrop: the vault, darkened at the edges
-            Image background = Stretch("Background", t, theme.background);
-            var fitter = background.gameObject.AddComponent<AspectRatioFitter>();
-            fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
-            fitter.aspectRatio = 16f / 9f;
-            Stretch("Vignette", t, theme.vignette);
-
-            // the guardians in their niches
-            UiFactory.Image("Niche Left", t, theme.niche, new Vector2(-800, -13), new Vector2(232, 751));
-            UiFactory.Image("Niche Right", t, theme.niche, new Vector2(800, -13), new Vector2(232, 751));
-            CharacterView left = Character("Guardian Left", t, theme, -785f, false, 0f);
-            CharacterView right = Character("Guardian Right", t, theme, 785f, true, 1.7f);
-
-            // the reels (built at run time) inside their frame
+            Backdrop(t, theme, Color.white);
+            CharacterView[] guardians = Guardians(t, theme);
             RectTransform machineRect = UiFactory.Stretch("Machine", t);
             var machineView = machineRect.gameObject.AddComponent<MachineView>();
-
-            // logo and jackpots
             Image logo = UiFactory.Image("Logo", t, theme.logo, new Vector2(0, 455), new Vector2(480, 171));
             logo.preserveAspect = true;
             JackpotPanelView jackpots = Jackpots(t, theme);
-
-            // console
             ConsoleView console = Console(t, theme);
             SealMeterView sealMeter = SealMeter(console.transform, theme);
             FlameClashView flameClash = FlameClash(t, theme, machineRect);
             MessageToast toast = Toast(t, theme);
 
-            // overlays
+            // overlays, last so they draw on top
             BigWinView bigWin = BigWin(t, theme);
             PaytableView paytable = Paytable(t, theme);
             ChapterCardView chapterCard = ChapterCard(t, theme);
             CoachMarkView coachMarks = CoachMarks(t, theme);
 
             var presenter = root.AddComponent<WinPresenter>();
-            var bootstrap = root.AddComponent<GameBootstrap>();
-            bootstrap.Setup(machine, theme, machineView, console, jackpots, presenter, bigWin, paytable, toast, new[] { left, right }, sealMeter, flameClash, chapterCard, coachMarks);
-
+            root.AddComponent<GameBootstrap>().Setup(machine, theme, machineView, console, jackpots, presenter, bigWin, paytable, toast, guardians,
+                                                     sealMeter, flameClash, chapterCard, coachMarks);
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             Object.DestroyImmediate(root);
             return prefab;
+        }
+
+        // A 1920 x 1080 overlay canvas that scales to any screen and takes clicks
+        private static GameObject OverlayCanvas(string name)
+        {
+            var root = new GameObject(name, typeof(RectTransform));
+            root.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            var scaler = root.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
+            root.AddComponent<GraphicRaycaster>();
+            return root;
+        }
+
+        // The vault painting filling the screen, darkened at the edges
+        private static void Backdrop(Transform t, ThemeDefinition theme, Color tint)
+        {
+            Image background = Stretch("Background", t, theme.background);
+            background.color = tint;
+            var fitter = background.gameObject.AddComponent<AspectRatioFitter>();
+            fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            fitter.aspectRatio = 16f / 9f;
+            Stretch("Vignette", t, theme.vignette);
+        }
+
+        private static CharacterView[] Guardians(Transform t, ThemeDefinition theme)
+        {
+            UiFactory.Image("Niche Left", t, theme.niche, new Vector2(-800, -13), new Vector2(232, 751));
+            UiFactory.Image("Niche Right", t, theme.niche, new Vector2(800, -13), new Vector2(232, 751));
+            return new[] { Character("Guardian Left", t, theme, -785f, false, 0f), Character("Guardian Right", t, theme, 785f, true, 1.7f) };
         }
 
         private static Image Stretch(string name, Transform parent, Sprite sprite)
@@ -84,95 +87,90 @@ namespace RoyalVault.EditorTools
             RectTransform holder = UiFactory.Rect(name, parent, new Vector2(x, -380), new Vector2(250, 705));
             holder.pivot = new Vector2(0.5f, 0f);
             holder.anchoredPosition = new Vector2(x, -380);
-
-            // a warm aura behind the figure
             Image aura = UiFactory.Image("Aura", holder, theme.glow, new Vector2(0, 40), new Vector2(560, 940));
             aura.material = theme.additive;
             aura.color = new Color(1f, 0.72f, 0.32f, 0.14f);
+            Image figure = Figure(holder, mirrored);
+            UiParticleEmitter dust = FigureDust(holder, theme);
 
+            RectTransform hand = UiFactory.Rect("Hand", holder, Vector2.zero, Vector2.one * 10f);
+            hand.anchorMin = hand.anchorMax = new Vector2(0.5f, 0f);
+            Image handGlow = UiFactory.Image("Hand Glow", hand, theme.glow, Vector2.zero, Vector2.one * 130f);
+            handGlow.material = theme.additive;
+
+            var view = holder.gameObject.AddComponent<CharacterView>();
+            view.Setup(figure, phase);
+            view.SetupEffects(aura, hand, handGlow, HandFlame(hand, theme), HandEmbers(hand, theme), HandSparks(hand, theme), dust);
+            return view;
+        }
+
+        private static Image Figure(RectTransform holder, bool mirrored)
+        {
             Image image = UiFactory.Image("Figure", holder, null, Vector2.zero, new Vector2(250, 705));
             image.rectTransform.pivot = new Vector2(0.5f, 0f);
             image.rectTransform.anchoredPosition = new Vector2(0, -352.5f);
             image.preserveAspect = true;
             image.color = Color.white;
             if (mirrored) image.rectTransform.localScale = new Vector3(-1f, 1f, 1f);
+            return image;
+        }
 
-            // gold dust drifting past the figure
+        private static UiParticleEmitter FigureDust(RectTransform holder, ThemeDefinition theme)
+        {
             UiParticleEmitter dust = Emitter("Gold Dust", holder, theme, theme.glow, Vector2.zero);
             dust.Rate = 2.5f; dust.LifeRange = new Vector2(3f, 5f); dust.SizeRange = new Vector2(5f, 12f); dust.EndSize = 0.6f;
             dust.Area = new Vector2(260f, 640f); dust.VelocityMin = new Vector2(-8f, 12f); dust.VelocityMax = new Vector2(8f, 34f);
             dust.Swirl = 10f; dust.SwirlFrequency = 1.5f; dust.MaxParticles = 30;
             dust.StartColor = new Color(1f, 0.85f, 0.5f, 0.6f); dust.EndColor = new Color(1f, 0.8f, 0.4f, 0f);
+            return dust;
+        }
 
-            // the magic in the raised hand: a glow, a living flame, embers and (on big wins) a spray of gold sparks
-            RectTransform hand = UiFactory.Rect("Hand", holder, Vector2.zero, Vector2.one * 10f);
-            hand.anchorMin = hand.anchorMax = new Vector2(0.5f, 0f);
-            Image handGlow = UiFactory.Image("Hand Glow", hand, theme.glow, Vector2.zero, Vector2.one * 130f);
-            handGlow.material = theme.additive;
-
+        private static UiParticleEmitter HandFlame(RectTransform hand, ThemeDefinition theme)
+        {
             UiParticleEmitter flame = Emitter("Flame", hand, theme, theme.glow, Vector2.zero);
             flame.Rate = 42f; flame.LifeRange = new Vector2(0.45f, 0.95f); flame.SizeRange = new Vector2(22f, 46f); flame.EndSize = 0.15f;
             flame.Area = new Vector2(18f, 10f); flame.VelocityMin = new Vector2(-25f, 70f); flame.VelocityMax = new Vector2(25f, 150f);
             flame.Gravity = new Vector2(0f, 60f); flame.Swirl = 40f; flame.SwirlFrequency = 9f; flame.MaxParticles = 110;
+            return flame;
+        }
 
+        private static UiParticleEmitter HandEmbers(RectTransform hand, ThemeDefinition theme)
+        {
             UiParticleEmitter embers = Emitter("Embers", hand, theme, theme.glow, Vector2.zero);
             embers.Rate = 7f; embers.LifeRange = new Vector2(1.2f, 2.2f); embers.SizeRange = new Vector2(5f, 10f); embers.EndSize = 0.5f;
             embers.Area = new Vector2(30f, 20f); embers.VelocityMin = new Vector2(-50f, 60f); embers.VelocityMax = new Vector2(50f, 140f);
             embers.Gravity = new Vector2(0f, -15f); embers.Swirl = 25f; embers.SwirlFrequency = 4f; embers.MaxParticles = 70;
+            return embers;
+        }
 
+        // Silent until a big win sprays them
+        private static UiParticleEmitter HandSparks(RectTransform hand, ThemeDefinition theme)
+        {
             UiParticleEmitter sparks = Emitter("Sparks", hand, theme, theme.sparkle, Vector2.zero);
             sparks.Rate = 0f; sparks.LifeRange = new Vector2(0.8f, 1.4f); sparks.SizeRange = new Vector2(14f, 30f); sparks.EndSize = 0.2f;
             sparks.VelocityMin = new Vector2(-80f, 280f); sparks.VelocityMax = new Vector2(80f, 520f);
             sparks.Gravity = new Vector2(0f, -700f); sparks.Drag = 0.6f; sparks.MaxParticles = 120;
             sparks.StartColor = new Color(1f, 0.9f, 0.6f, 1f); sparks.EndColor = new Color(1f, 0.6f, 0.2f, 0f);
-
-            var view = holder.gameObject.AddComponent<CharacterView>();
-            view.Setup(image, phase);
-            view.SetupEffects(aura, hand, handGlow, flame, embers, sparks, dust);
-            return view;
+            return sparks;
         }
 
-        /// <summary>The guardians' flame clash: two fireballs with spark trails, a flash, shockwave rings and bursts.</summary>
+        // Both guardians hurl flames that meet over the reels before a big win
         private static FlameClashView FlameClash(Transform parent, ThemeDefinition theme, RectTransform machine)
         {
             RectTransform layer = UiFactory.Stretch("Flame Clash", parent);
+            var trails = new UiParticleEmitter[2];
             var fireballs = new Image[2];
             var cores = new Image[2];
-            var trails = new UiParticleEmitter[2];
-            for (int i = 0; i < 2; i++)
-            {
-                UiParticleEmitter trail = Emitter("Trail " + (i + 1), layer, theme, theme.glow, Vector2.zero);
-                trail.Rate = 150f; trail.LifeRange = new Vector2(0.25f, 0.55f); trail.SizeRange = new Vector2(26f, 54f); trail.EndSize = 0.1f;
-                trail.Area = new Vector2(16f, 16f); trail.VelocityMin = new Vector2(-30f, -30f); trail.VelocityMax = new Vector2(30f, 30f);
-                trail.Swirl = 30f; trail.SwirlFrequency = 12f; trail.MaxParticles = 140; trail.Intensity = 0f;
-                trails[i] = trail;
-
-                fireballs[i] = UiFactory.Image("Fireball " + (i + 1), layer, theme.glow, Vector2.zero, new Vector2(190, 190));
-                fireballs[i].material = theme.additive;
-                cores[i] = UiFactory.Image("Core", fireballs[i].transform, theme.glow, Vector2.zero, new Vector2(80, 80));
-                cores[i].material = theme.additive;
-                cores[i].color = Color.white;
-                fireballs[i].gameObject.SetActive(false);
-            }
-
             var rings = new Image[2];
             for (int i = 0; i < 2; i++)
             {
+                trails[i] = FireTrail(layer, theme, i);
+                (fireballs[i], cores[i]) = Fireball(layer, theme, i);
                 rings[i] = UiFactory.Image("Shockwave " + (i + 1), layer, Sprite("Generated/ring"), Vector2.zero, new Vector2(220, 220));
                 rings[i].material = theme.additive;
                 rings[i].gameObject.SetActive(false);
             }
-
-            UiParticleEmitter burst = Emitter("Clash Burst", layer, theme, theme.sparkle, Vector2.zero);
-            burst.Rate = 0f; burst.LifeRange = new Vector2(0.6f, 1.3f); burst.SizeRange = new Vector2(16f, 40f); burst.EndSize = 0.15f;
-            burst.VelocityMin = new Vector2(-300f, 200f); burst.VelocityMax = new Vector2(300f, 700f);
-            burst.Gravity = new Vector2(0f, -500f); burst.Drag = 0.5f; burst.MaxParticles = 160;
-            UiParticleEmitter gold = Emitter("Clash Gold", layer, theme, theme.glow, Vector2.zero);
-            gold.Rate = 0f; gold.LifeRange = new Vector2(0.7f, 1.5f); gold.SizeRange = new Vector2(10f, 22f); gold.EndSize = 0.2f;
-            gold.VelocityMin = new Vector2(-200f, 150f); gold.VelocityMax = new Vector2(200f, 520f);
-            gold.Gravity = new Vector2(0f, -650f); gold.Drag = 0.4f; gold.MaxParticles = 90;
-            gold.StartColor = new Color(1f, 0.88f, 0.55f, 1f); gold.EndColor = new Color(1f, 0.6f, 0.2f, 0f);
-
+            (UiParticleEmitter burst, UiParticleEmitter gold) = ClashBursts(layer, theme);
             Image flash = Stretch("Flash", layer, theme.white);
             flash.material = theme.additive;
             flash.color = new Color(1f, 1f, 1f, 0f);
@@ -182,11 +180,45 @@ namespace RoyalVault.EditorTools
             return view;
         }
 
-        /// <summary>The Vault Seal medallion beside the spin button: the seal's face, its cracks, the pips that count seals.</summary>
+        private static UiParticleEmitter FireTrail(RectTransform layer, ThemeDefinition theme, int i)
+        {
+            UiParticleEmitter trail = Emitter("Trail " + (i + 1), layer, theme, theme.glow, Vector2.zero);
+            trail.Rate = 150f; trail.LifeRange = new Vector2(0.25f, 0.55f); trail.SizeRange = new Vector2(26f, 54f); trail.EndSize = 0.1f;
+            trail.Area = new Vector2(16f, 16f); trail.VelocityMin = new Vector2(-30f, -30f); trail.VelocityMax = new Vector2(30f, 30f);
+            trail.Swirl = 30f; trail.SwirlFrequency = 12f; trail.MaxParticles = 140; trail.Intensity = 0f;
+            return trail;
+        }
+
+        private static (Image, Image) Fireball(RectTransform layer, ThemeDefinition theme, int i)
+        {
+            Image ball = UiFactory.Image("Fireball " + (i + 1), layer, theme.glow, Vector2.zero, new Vector2(190, 190));
+            ball.material = theme.additive;
+            Image core = UiFactory.Image("Core", ball.transform, theme.glow, Vector2.zero, new Vector2(80, 80));
+            core.material = theme.additive;
+            core.color = Color.white;
+            ball.gameObject.SetActive(false);
+            return (ball, core);
+        }
+
+        // Blue sparks and gold embers sprayed where the flames meet
+        private static (UiParticleEmitter, UiParticleEmitter) ClashBursts(RectTransform layer, ThemeDefinition theme)
+        {
+            UiParticleEmitter burst = Emitter("Clash Burst", layer, theme, theme.sparkle, Vector2.zero);
+            burst.Rate = 0f; burst.LifeRange = new Vector2(0.6f, 1.3f); burst.SizeRange = new Vector2(16f, 40f); burst.EndSize = 0.15f;
+            burst.VelocityMin = new Vector2(-300f, 200f); burst.VelocityMax = new Vector2(300f, 700f);
+            burst.Gravity = new Vector2(0f, -500f); burst.Drag = 0.5f; burst.MaxParticles = 160;
+            UiParticleEmitter gold = Emitter("Clash Gold", layer, theme, theme.glow, Vector2.zero);
+            gold.Rate = 0f; gold.LifeRange = new Vector2(0.7f, 1.5f); gold.SizeRange = new Vector2(10f, 22f); gold.EndSize = 0.2f;
+            gold.VelocityMin = new Vector2(-200f, 150f); gold.VelocityMax = new Vector2(200f, 520f);
+            gold.Gravity = new Vector2(0f, -650f); gold.Drag = 0.4f; gold.MaxParticles = 90;
+            gold.StartColor = new Color(1f, 0.88f, 0.55f, 1f); gold.EndColor = new Color(1f, 0.6f, 0.2f, 0f);
+            return (burst, gold);
+        }
+
+        // The Vault Seal medallion: face, cracks and pips
         private static SealMeterView SealMeter(Transform parent, ThemeDefinition theme)
         {
             RectTransform holder = UiFactory.Rect("Seal Meter", parent, new Vector2(-250, -452), new Vector2(120, 120));
-
             Image magic = UiFactory.Image("Vault Light", holder, theme.glow, Vector2.zero, new Vector2(230, 230));
             magic.material = theme.additive;
             magic.color = new Color(0f, 0f, 0f, 0f);
@@ -194,42 +226,51 @@ namespace RoyalVault.EditorTools
             RectTransform seal = UiFactory.Rect("Seal", holder, new Vector2(0, 8), new Vector2(92, 92));
             Image face = UiFactory.Image("Face", seal, null, Vector2.zero, new Vector2(92, 92));
             face.preserveAspect = true;
-            var cracks = new Image[3];
-            var fractures = new Image[3];
-            for (int i = 0; i < cracks.Length; i++)
-            {
-                fractures[i] = UiFactory.Image("Fracture " + (i + 1), seal, Sprite("Generated/crack_" + (i + 1)), Vector2.zero, new Vector2(90, 90));
-                fractures[i].color = new Color(0.12f, 0.06f, 0.02f, 0.85f);
-                fractures[i].enabled = false;
-            }
-            for (int i = 0; i < cracks.Length; i++)
-            {
-                cracks[i] = UiFactory.Image("Crack " + (i + 1), seal, Sprite("Generated/crack_" + (i + 1)), Vector2.zero, new Vector2(84, 84));
-                cracks[i].material = theme.additive;
-                cracks[i].enabled = false;
-            }
+            Image[] fractures = CrackLayers(seal, "Fracture", 90f, img => { img.color = new Color(0.12f, 0.06f, 0.02f, 0.85f); });
+            Image[] cracks = CrackLayers(seal, "Crack", 84f, img => { img.material = theme.additive; });
             Image flash = UiFactory.Image("Flash", seal, theme.glow, Vector2.zero, new Vector2(190, 190));
             flash.material = theme.additive;
             flash.color = new Color(1f, 0.9f, 0.6f, 0f);
 
-            // three small diamonds under the seal: one lights for every seal that lands
+            var view = holder.gameObject.AddComponent<SealMeterView>();
+            view.Setup(seal, face, cracks, Pips(holder, theme), flash, magic, SealSparks(seal, theme));
+            view.SetupFractures(fractures);
+            return view;
+        }
+
+        // One hidden image per crack stage
+        private static Image[] CrackLayers(RectTransform seal, string name, float size, System.Action<Image> style)
+        {
+            var layers = new Image[3];
+            for (int i = 0; i < layers.Length; i++)
+            {
+                layers[i] = UiFactory.Image(name + " " + (i + 1), seal, Sprite("Generated/crack_" + (i + 1)), Vector2.zero, new Vector2(size, size));
+                style(layers[i]);
+                layers[i].enabled = false;
+            }
+            return layers;
+        }
+
+        // Three small diamonds under the seal, one per landed seal
+        private static Image[] Pips(RectTransform holder, ThemeDefinition theme)
+        {
             var pips = new Image[3];
             for (int i = 0; i < pips.Length; i++)
             {
                 pips[i] = UiFactory.Image("Pip " + (i + 1), holder, theme.white, new Vector2((i - 1) * 20f, -54f), new Vector2(8, 8));
                 pips[i].rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
             }
+            return pips;
+        }
 
+        private static UiParticleEmitter SealSparks(RectTransform seal, ThemeDefinition theme)
+        {
             UiParticleEmitter sparks = Emitter("Seal Sparks", seal, theme, theme.sparkle, Vector2.zero);
             sparks.Rate = 0f; sparks.LifeRange = new Vector2(0.5f, 1.1f); sparks.SizeRange = new Vector2(10f, 22f); sparks.EndSize = 0.2f;
             sparks.Area = new Vector2(40f, 40f); sparks.VelocityMin = new Vector2(-220f, 60f); sparks.VelocityMax = new Vector2(220f, 380f);
             sparks.Gravity = new Vector2(0f, -600f); sparks.Drag = 0.8f; sparks.MaxParticles = 120;
             sparks.EndColor = new Color(1f, 0.6f, 0.2f, 0f);
-
-            var view = holder.gameObject.AddComponent<SealMeterView>();
-            view.Setup(seal, face, cracks, pips, flash, magic, sparks);
-            view.SetupFractures(fractures);
-            return view;
+            return sparks;
         }
 
         private static UiParticleEmitter Emitter(string name, Transform parent, ThemeDefinition theme, Sprite sprite, Vector2 position)
@@ -241,7 +282,7 @@ namespace RoyalVault.EditorTools
             return emitter;
         }
 
-        // Glow, turning rays, the medallion with its light sweep, and the SPIN / STOP label.
+        // Glow, turning rays, the medallion with its light sweep, and the SPIN / STOP label
         private static SpinButtonView SpinButton(Transform parent, ThemeDefinition theme, Vector2 position)
         {
             Image glow = UiFactory.Image("Spin Glow", parent, theme.glow, position, new Vector2(330, 330));
@@ -292,48 +333,54 @@ namespace RoyalVault.EditorTools
         private static ConsoleView Console(Transform parent, ThemeDefinition theme)
         {
             RectTransform console = UiFactory.Stretch("Console", parent);
+            ConsoleBar(console);
+            (CountingText balance, TextMeshProUGUI winLabel, CountingText win) = Readouts(console, theme);
+            SpinButtonView spin = SpinButton(console, theme, new Vector2(0, -460));
 
-            // the bar spans the whole screen width (wide screens too): lacquer, a double gold rule, the spin socket
+            Image autoPill = Pill("Auto", console, theme, new Vector2(362, -471), new Vector2(168, 64));
+            TextMeshProUGUI autoText = UiFactory.Text("Label", autoPill.transform, theme.headingFont, "AUTO", 17, theme.gold, Vector2.zero, new Vector2(168, 64), TextAlignmentOptions.Center, 22);
+            (Button minus, Button plus, TextMeshProUGUI totalBet) = BetStepper(console, theme);
+            Button menu = IconButton("Menu", console, theme, theme.iconMenu, new Vector2(-884, -471), out _);
+            Button sound = IconButton("Sound", console, theme, theme.iconSound, new Vector2(884, -471), out Image soundIcon);
+
+            var view = console.gameObject.AddComponent<ConsoleView>();
+            view.Setup(balance, winLabel, win, totalBet, autoText, spin, minus, plus, UiFactory.Button(autoPill), menu, sound, soundIcon);
+            return view;
+        }
+
+        // Full-width lacquer bar with a double gold rule and the spin socket
+        private static void ConsoleBar(RectTransform console)
+        {
             RectTransform bar = BottomStrip("Bar", console, Sprite("Generated/bar"), 150, 0, 0).rectTransform;
-            Image rule = BottomStrip("Rule", bar, Sprite("Generated/rule"), 3, 148, 0);
+            BottomStrip("Rule", bar, Sprite("Generated/rule"), 3, 148, 0);
             Image inner = BottomStrip("Inner Rule", bar, Sprite("Generated/rule"), 2, 140, 160);
             inner.color = new Color(1f, 1f, 1f, 0.45f);
-            _ = rule;
             UiFactory.Image("Spin Socket", console, Sprite("Generated/socket"), new Vector2(0, -460), new Vector2(320, 320));
+        }
 
-            // readouts
-            TextMeshProUGUI balanceLabel = Left("Balance Label", console, theme.labelFont, "BALANCE", 15, theme.dimGold, -810, -444, 28);
-            TextMeshProUGUI balanceValue = Left("Balance", console, theme.headingFont, "0", 34, theme.ivory, -810, -482, 0);
+        private static (CountingText, TextMeshProUGUI, CountingText) Readouts(RectTransform console, ThemeDefinition theme)
+        {
+            Left("Balance Label", console, theme.labelFont, "BALANCE", 15, theme.dimGold, -810, -444, 28);
+            TextMeshProUGUI balance = Left("Balance", console, theme.headingFont, "0", 34, theme.ivory, -810, -482, 0);
             Image divider = UiFactory.Image("Divider", console, theme.white, new Vector2(-596, -462), new Vector2(1, 56));
             divider.color = new Color(theme.gold.r, theme.gold.g, theme.gold.b, 0.5f);
             TextMeshProUGUI winLabel = Left("Win Label", console, theme.labelFont, "WIN", 15, theme.dimGold, -560, -444, 28);
-            TextMeshProUGUI winValue = Left("Win", console, theme.headingFont, "0", 34, theme.paleGold, -560, -482, 0);
-            _ = balanceLabel;
+            TextMeshProUGUI win = Left("Win", console, theme.headingFont, "0", 34, theme.paleGold, -560, -482, 0);
+            return (balance.gameObject.AddComponent<CountingText>(), winLabel, win.gameObject.AddComponent<CountingText>());
+        }
 
-            SpinButtonView spin = SpinButton(console, theme, new Vector2(0, -460));
-
-            // auto play and the bet stepper
-            Image autoPill = Pill("Auto", console, theme, new Vector2(362, -471), new Vector2(168, 64));
-            TextMeshProUGUI autoText = UiFactory.Text("Label", autoPill.transform, theme.headingFont, "AUTO", 17, theme.gold, Vector2.zero, new Vector2(168, 64), TextAlignmentOptions.Center, 22);
+        private static (Button, Button, TextMeshProUGUI) BetStepper(RectTransform console, ThemeDefinition theme)
+        {
             Image stepper = Pill("Bet Stepper", console, theme, new Vector2(640, -471), new Vector2(340, 64));
             stepper.raycastTarget = false;
             Button minus = RoundButton("Bet Minus", stepper.transform, theme, new Vector2(-138, 0), 48, false);
             Button plus = RoundButton("Bet Plus", stepper.transform, theme, new Vector2(138, 0), 48, true);
             UiFactory.Text("Total Bet Label", stepper.transform, theme.labelFont, "TOTAL BET", 12, theme.dimGold, new Vector2(0, 14), new Vector2(200, 20), TextAlignmentOptions.Center, 26);
-            TextMeshProUGUI totalBet = UiFactory.Text("Total Bet", stepper.transform, theme.headingFont, "0", 26, theme.ivory, new Vector2(0, -9), new Vector2(200, 36));
-
-            // menu and sound at the ends
-            Button menu = IconButton("Menu", console, theme, theme.iconMenu, new Vector2(-884, -471), out _);
-            Button sound = IconButton("Sound", console, theme, theme.iconSound, new Vector2(884, -471), out Image soundIcon);
-
-            var view = console.gameObject.AddComponent<ConsoleView>();
-            CountingText balance = balanceValue.gameObject.AddComponent<CountingText>();
-            CountingText win = winValue.gameObject.AddComponent<CountingText>();
-            view.Setup(balance, winLabel, win, totalBet, autoText, spin, minus, plus, UiFactory.Button(autoPill), menu, sound, soundIcon);
-            return view;
+            TextMeshProUGUI total = UiFactory.Text("Total Bet", stepper.transform, theme.headingFont, "0", 26, theme.ivory, new Vector2(0, -9), new Vector2(200, 36));
+            return (minus, plus, total);
         }
 
-        /// <summary>A full-width strip anchored to the bottom of its parent, <paramref name="inset"/> pixels in from each side.</summary>
+        // A full-width strip anchored to the bottom of its parent, inset pixels in from each side
         private static Image BottomStrip(string name, Transform parent, Sprite sprite, float height, float y, float inset)
         {
             Image image = UiFactory.Image(name, parent, sprite, Vector2.zero, Vector2.zero);
@@ -406,41 +453,16 @@ namespace RoyalVault.EditorTools
             dim.color = new Color(0.02f, 0.02f, 0.03f, 0.8f);
             Button skip = UiFactory.Button(dim);
             skip.transition = Selectable.Transition.None;
-
             Image rays = UiFactory.Image("Rays", overlay, Sprite("Generated/rays"), new Vector2(0, 90), new Vector2(1500, 1500));
             Image halo = UiFactory.Image("Halo", overlay, theme.glow, new Vector2(0, 90), new Vector2(1100, 700));
             halo.color = new Color(1f, 0.78f, 0.38f, 0.35f);
 
-            // the heroes stand at either side, behind the banner, their feet at the foot of the screen
             CharacterAnimation[] motion = { theme.heroLeft, theme.heroRight };
             Vector2[] home = { new Vector2(-740, -560), new Vector2(760, -560) };
-            var heroes = new Image[2];
-            for (int i = 0; i < heroes.Length; i++)
-            {
-                heroes[i] = UiFactory.Image(i == 0 ? "Hero Left" : "Hero Right", overlay, null, home[i], new Vector2(300, 740));
-                heroes[i].rectTransform.pivot = new Vector2(0.5f, 0f);
-                heroes[i].color = Color.white;
-                if (motion[i] != null && motion[i].IsValid)
-                {
-                    Sprite first = motion[i].idle.frames[0];
-                    float height = 740f;
-                    heroes[i].rectTransform.sizeDelta = new Vector2(height * first.rect.width / first.rect.height, height);
-                }
-                if (i == 1) heroes[i].rectTransform.localScale = new Vector3(-1f, 1f, 1f);
-                heroes[i].gameObject.SetActive(false);
-            }
+            Image[] heroes = { Hero("Hero Left", overlay, motion[0], home[0], false), Hero("Hero Right", overlay, motion[1], home[1], true) };
             Image banner = UiFactory.Image("Banner", overlay, theme.bigWinBanner, new Vector2(0, 130), new Vector2(1200, 400));
             banner.preserveAspect = true;
-            TextMeshProUGUI title = UiFactory.Text("Title", overlay, theme.displayFont, "MEGA WIN", 128, Color.white, new Vector2(0, 130), new Vector2(1700, 180));
-            title.enableVertexGradient = true;
-            title.colorGradient = new VertexGradient(new Color32(255, 241, 193, 255), new Color32(255, 241, 193, 255), new Color32(184, 135, 59, 255), new Color32(184, 135, 59, 255));
-            title.outlineWidth = 0.12f;
-            title.outlineColor = new Color32(58, 37, 10, 255);
-            TextMeshProUGUI subtitle = UiFactory.Text("Subtitle", overlay, theme.headingFont, "", 40, theme.paleGold, new Vector2(0, 20), new Vector2(1400, 60), TextAlignmentOptions.Center, 20);
-            TextMeshProUGUI amountText = UiFactory.Text("Amount", overlay, theme.displayFont, "0", 112, theme.paleGold, new Vector2(0, -90), new Vector2(1400, 150));
-            amountText.outlineWidth = 0.1f;
-            amountText.outlineColor = new Color32(58, 37, 10, 255);
-            CountingText amount = amountText.gameObject.AddComponent<CountingText>();
+            (TextMeshProUGUI title, TextMeshProUGUI subtitle, CountingText amount) = BigWinText(overlay, theme);
             RectTransform coins = UiFactory.Rect("Coins", overlay, new Vector2(0, -560), Vector2.one * 10);
 
             var view = overlay.gameObject.AddComponent<BigWinView>();
@@ -449,7 +471,40 @@ namespace RoyalVault.EditorTools
             return view;
         }
 
-        // A full-screen click catcher that never tints.
+        // A hero beside the banner, feet at the foot of the screen, sized to its baked frames
+        private static Image Hero(string name, RectTransform overlay, CharacterAnimation motion, Vector2 home, bool mirrored)
+        {
+            const float height = 740f;
+            Image hero = UiFactory.Image(name, overlay, null, home, new Vector2(300, height));
+            hero.rectTransform.pivot = new Vector2(0.5f, 0f);
+            hero.color = Color.white;
+            if (motion != null && motion.IsValid)
+            {
+                Sprite first = motion.idle.frames[0];
+                hero.rectTransform.sizeDelta = new Vector2(height * first.rect.width / first.rect.height, height);
+            }
+            if (mirrored) hero.rectTransform.localScale = new Vector3(-1f, 1f, 1f);
+            hero.gameObject.SetActive(false);
+            return hero;
+        }
+
+        private static (TextMeshProUGUI, TextMeshProUGUI, CountingText) BigWinText(RectTransform overlay, ThemeDefinition theme)
+        {
+            var brown = new Color32(58, 37, 10, 255);
+            TextMeshProUGUI title = UiFactory.Text("Title", overlay, theme.displayFont, "MEGA WIN", 128, Color.white, new Vector2(0, 130), new Vector2(1700, 180));
+            title.enableVertexGradient = true;
+            Color32 light = new Color32(255, 241, 193, 255), dark = new Color32(184, 135, 59, 255);
+            title.colorGradient = new VertexGradient(light, light, dark, dark);
+            title.outlineWidth = 0.12f;
+            title.outlineColor = brown;
+            TextMeshProUGUI subtitle = UiFactory.Text("Subtitle", overlay, theme.headingFont, "", 40, theme.paleGold, new Vector2(0, 20), new Vector2(1400, 60), TextAlignmentOptions.Center, 20);
+            TextMeshProUGUI amount = UiFactory.Text("Amount", overlay, theme.displayFont, "0", 112, theme.paleGold, new Vector2(0, -90), new Vector2(1400, 150));
+            amount.outlineWidth = 0.1f;
+            amount.outlineColor = brown;
+            return (title, subtitle, amount.gameObject.AddComponent<CountingText>());
+        }
+
+        // A full-screen click catcher that never tints
         private static Button TapButton(Image graphic)
         {
             Button button = UiFactory.Button(graphic);
@@ -457,7 +512,7 @@ namespace RoyalVault.EditorTools
             return button;
         }
 
-        // A framed story chapter over the game: art in a window, chapter, title and typed beats.
+        // A framed story chapter over the game: art in a window, chapter, title and typed beats
         private static ChapterCardView ChapterCard(Transform parent, ThemeDefinition theme)
         {
             RectTransform root = UiFactory.Stretch("Chapter Card", parent);
@@ -476,7 +531,7 @@ namespace RoyalVault.EditorTools
             return view;
         }
 
-        // The chapter's story card laid out inside the panel: a masked art window above the words.
+        // The chapter's story card laid out inside the panel: a masked art window above the words
         private static StoryCardView ChapterStory(Transform panel, ThemeDefinition theme)
         {
             RectTransform rect = UiFactory.Rect("Story", panel, Vector2.zero, new Vector2(1320, 820));
@@ -499,7 +554,7 @@ namespace RoyalVault.EditorTools
             return view;
         }
 
-        // Four shades around a spotlight, a ring of light and a message bubble.
+        // Four shades around a spotlight, a ring of light and a message bubble
         private static CoachMarkView CoachMarks(Transform parent, ThemeDefinition theme)
         {
             RectTransform root = UiFactory.Stretch("Coach Marks", parent);

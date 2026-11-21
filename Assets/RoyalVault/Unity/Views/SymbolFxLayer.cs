@@ -5,12 +5,7 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// The light around winning symbols, drawn over the cell plates and outside the reels' masks so it is never cut
-    /// at a reel's edge: rotating rays behind the grand symbols (wild, crown, seal), a coloured glow behind gems and
-    /// treasures, twinkling stars, rising gold dust or blue sparks in front, and a ring of light when a special
-    /// symbol lands. Each style of symbol (see <see cref="SymbolStyle"/>) gets its own mix.
-    /// </summary>
+    // Light around winning symbols, drawn outside the reel masks
     public sealed class SymbolFxLayer : MonoBehaviour
     {
         private RectTransform back;
@@ -33,7 +28,7 @@ namespace RoyalVault.Unity
             magic = theme.characterMagic;
         }
 
-        /// <summary>Plays the win effects of <paramref name="art"/> around the cell at <paramref name="centre"/>.</summary>
+        // Plays the win effects of art around the cell at centre
         public void Play(Vector2 centre, Vector2 cell, ThemeDefinition.SymbolArt art, float seconds)
         {
             if (art == null || back == null) return;
@@ -67,7 +62,7 @@ namespace RoyalVault.Unity
             }
         }
 
-        /// <summary>A ring of light opens from a special symbol as it lands.</summary>
+        // A ring of light opens from a special symbol as it lands
         public void Land(Vector2 centre, Vector2 cell, ThemeDefinition.SymbolArt art)
         {
             if (art == null || back == null) return;
@@ -130,7 +125,7 @@ namespace RoyalVault.Unity
             return g.gameObject;
         }
 
-        /// <summary>Four-point stars that flare and fade at random spots over the symbol; jewels twinkle in colour.</summary>
+        // Four-point stars that flare and fade at random spots over the symbol; jewels twinkle in colour
         private GameObject StartStars(Vector2 centre, Vector2 cell, int count, Color c, float seconds, bool jewels = false)
         {
             RectTransform group = UiFactory.Rect("Stars", front, centre, cell);
@@ -185,7 +180,7 @@ namespace RoyalVault.Unity
             return rect.gameObject;
         }
 
-        /// <summary>Fades in fast and out over the last fifth.</summary>
+        // Fades in fast and out over the last fifth
         private static float Envelope(float t, float seconds)
         {
             return Mathf.Clamp01(t * 6f) * Mathf.Clamp01((seconds - t) / Mathf.Max(0.05f, seconds * 0.2f));
@@ -196,7 +191,7 @@ namespace RoyalVault.Unity
             return new Vector2(Random.Range(-0.36f, 0.36f) * cell.x, Random.Range(-0.36f, 0.36f) * cell.y);
         }
 
-        /// <summary>Runs <paramref name="step"/> from 0 to 1 over <paramref name="seconds"/>, then removes the effect.</summary>
+        // Runs step from 0 to 1 over seconds, then removes the effect
         private IEnumerator Fade(Graphic graphic, float seconds, System.Action<float> step, GameObject owner = null, float linger = 0f)
         {
             GameObject target = owner != null ? owner : graphic != null ? graphic.gameObject : null;

@@ -3,7 +3,7 @@ using RoyalVault.Core;
 
 namespace RoyalVault.Tests
 {
-    /// <summary>The spin flow, the session and the standard features, played without any presentation.</summary>
+    // The spin flow, the session and the standard features, played without any presentation
     public sealed class FlowTests
     {
         private static (GameSession session, SpinFlow flow, SpinEngine engine) Create(long balance = 100000)
@@ -151,7 +151,7 @@ namespace RoyalVault.Tests
             Assert.AreEqual(3, spin.Outcome.Multiplier);
         }
 
-        /// <summary>An example feature: every win pays three times.</summary>
+        // An example feature: every win pays three times
         private sealed class TripleEveryWin : SlotFeature
         {
             public override int Order { get { return 20; } }

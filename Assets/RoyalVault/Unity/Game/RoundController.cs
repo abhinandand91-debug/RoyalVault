@@ -4,10 +4,7 @@ using UnityEngine;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// The glue between the player, the spin flow and the views: it turns console presses into flow requests and
-    /// flow events into reel spins, win shows and the next automatic spin. It holds no rules of its own.
-    /// </summary>
+    // Turns console presses into spin requests and flow events into reel spins and win shows
     public sealed class RoundController : MonoBehaviour
     {
         private GameSession session;
@@ -22,7 +19,7 @@ namespace RoyalVault.Unity
         private long freeSpinRoundWin;
         private StoryDirector story;
 
-        /// <summary>Spins played automatically after the player starts auto play.</summary>
+        // Spins played automatically after the player starts auto play
         public int AutoPlaySpins = 25;
 
         public void Bind(GameSession gameSession, SpinFlow spinFlow, MachineView machineView, ConsoleView consoleView, WinPresenter winPresenter,

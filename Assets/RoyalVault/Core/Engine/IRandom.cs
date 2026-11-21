@@ -1,13 +1,13 @@
 namespace RoyalVault.Core
 {
-    /// <summary>The source of every random decision, so tests and replays can use a fixed seed.</summary>
+    // The source of every random decision, so tests and replays can use a fixed seed
     public interface IRandom
     {
-        /// <summary>A whole number from 0 up to, but not including, <paramref name="maxExclusive"/>.</summary>
+        // A whole number from 0 up to, but not including, maxExclusive
         int Next(int maxExclusive);
     }
 
-    /// <summary><see cref="IRandom"/> on System.Random; the same seed always gives the same spins.</summary>
+    // IRandom on System.Random; the same seed always gives the same spins
     public sealed class SeededRandom : IRandom
     {
         private readonly System.Random random;

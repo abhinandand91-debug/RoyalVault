@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    // A framed story chapter over the game, told beat by beat; a tap moves it on.
+    // A framed story chapter over the game, told beat by beat; a tap moves it on
     public sealed class ChapterCardView : MonoBehaviour
     {
         [SerializeField] private CanvasGroup group;
@@ -35,7 +35,7 @@ namespace RoyalVault.Unity
 
         public void Advance() => advance = true;
 
-        // Closes the card at once (testing, or when the story is turned off).
+        // Closes the card at once (testing, or when the story is turned off)
         public void CloseNow() => closeNow = true;
 
         public IEnumerator Tell(StoryDefinition.Scene scene, int number, string chapterLabel)

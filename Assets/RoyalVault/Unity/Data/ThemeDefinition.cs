@@ -4,27 +4,24 @@ using UnityEngine;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>How a symbol celebrates: which light and particles surround it when it wins.</summary>
+    // How a symbol celebrates: which light and particles surround it when it wins
     public enum SymbolStyle
     {
-        /// <summary>Card royals: a light sweep and a warm glow.</summary>
+        // Card royals: a light sweep and a warm glow
         Card,
-        /// <summary>Gems: a coloured glow, a sway and twinkling stars.</summary>
+        // Gems: a coloured glow, a sway and twinkling stars
         Gem,
-        /// <summary>Treasures (gold, keys, relics): a light sweep and rising gold dust.</summary>
+        // Treasures (gold, keys, relics): a light sweep and rising gold dust
         Treasure,
-        /// <summary>The wild: a big pop and flash, rotating rays, stars.</summary>
+        // The wild: a big pop and flash, rotating rays, stars
         Wild,
-        /// <summary>The scatter: rays and sparks in the vault's blue magic.</summary>
+        // The scatter: rays and sparks in the vault's blue magic
         Scatter,
-        /// <summary>The jackpot symbol: golden rays and jewel-coloured glints.</summary>
+        // The jackpot symbol: golden rays and jewel-coloured glints
         Jackpot,
     }
 
-    /// <summary>
-    /// Everything a machine looks like: symbol art, machine and interface sprites, fonts, colours and the reel window.
-    /// A reskin is a new theme asset; the game code and the machine stay the same.
-    /// </summary>
+    // Art, fonts and colours for a machine
     [CreateAssetMenu(menuName = "Royal Vault/Theme", fileName = "Theme")]
     public sealed class ThemeDefinition : ScriptableObject
     {

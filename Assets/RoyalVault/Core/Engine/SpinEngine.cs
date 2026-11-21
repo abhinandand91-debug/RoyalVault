@@ -1,16 +1,13 @@
 namespace RoyalVault.Core
 {
-    /// <summary>
-    /// Decides spins: a random stop on every reel, the grid it shows and everything that grid wins. The result is
-    /// final before the presentation moves a single reel.
-    /// </summary>
+    // Decides spins: a random stop on every reel, the grid it shows and everything that grid wins
     public sealed class SpinEngine
     {
         private readonly MachineDefinition machine;
         private readonly IRandom random;
         private readonly WinEvaluator evaluator;
 
-        /// <summary>Testing aid: when set, the next spin stops here instead of at random, then this is cleared.</summary>
+        // Testing aid: when set, the next spin stops here instead of at random, then this is cleared
         public int[] ForcedStops;
 
         public SpinEngine(MachineDefinition machine, IRandom random, WinEvaluator evaluator = null)
@@ -31,7 +28,7 @@ namespace RoyalVault.Core
             return Evaluate(stops, lineBet);
         }
 
-        /// <summary>The outcome of given stops, without randomness.</summary>
+        // The outcome of given stops, without randomness
         public SpinOutcome Evaluate(int[] stops, long lineBet)
         {
             SymbolGrid grid = SymbolGrid.FromStops(machine, stops);

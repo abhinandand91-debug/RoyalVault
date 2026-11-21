@@ -4,13 +4,7 @@ using UnityEngine.UI;
 
 namespace RoyalVault.Unity
 {
-    /// <summary>
-    /// One symbol on a reel: its art, the motion-blurred art while spinning, and its moments of life. On a win it pops
-    /// and pulses while a band of light sweeps across it (inside its own shape, via the "RoyalVault/UI Symbol" shader);
-    /// the grand symbols flash too. Special symbols thump as they land, and idle symbols catch an occasional glint. A
-    /// symbol with baked win frames (from an animation tool) plays them instead of the pulse. Effects around the symbol
-    /// (rays, sparkles, dust) are drawn by the machine's <see cref="SymbolFxLayer"/>, outside the reel's mask.
-    /// </summary>
+    // One symbol on a reel: its art, the motion-blurred art while spinning, and its moments of life
     public sealed class SymbolView : MonoBehaviour
     {
         private static readonly int ShinePos = Shader.PropertyToID("_ShinePos");
@@ -79,14 +73,14 @@ namespace RoyalVault.Unity
             if (blurred) Shine(-1f);
         }
 
-        /// <summary>Dims the symbol while other symbols are winning.</summary>
+        // Dims the symbol while other symbols are winning
         public void SetDimmed(bool dimmed)
         {
             if (art == null) return;
             image.color = dimmed ? new Color(0.42f, 0.42f, 0.46f, 1f) : Color.white;
         }
 
-        /// <summary>Pops, pulses and shines while its win is shown.</summary>
+        // Pops, pulses and shines while its win is shown
         public void Celebrate(float seconds)
         {
             StopCelebrating();
@@ -105,14 +99,14 @@ namespace RoyalVault.Unity
             if (art != null && !blurred) image.sprite = art.sprite;
         }
 
-        /// <summary>A special symbol lands: a squash, a settle and a flash of light.</summary>
+        // A special symbol lands: a squash, a settle and a flash of light
         public void Land()
         {
             if (art == null || !isActiveAndEnabled) return;
             StartCoroutine(LandRoutine());
         }
 
-        /// <summary>A single band of light passes over the symbol (idle reels).</summary>
+        // A single band of light passes over the symbol (idle reels)
         public void Glint()
         {
             if (art == null || pulse != null || glint != null || !isActiveAndEnabled) return;
@@ -176,10 +170,7 @@ namespace RoyalVault.Unity
             StopCelebrating();
         }
 
-        /// <summary>
-        /// Baked win frames (from an animation tool): played on a loop for the win, then back to the still art. Frames
-        /// with room around the symbol for its rays and sparks are shown larger, so the symbol keeps its size in the cell.
-        /// </summary>
+        // Baked win frames (from an animation tool): played on a loop for the win, then back to the still art
         private IEnumerator PlayFrames(float seconds)
         {
             CharacterAnimation motion = art.winAnimation;
