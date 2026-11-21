@@ -9,7 +9,9 @@ namespace RoyalVault.Unity
 {
     /// <summary>
     /// The celebration overlay: BIG / MEGA / EPIC WIN and jackpot wins with a counting amount and a shower of gold
-    /// coins, plus short title cards (free spins awarded, free spins total). A tap skips to the end.
+    /// coins, plus short title cards (free spins awarded, free spins total). A tap skips to the end. When the theme has
+    /// heroes, they stride in at either side of the banner and play their action (the prospector shoulders his
+    /// pickaxe, the sharpshooter spins her revolver) for as long as the celebration lasts.
     /// </summary>
     public sealed class BigWinView : MonoBehaviour
     {
@@ -22,6 +24,10 @@ namespace RoyalVault.Unity
         [SerializeField] private RectTransform coinLayer;
         [SerializeField] private Sprite coinSprite;
         [SerializeField] private Button skip;
+        [Header("Heroes")]
+        [SerializeField] private Image[] heroes = new Image[0];
+        [SerializeField] private CharacterAnimation[] heroMotion = new CharacterAnimation[0];
+        [SerializeField] private Vector2[] heroHome = new Vector2[0];
 
         private readonly List<RectTransform> coins = new List<RectTransform>();
         private bool skipped;
@@ -40,6 +46,33 @@ namespace RoyalVault.Unity
             coinLayer = coins;
             coinSprite = coin;
             skip = skipButton;
+        }
+
+        /// <summary>Heroes beside the banner: their images, baked animations and where each stands (feet, canvas pixels).</summary>
+        public void SetupHeroes(Image[] heroImages, CharacterAnimation[] motion, Vector2[] home)
+        {
+            heroes = heroImages;
+            heroMotion = motion;
+            heroHome = home;
+        }
+
+        private bool HasHero(int i) => i < heroMotion.Length && heroMotion[i] != null && heroMotion[i].IsValid;
+
+        /// <summary>Shows the heroes' frames at <paramref name="t"/> seconds and slides them in by <paramref name="enter"/> (0..1).</summary>
+        private void PoseHeroes(float t, float enter)
+        {
+            for (int i = 0; i < heroes.Length; i++)
+            {
+                if (!HasHero(i)) { heroes[i].gameObject.SetActive(false); continue; }
+                CharacterAnimation motion = heroMotion[i];
+                CharacterAnimation.Clip clip = motion.action.IsValid ? motion.action : motion.idle;
+                heroes[i].gameObject.SetActive(true);
+                heroes[i].sprite = clip.frames[Mathf.FloorToInt(t * motion.framesPerSecond) % clip.frames.Length];
+                Vector2 home = heroHome[i];
+                float side = Mathf.Sign(home.x);
+                heroes[i].rectTransform.anchoredPosition = home + new Vector2(side * 520f * (1f - Ease.OutCubic(enter)), 0f);
+                heroes[i].color = new Color(1f, 1f, 1f, enter);
+            }
         }
 
         private void Awake()
@@ -88,6 +121,7 @@ namespace RoyalVault.Unity
             if (value > 0) amount.Roll(0, value, countSeconds);
 
             RectTransform hero = heading == null ? banner.rectTransform : title.rectTransform;
+            float clock = 0f;
             yield return Tween.Run(0.35f, k =>
             {
                 group.alpha = k;
@@ -95,11 +129,14 @@ namespace RoyalVault.Unity
             }, Ease.Linear);
 
             float t = 0f;
+            const float stride = 0.55f;
             float spawn = 0f;
             float hold = value > 0 ? countSeconds + 1.4f : countSeconds;
             while (t < hold && !skipped)
             {
                 t += Time.deltaTime;
+                clock += Time.deltaTime;
+                PoseHeroes(clock, Mathf.Clamp01(clock / stride));
                 if (rays != null) rays.localRotation = Quaternion.Euler(0f, 0f, -t * 12f);
                 if (coinsOn && t < countSeconds)
                 {
@@ -114,7 +151,7 @@ namespace RoyalVault.Unity
                 yield return new WaitForSeconds(0.6f);
             }
 
-            yield return Tween.Run(0.3f, k => group.alpha = 1f - k, Ease.Linear);
+            yield return Tween.Run(0.3f, k => { group.alpha = 1f - k; clock += Time.deltaTime; PoseHeroes(clock, 1f); }, Ease.Linear);
             foreach (RectTransform coin in coins) coin.gameObject.SetActive(false);
             Hide();
             IsShowing = false;

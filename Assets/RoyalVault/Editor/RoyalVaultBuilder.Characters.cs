@@ -63,7 +63,8 @@ namespace RoyalVault.EditorTools
             for (int i = 0; i < count; i++)
             {
                 clip.frames[i] = AssetDatabase.LoadAssetAtPath<Sprite>($"{folder}/{prefix}_{i:000}.png");
-                clip.hand[i] = new Vector2(data.hand[i * 2], data.hand[i * 2 + 1]);
+                // a character without magic in its hand has no hand path
+                clip.hand[i] = data.hand != null && data.hand.Length > i * 2 + 1 ? new Vector2(data.hand[i * 2], data.hand[i * 2 + 1]) : Vector2.zero;
                 clip.flame[i] = data.flame[i];
             }
             return clip;

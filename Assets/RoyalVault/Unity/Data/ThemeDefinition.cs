@@ -35,6 +35,8 @@ namespace RoyalVault.Unity
         public Color characterMagic = new Color(0.35f, 0.75f, 1f, 1f);
         [Tooltip("Additive material for glows and particles")] public Material additive;
         [Tooltip("Optional story told on the loading screen and at game moments")] public StoryDefinition story;
+        [Tooltip("Optional hero who celebrates big wins on the left (the prospector)")] public CharacterAnimation heroLeft;
+        [Tooltip("Optional hero who celebrates big wins on the right (the sharpshooter, mirrored to face the centre)")] public CharacterAnimation heroRight;
 
         [Header("Interface")]
         public Sprite consoleBar;

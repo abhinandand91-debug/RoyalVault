@@ -343,6 +343,25 @@ namespace RoyalVault.EditorTools
             Image rays = UiFactory.Image("Rays", overlay, Sprite("Generated/rays"), new Vector2(0, 90), new Vector2(1500, 1500));
             Image halo = UiFactory.Image("Halo", overlay, theme.glow, new Vector2(0, 90), new Vector2(1100, 700));
             halo.color = new Color(1f, 0.78f, 0.38f, 0.35f);
+
+            // the heroes stand at either side, behind the banner, their feet at the foot of the screen
+            CharacterAnimation[] motion = { theme.heroLeft, theme.heroRight };
+            Vector2[] home = { new Vector2(-740, -560), new Vector2(760, -560) };
+            var heroes = new Image[2];
+            for (int i = 0; i < heroes.Length; i++)
+            {
+                heroes[i] = UiFactory.Image(i == 0 ? "Hero Left" : "Hero Right", overlay, null, home[i], new Vector2(300, 740));
+                heroes[i].rectTransform.pivot = new Vector2(0.5f, 0f);
+                heroes[i].color = Color.white;
+                if (motion[i] != null && motion[i].IsValid)
+                {
+                    Sprite first = motion[i].idle.frames[0];
+                    float height = 740f;
+                    heroes[i].rectTransform.sizeDelta = new Vector2(height * first.rect.width / first.rect.height, height);
+                }
+                if (i == 1) heroes[i].rectTransform.localScale = new Vector3(-1f, 1f, 1f);
+                heroes[i].gameObject.SetActive(false);
+            }
             Image banner = UiFactory.Image("Banner", overlay, theme.bigWinBanner, new Vector2(0, 130), new Vector2(1200, 400));
             banner.preserveAspect = true;
             TextMeshProUGUI title = UiFactory.Text("Title", overlay, theme.displayFont, "MEGA WIN", 128, Color.white, new Vector2(0, 130), new Vector2(1700, 180));
@@ -359,6 +378,7 @@ namespace RoyalVault.EditorTools
 
             var view = overlay.gameObject.AddComponent<BigWinView>();
             view.Setup(group, banner, title, subtitle, amount, rays.rectTransform, coins, theme.coin, skip);
+            view.SetupHeroes(heroes, motion, home);
             return view;
         }
 

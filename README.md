@@ -46,6 +46,15 @@ are unchanged.
 
 ![Seal meter: at rest, cracking, open](docs/screenshots/seal_meter.jpg)
 
+### The heroes celebrate
+
+On big wins, jackpots and the free spin cards, Cole and Ruby stride in at either side of the banner and play their
+action for as long as the celebration lasts: he shoulders his pickaxe, she spins her revolver. Their skeletal
+animations are baked to frames like the guardians' (`CharacterAnimation`, set on the theme as `heroLeft` and
+`heroRight`); without them the celebration plays as before.
+
+![Big win with the heroes](docs/screenshots/06_big_win.jpg)
+
 ## Running it
 
 - Unity **6000.3.10f1** (Unity 6.3). Open the project, open `Assets/RoyalVault/Scenes/Boot.unity` and press Play.
@@ -116,8 +125,8 @@ Reel strips and pays were tuned by simulation and are checked by the tests (1,00
 - The Anubis guardians are licensed art (Retro Style Games, Crowns of Kemet) and are **not** in this repository
   (`Assets/RoyalVault/Art.Private` is git-ignored, including their baked animation frames). Without them the game
   runs with empty niches.
-- The story's prospector and sharpshooter are licensed art as well and live in `Art.Private`; without them the story
-  is told over the painted backdrops alone. The backdrops (`Art/Story`) were painted for this game with Figma AI.
+- The story's prospector and sharpshooter are licensed art as well and live in `Art.Private` (with their baked
+  frames); without them the story is told over the painted backdrops alone and the celebrations play without them. The backdrops (`Art/Story`) were painted for this game with Figma AI.
 
 ## Licence
 
