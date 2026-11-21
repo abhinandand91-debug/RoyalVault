@@ -135,6 +135,12 @@ namespace RoyalVault.Tests
             Object.FindFirstObjectByType<PaytableView>(FindObjectsInactive.Include).Close();
             yield return new WaitForSeconds(0.4f);
 
+            // the guardians' celebration on their own (in play it sits under the big win overlay)
+            foreach (CharacterView guardian in Object.FindObjectsByType<CharacterView>(FindObjectsSortMode.None)) guardian.Celebrate();
+            yield return new WaitForSeconds(0.35f);
+            yield return Shot("14_guardians_celebrate");
+            yield return new WaitForSeconds(2f);
+
             // an ultra-wide screen
             UseTarget(2560, 1080);
             yield return new WaitForSeconds(0.3f);

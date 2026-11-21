@@ -37,8 +37,8 @@ namespace RoyalVault.EditorTools
             // the guardians in their niches
             UiFactory.Image("Niche Left", t, theme.niche, new Vector2(-800, -13), new Vector2(232, 751));
             UiFactory.Image("Niche Right", t, theme.niche, new Vector2(800, -13), new Vector2(232, 751));
-            CharacterView left = Character("Guardian Left", t, -800f, false, 0f);
-            CharacterView right = Character("Guardian Right", t, 800f, true, 1.7f);
+            CharacterView left = Character("Guardian Left", t, theme, -800f, false, 0f);
+            CharacterView right = Character("Guardian Right", t, theme, 800f, true, 1.7f);
 
             // the reels (built at run time) inside their frame
             RectTransform machineRect = UiFactory.Stretch("Machine", t);
@@ -75,20 +75,66 @@ namespace RoyalVault.EditorTools
             return image;
         }
 
-        private static CharacterView Character(string name, Transform parent, float x, bool mirrored, float phase)
+        private static CharacterView Character(string name, Transform parent, ThemeDefinition theme, float x, bool mirrored, float phase)
         {
             RectTransform holder = UiFactory.Rect(name, parent, new Vector2(x, -380), new Vector2(250, 705));
             holder.pivot = new Vector2(0.5f, 0f);
             holder.anchoredPosition = new Vector2(x, -380);
+
+            // a warm aura behind the figure
+            Image aura = UiFactory.Image("Aura", holder, theme.glow, new Vector2(0, 40), new Vector2(560, 940));
+            aura.material = theme.additive;
+            aura.color = new Color(1f, 0.72f, 0.32f, 0.14f);
+
             Image image = UiFactory.Image("Figure", holder, null, Vector2.zero, new Vector2(250, 705));
             image.rectTransform.pivot = new Vector2(0.5f, 0f);
             image.rectTransform.anchoredPosition = new Vector2(0, -352.5f);
             image.preserveAspect = true;
             image.color = Color.white;
             if (mirrored) image.rectTransform.localScale = new Vector3(-1f, 1f, 1f);
+
+            // gold dust drifting past the figure
+            UiParticleEmitter dust = Emitter("Gold Dust", holder, theme, theme.glow, Vector2.zero);
+            dust.Rate = 2.5f; dust.LifeRange = new Vector2(3f, 5f); dust.SizeRange = new Vector2(5f, 12f); dust.EndSize = 0.6f;
+            dust.Area = new Vector2(260f, 640f); dust.VelocityMin = new Vector2(-8f, 12f); dust.VelocityMax = new Vector2(8f, 34f);
+            dust.Swirl = 10f; dust.SwirlFrequency = 1.5f; dust.MaxParticles = 30;
+            dust.StartColor = new Color(1f, 0.85f, 0.5f, 0.6f); dust.EndColor = new Color(1f, 0.8f, 0.4f, 0f);
+
+            // the magic in the raised hand: a glow, a living flame, embers and (on big wins) a spray of gold sparks
+            RectTransform hand = UiFactory.Rect("Hand", holder, Vector2.zero, Vector2.one * 10f);
+            hand.anchorMin = hand.anchorMax = new Vector2(0.5f, 0f);
+            Image handGlow = UiFactory.Image("Hand Glow", hand, theme.glow, Vector2.zero, Vector2.one * 130f);
+            handGlow.material = theme.additive;
+
+            UiParticleEmitter flame = Emitter("Flame", hand, theme, theme.glow, Vector2.zero);
+            flame.Rate = 42f; flame.LifeRange = new Vector2(0.45f, 0.95f); flame.SizeRange = new Vector2(22f, 46f); flame.EndSize = 0.15f;
+            flame.Area = new Vector2(18f, 10f); flame.VelocityMin = new Vector2(-25f, 70f); flame.VelocityMax = new Vector2(25f, 150f);
+            flame.Gravity = new Vector2(0f, 60f); flame.Swirl = 40f; flame.SwirlFrequency = 9f; flame.MaxParticles = 110;
+
+            UiParticleEmitter embers = Emitter("Embers", hand, theme, theme.glow, Vector2.zero);
+            embers.Rate = 7f; embers.LifeRange = new Vector2(1.2f, 2.2f); embers.SizeRange = new Vector2(5f, 10f); embers.EndSize = 0.5f;
+            embers.Area = new Vector2(30f, 20f); embers.VelocityMin = new Vector2(-50f, 60f); embers.VelocityMax = new Vector2(50f, 140f);
+            embers.Gravity = new Vector2(0f, -15f); embers.Swirl = 25f; embers.SwirlFrequency = 4f; embers.MaxParticles = 70;
+
+            UiParticleEmitter sparks = Emitter("Sparks", hand, theme, theme.sparkle, Vector2.zero);
+            sparks.Rate = 0f; sparks.LifeRange = new Vector2(0.8f, 1.4f); sparks.SizeRange = new Vector2(14f, 30f); sparks.EndSize = 0.2f;
+            sparks.VelocityMin = new Vector2(-80f, 280f); sparks.VelocityMax = new Vector2(80f, 520f);
+            sparks.Gravity = new Vector2(0f, -700f); sparks.Drag = 0.6f; sparks.MaxParticles = 120;
+            sparks.StartColor = new Color(1f, 0.9f, 0.6f, 1f); sparks.EndColor = new Color(1f, 0.6f, 0.2f, 0f);
+
             var view = holder.gameObject.AddComponent<CharacterView>();
             view.Setup(image, phase);
+            view.SetupEffects(aura, hand, handGlow, flame, embers, sparks, dust);
             return view;
+        }
+
+        private static UiParticleEmitter Emitter(string name, Transform parent, ThemeDefinition theme, Sprite sprite, Vector2 position)
+        {
+            RectTransform rect = UiFactory.Rect(name, parent, position, Vector2.one * 10f);
+            var emitter = rect.gameObject.AddComponent<UiParticleEmitter>();
+            emitter.Sprite = sprite;
+            emitter.Material = theme.additive;
+            return emitter;
         }
 
         private static JackpotPanelView Jackpots(Transform parent, ThemeDefinition theme)

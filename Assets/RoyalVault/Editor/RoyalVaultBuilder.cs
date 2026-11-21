@@ -143,6 +143,7 @@ namespace RoyalVault.EditorTools
             theme.iconInfo = Sprite("UI/Icons/icon_info");
             theme.iconSound = Sprite("UI/Icons/icon_sound");
             theme.iconClose = Sprite("UI/Icons/icon_close");
+            theme.additive = AdditiveMaterial();
             theme.displayFont = fonts.Display;
             theme.headingFont = fonts.Heading;
             theme.labelFont = fonts.Label;
@@ -151,6 +152,17 @@ namespace RoyalVault.EditorTools
             if (created) AssetDatabase.CreateAsset(theme, path);
             EditorUtility.SetDirty(theme);
             return theme;
+        }
+
+        /// <summary>The additive UI material glows and particles use (created once).</summary>
+        private static Material AdditiveMaterial()
+        {
+            string path = Generated + "UIAdditive.mat";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material != null) return material;
+            material = new Material(Shader.Find("RoyalVault/UI Additive")) { name = "UIAdditive" };
+            AssetDatabase.CreateAsset(material, path);
+            return material;
         }
 
         private static Sprite Sprite(string relative, string extension = ".png")

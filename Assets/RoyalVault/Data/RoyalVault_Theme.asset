@@ -62,6 +62,9 @@ MonoBehaviour:
   logo: {fileID: 21300000, guid: 88f341947927e4dc594ecd48001200ed, type: 3}
   niche: {fileID: 21300000, guid: 78094a83df1a441f7bc9f3e4760a2509, type: 3}
   character: {fileID: 21300000, guid: 98663f0ca23be4091ab8354bcacca9a9, type: 3}
+  characterEffectAnchor: {x: 0.89, y: 0.837}
+  characterMagic: {r: 0.35, g: 0.75, b: 1, a: 1}
+  additive: {fileID: 2100000, guid: 87cfb5d4bd56c432b83a1803eae1b483, type: 2}
   consoleBar: {fileID: 21300000, guid: 51ab14f97dd0441a9b3cc870d497b294, type: 3}
   spinButton: {fileID: 21300000, guid: b6a015090805a456594f2bb64b40270f, type: 3}
   spinButtonPressed: {fileID: 21300000, guid: 2ab9fc88a2635492b9202726cdd7470e, type: 3}

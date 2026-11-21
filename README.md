@@ -13,6 +13,12 @@ celebrations, coin showers). A 3 x 3 classic machine ships alongside it on the s
 | **Win lines** | **Pay table** | **Classic 3 x 3** |
 | ![Win lines](docs/screenshots/04_win_lines.jpg) | ![Pay table](docs/screenshots/11_paytable.jpg) | ![Classic 3x3](docs/screenshots/13_classic_3x3.jpg) |
 
+The guardians breathe, their hands burn with a living blue flame that throws embers and surges every few seconds, and
+on big wins they rise in a flash with the flame erupting and gold sparks spraying (UiParticleEmitter, an additive UI
+particle system, since Unity's ParticleSystem does not draw in an overlay canvas).
+
+![Guardians celebrating](docs/screenshots/14_guardians_celebrate.jpg)
+
 ## Running it
 
 - Unity **6000.3.10f1** (Unity 6.3). Open the project, open `Assets/RoyalVault/Scenes/Boot.unity` and press Play.
