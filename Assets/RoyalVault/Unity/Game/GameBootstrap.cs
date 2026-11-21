@@ -20,6 +20,17 @@ namespace RoyalVault.Unity
         [Tooltip("Keep credits, bet and jackpots between sessions")]
         [SerializeField] private bool saveProgress = true;
 
+        [Header("Testing")]
+        [Tooltip("Every paid spin lands the next result in the list below, to check all the celebrations and effects. " +
+                 "Real outcomes are found by the normal rules; progress is not saved while this is on at start.")]
+        [SerializeField] private bool showcaseWins;
+        [Tooltip("The results the showcase lands, in order, then from the top again")]
+        [SerializeField] private ShowcaseWin[] showcaseOrder =
+        {
+            ShowcaseWin.LineWin, ShowcaseWin.BigWin, ShowcaseWin.MegaWin, ShowcaseWin.EpicWin, ShowcaseWin.FreeSpins,
+            ShowcaseWin.MinorJackpot, ShowcaseWin.MajorJackpot, ShowcaseWin.GrandJackpot,
+        };
+
         [Header("Views")]
         [SerializeField] private MachineView machineView;
         [SerializeField] private ConsoleView console;
@@ -36,6 +47,11 @@ namespace RoyalVault.Unity
         public SpinFlow Flow { get; private set; }
         public MachineDefinition Machine { get; private set; }
         public SoundDirector Sound { get; private set; }
+        public WinShowcase Showcase { get; private set; }
+
+        /// <summary>Turns the win showcase on or off (it can also be ticked in the Inspector while playing).</summary>
+        public bool ShowcaseWins { get => showcaseWins; set { showcaseWins = value; Showcase?.Arm(); } }
+        public ShowcaseWin[] ShowcaseOrder { get => showcaseOrder; set { showcaseOrder = value; Showcase?.Arm(); } }
 
         /// <summary>The machine to play, set before the object wakes (the boot scene or a test may choose).</summary>
         public MachineDefinitionAsset MachineAsset { get { return machine; } set { machine = value; } }
@@ -69,7 +85,8 @@ namespace RoyalVault.Unity
             }
 
             // core
-            ISaveStore store = saveProgress ? new PlayerPrefsSaveStore(Machine.Name) : (ISaveStore)new MemorySaveStore();
+            // the showcase pays out on purpose, so its credits are not saved
+            ISaveStore store = saveProgress && !showcaseWins ? new PlayerPrefsSaveStore(Machine.Name) : (ISaveStore)new MemorySaveStore();
             Session = new GameSession(Machine, store);
             IRandom random = seed != 0 ? new SeededRandom(seed) : new SeededRandom();
             Engine = new SpinEngine(Machine, random);
@@ -89,6 +106,15 @@ namespace RoyalVault.Unity
             Sound = gameObject.AddComponent<SoundDirector>();
             gameObject.AddComponent<RoundController>().Bind(Session, Flow, machineView, console, presenter, bigWin, paytable, toast);
             Sound.Bind(player, Machine, Session, Flow, machineView, console, bigWin, sealMeter);
+            Showcase = new WinShowcase(Engine, Session, Flow, toast, () => showcaseWins, () => showcaseOrder);
+        }
+
+        /// <summary>Ticking or unticking the showcase in the Inspector while playing takes effect on the next spin.</summary>
+        private void OnValidate()
+        {
+            if (!Application.isPlaying || Showcase == null) return;
+            bool armed = Showcase.Armed != null;
+            if (showcaseWins != armed) Showcase.Arm();
         }
 
         /// <summary>Testing aid: the next spin stops at these reel positions.</summary>

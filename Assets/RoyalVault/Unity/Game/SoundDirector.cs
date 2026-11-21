@@ -18,7 +18,8 @@ namespace RoyalVault.Unity
         private int scatter = -1;
         private int jackpot = -1;
         private int wild = -1;
-        private int reels;
+        private int landed;
+        private int lastStopFrame = -1;
 
         public SoundPlayer Player => sound;
 
@@ -31,7 +32,6 @@ namespace RoyalVault.Unity
             scatter = definition.FirstIndexOfKind(SymbolKind.Scatter);
             jackpot = definition.FirstIndexOfKind(SymbolKind.Jackpot);
             wild = definition.FirstIndexOfKind(SymbolKind.Wild);
-            reels = definition.Reels;
 
             // the interface
             console.SpinPressed += () => sound.Play(SoundCue.SpinPress);
@@ -51,9 +51,11 @@ namespace RoyalVault.Unity
             flow.SpinStarted += context =>
             {
                 outcome = context.Outcome;
+                landed = 0;
                 sound.StartLoop(SoundCue.ReelSpinLoop);
             };
             machine.ReelStopped += OnReelStopped;
+            machine.AllReelsStopped += () => sound.StopLoop(SoundCue.ReelSpinLoop);
 
             // the seal on the vault door
             if (seal != null)
@@ -86,8 +88,11 @@ namespace RoyalVault.Unity
         private void OnReelStopped(int reel)
         {
             if (outcome == null) return;
-            // each reel lands a touch higher, so the stops build towards the last one
-            sound.Play(SoundCue.ReelStop, 1f, 1f + 0.03f * reel);
+            // each landing is a touch higher than the one before, so the stops build towards the last; reels that
+            // land together (all at once) make one stop, not a pile of them
+            if (Time.frameCount != lastStopFrame) sound.Play(SoundCue.ReelStop, 1f, 1f + 0.03f * landed);
+            lastStopFrame = Time.frameCount;
+            landed++;
             bool seal = false, crown = false, wildLanded = false;
             for (int row = 0; row < outcome.Grid.Rows; row++)
             {
@@ -99,7 +104,6 @@ namespace RoyalVault.Unity
             if (seal) sound.Play(SoundCue.ScatterLand);
             if (crown) sound.Play(SoundCue.JackpotLand);
             if (wildLanded) sound.Play(SoundCue.WildLand);
-            if (reel == reels - 1) sound.StopLoop(SoundCue.ReelSpinLoop);
         }
 
         private void OnCelebration(CelebrationKind kind, bool counting)

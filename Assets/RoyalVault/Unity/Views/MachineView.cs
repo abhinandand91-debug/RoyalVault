@@ -11,10 +11,33 @@ namespace RoyalVault.Unity
     /// theme's reel area, the reels are centred, and the 9-slice frame wraps whatever size results. It spins the reels
     /// to the stops the engine chose and highlights winning cells and lines.
     /// </summary>
+    /// <summary>The order the reels start or stop in.</summary>
+    public enum ReelOrder
+    {
+        /// <summary>One after another, left to right.</summary>
+        Sequential,
+        /// <summary>One after another, in a new random order every spin.</summary>
+        Random,
+        /// <summary>Every reel together.</summary>
+        AllAtOnce,
+    }
+
     public sealed class MachineView : MonoBehaviour
     {
         private const float RunSeconds = 1.25f;
-        private const float StopStagger = 0.24f;
+        private const float FastRunSeconds = 0.55f;
+
+        [Header("Reel timing")]
+        [Tooltip("The order the reels start spinning in")]
+        [SerializeField] private ReelOrder startOrder = ReelOrder.Sequential;
+        [Tooltip("Seconds between one reel starting and the next")]
+        [SerializeField, Range(0f, 0.4f)] private float startGap = 0.05f;
+        [Tooltip("The order the reels land in")]
+        [SerializeField] private ReelOrder stopOrder = ReelOrder.Sequential;
+        [Tooltip("Seconds between one reel landing and the next")]
+        [SerializeField, Range(0f, 0.6f)] private float stopGap = 0.24f;
+        [Tooltip("Seconds between landings in quick spins (auto play, free spins)")]
+        [SerializeField, Range(0f, 0.3f)] private float fastStopGap = 0.1f;
 
         private MachineDefinition machine;
         private ThemeDefinition theme;
@@ -37,6 +60,9 @@ namespace RoyalVault.Unity
                 return false;
             }
         }
+
+        public ReelOrder StartOrder { get => startOrder; set => startOrder = value; }
+        public ReelOrder StopOrder { get => stopOrder; set => stopOrder = value; }
 
         /// <summary>The window the reels occupy, in this view's local space.</summary>
         public Rect Window { get; private set; }
@@ -110,23 +136,51 @@ namespace RoyalVault.Unity
             return new Vector2(x, y);
         }
 
-        /// <summary>A reel has landed (its index, 0 = leftmost); the reels land left to right.</summary>
+        /// <summary>A reel has landed (its index, 0 = leftmost), in the order set by <see cref="StopOrder"/>.</summary>
         public event Action<int> ReelStopped;
+        /// <summary>The last reel of a spin has landed.</summary>
+        public event Action AllReelsStopped;
 
-        /// <summary>Spins every reel to the outcome's stops, left to right, and calls back when the last one lands.</summary>
+        /// <summary>
+        /// Each reel's place in the given order: 0 for the first, 1 for the next... (all 0 when all at once).
+        /// </summary>
+        private int[] Ranks(ReelOrder order)
+        {
+            var ranks = new int[reels.Length];
+            for (int r = 0; r < ranks.Length; r++) ranks[r] = order == ReelOrder.AllAtOnce ? 0 : r;
+            if (order == ReelOrder.Random)
+                for (int i = ranks.Length - 1; i > 0; i--)
+                {
+                    int j = UnityEngine.Random.Range(0, i + 1);
+                    (ranks[i], ranks[j]) = (ranks[j], ranks[i]);
+                }
+            return ranks;
+        }
+
+        /// <summary>Spins every reel to the outcome's stops in the start and stop orders, and calls back when the last one lands.</summary>
         public void Spin(SpinOutcome outcome, bool fast, Action onAllStopped)
         {
             ClearWins();
             int stopped = 0;
+            int[] starts = Ranks(startOrder);
+            int[] stops = Ranks(stopOrder);
+            float baseRun = fast ? FastRunSeconds : RunSeconds;
+            float gapBetweenStops = fast ? fastStopGap : stopGap;
+            float lastStart = (reels.Length - 1) * startGap;
             for (int r = 0; r < reels.Length; r++)
             {
                 int reel = r;
-                float run = (fast ? 0.55f : RunSeconds) + r * (fast ? 0.1f : StopStagger);
-                reels[r].Spin(outcome.Stops[r], r * 0.05f, run, () =>
+                float delay = starts[r] * startGap;
+                // landing times follow the stop order whatever the start order: every reel lands at the same moment
+                // after the last one started, plus its place in the stop order
+                float landAt = lastStart + baseRun + stops[r] * gapBetweenStops;
+                float run = Mathf.Max(0.3f, landAt - delay);
+                reels[r].Spin(outcome.Stops[r], delay, run, () =>
                 {
                     LandSpecials(reel);
                     ReelStopped?.Invoke(reel);
                     stopped++;
+                    if (stopped == reels.Length) AllReelsStopped?.Invoke();
                     if (stopped == reels.Length) onAllStopped?.Invoke();
                 });
             }

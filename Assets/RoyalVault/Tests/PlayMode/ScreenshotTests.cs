@@ -165,6 +165,20 @@ namespace RoyalVault.Tests
             yield return Shot("18_symbols_shine");
             machineView.ClearWins();
 
+            // the showcase lands the rarest celebrations: an epic win and the grand jackpot
+            game.ShowcaseOrder = new[] { ShowcaseWin.EpicWin, ShowcaseWin.GrandJackpot };
+            game.ShowcaseWins = true;
+            foreach (string name in new[] { "19_epic_win", "20_grand_jackpot" })
+            {
+                yield return WaitFor(() => game.Flow.State == SpinState.Idle, 40f);
+                Assert.IsTrue(game.Flow.RequestSpin());
+                yield return WaitFor(() => Object.FindFirstObjectByType<BigWinView>(FindObjectsInactive.Include).IsShowing, 30f);
+                yield return new WaitForSeconds(2.5f);
+                yield return Shot(name);
+                yield return WaitFor(() => game.Flow.State == SpinState.Idle, 40f);
+            }
+            game.ShowcaseWins = false;
+
             // an ultra-wide screen
             UseTarget(2560, 1080);
             yield return new WaitForSeconds(0.3f);

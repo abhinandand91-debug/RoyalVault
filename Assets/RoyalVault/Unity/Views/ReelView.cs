@@ -76,12 +76,19 @@ namespace RoyalVault.Unity
             // wind-up: the reel lifts a little before it falls
             if (!hurry) yield return Tween.Run(0.12f, k => { position = start + WindUp * k; Layout(false); }, Ease.OutCubic);
 
-            // the run ends just past the target on a lap far enough down the strip for the requested run time
+            // the run lasts exactly the requested time, so reels land in the order and at the moment the machine asks.
+            // At full speed that covers a fixed distance, but the target can sit anywhere on the strip: the difference
+            // (under half a lap either way) is made up by one jump along the strip while the reel is a motion blur,
+            // where it cannot be seen.
             float from = position;
-            float landing = target + length * Mathf.Floor((from - Speed * runSeconds - target) / length);
+            float planned = Speed * runSeconds;
+            float landing = target + length * Mathf.Round((from - planned - target) / length);
+            if (from - (landing - Overshoot) < Mathf.Max(3f, planned * 0.25f)) landing -= length;
             float end = landing - Overshoot;
             float distance = from - end;
-            float duration = distance / Speed;
+            float jump = distance - planned;
+            bool jumped = false;
+            float duration = Mathf.Max(0.05f, runSeconds);
             float norm = 1f - Acceleration * 0.5f;
             t = 0f;
             while (t < duration)
@@ -95,8 +102,10 @@ namespace RoyalVault.Unity
                 }
                 float u = t / duration;
                 float travelled = (u < Acceleration ? u * u / (2f * Acceleration) : u - Acceleration * 0.5f) / norm;
-                position = from - distance * travelled;
-                Layout(u > Acceleration * 0.4f && u < 0.98f);
+                bool blurred = u > Acceleration * 0.4f && u < 0.98f;
+                jumped |= blurred;
+                position = from - planned * travelled - (jumped ? jump : 0f);
+                Layout(blurred);
                 t += Time.deltaTime;
                 yield return null;
             }

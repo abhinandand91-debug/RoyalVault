@@ -65,6 +65,24 @@ OpenGameArt: "Desert Mystic" by PolygonDan on the loading screen and its stronge
 Loop" by iamoneabe in the base game (also kept in `Art.Private/Audio`).
 The `SoundTests` PlayMode tests spin forced outcomes and check that every moment reaches the player.
 
+## Testing the look and feel
+
+- **Win showcase:** tick *Showcase Wins* on the `GameBootstrap` (the RoyalVaultGame prefab) and every paid spin lands
+  the next result in *Showcase Order*: line win, big, mega and epic wins, free spins, and each jackpot tier, then
+  round again. It fakes nothing: `WinShowcase` searches for reel stops whose real outcome, by the normal rules, is that
+  result. A toast names what is coming, free spins play out at random, and credits are not saved while it is on at
+  start. It can be ticked or unticked while playing.
+- **Reel order:** on the `MachineView`, *Start Order* and *Stop Order* are each **Sequential**, **Random** (a new order
+  every spin) or **All At Once**, with the gap between reels for each. Every reel runs exactly its scheduled time: the
+  part of a lap needed to reach its target symbol is made up by one jump along the strip while it is a motion blur, so
+  reels land in exactly the order asked for.
+- `ShowcaseTests` (PlayMode) spins every showcase result and checks it, and spins all nine start / stop order pairs
+  checking that every cell shows what the engine decided.
+
+| Epic win | Grand jackpot |
+|---|---|
+| ![Epic win](docs/screenshots/19_epic_win.jpg) | ![Grand jackpot](docs/screenshots/20_grand_jackpot.jpg) |
+
 ## The story
 
 **Gold Rush to the Pharaoh's Vault.** A prospector, Cole Harlan, and a sharpshooter, Ruby Vance, follow a map out of
