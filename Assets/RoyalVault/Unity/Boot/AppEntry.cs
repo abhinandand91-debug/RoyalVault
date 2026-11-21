@@ -37,12 +37,10 @@ namespace RoyalVault.Unity
 
             float elapsed = 0f;
             float shown = 0f;
-            // the first time, the story's intro sets the pace; skipping it lets the bar finish quickly
-            float total = Mathf.Max(minimumSeconds, loadingScreen.StorySeconds);
+            float total = minimumSeconds;
             while (shown < 1f || !loadingScreen.StoryDone)
             {
                 elapsed += Time.unscaledDeltaTime;
-                if (loadingScreen.Skipped) total = Mathf.Min(total, Mathf.Max(minimumSeconds, elapsed + 0.8f));
                 // Unity reports 0.9 when a scene is loaded and waiting to be activated
                 float loaded = Mathf.Clamp01(load.progress / 0.9f);
                 float target = Mathf.Min(loaded, elapsed / total);

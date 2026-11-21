@@ -10,6 +10,8 @@ namespace RoyalVault.Unity
     public sealed class JackpotPanelView : MonoBehaviour
     {
         [SerializeField, Tooltip("Centre, left, right")] private Image[] plaques = new Image[0];
+
+        public RectTransform TopPlaque => plaques.Length > 0 ? plaques[0].rectTransform : null;
         [SerializeField] private TextMeshProUGUI[] names = new TextMeshProUGUI[0];
         [SerializeField] private CountingText[] values = new CountingText[0];
 

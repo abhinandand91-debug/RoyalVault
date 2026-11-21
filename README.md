@@ -93,7 +93,17 @@ The `SoundTests` PlayMode tests spin forced outcomes and check that every moment
 the Wild West into a buried pyramid, where the Anubis guardians judge whether they leave rich. The story is data: a
 `StoryDefinition` ScriptableObject holds six scenes (backdrop, characters, title, caption) and the game moment that
 tells each one. The loading screen tells the intro (chapters I and II) the first time the game starts, with a slow
-camera push and the captions rising in; a click moves on, and later starts show only the last intro scene.
+camera push. The first launch tells it as a letterboxed cinematic paced by the player: each chapter types out beat by
+beat, the heroes step in, "Skip story" is always there and the last page ends on **Enter the Vault**, while the game
+loads underneath. Later starts show only the last intro scene behind the loading bar.
+
+In play, `StoryDirector` tells each later chapter once, at its moment: chapter III on the first visit (followed by
+hints that spotlight the spin button, the seal meter and the jackpots), IV when the seal first breaks, V and VI on the
+first Major and Grand jackpots. `TypewriterText`, `ChapterCardView` and `CoachMarkView` are small reusable pieces.
+
+| Enter the Vault | Chapter III in play | First-visit hint |
+|---|---|---|
+| ![Enter](docs/screenshots/01b_story_enter.jpg) | ![Chapter card](docs/screenshots/25_chapter_card.jpg) | ![Hint](docs/screenshots/26_coach_mark.jpg) |
 
 | Chapter I | Chapter II |
 |---|---|

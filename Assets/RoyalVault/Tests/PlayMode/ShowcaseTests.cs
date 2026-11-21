@@ -24,6 +24,7 @@ namespace RoyalVault.Tests
             PlayerPrefs.DeleteAll();
             yield return SceneManager.LoadSceneAsync("Game");
             yield return null;
+            Object.FindFirstObjectByType<GameBootstrap>().Story.Mute();
         }
 
         [UnityTest, Timeout(900000)]

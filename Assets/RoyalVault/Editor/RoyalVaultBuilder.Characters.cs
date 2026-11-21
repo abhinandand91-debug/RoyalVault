@@ -93,6 +93,38 @@ namespace RoyalVault.EditorTools
         /// painted backdrops are public; the prospector and the sharpshooter are licensed art and stay out of the
         /// repository, so a public checkout tells the story over the paintings alone.
         /// </summary>
+        // Each chapter told in short beats, and the first-visit hints.
+        private static void SetBeats(StoryDefinition story)
+        {
+            string[][] beats =
+            {
+                new[] { "Midnight in a frontier saloon. One last hand, one last pot.",
+                        "Ruby Vance wins it, and with it a torn map drawn in her grandfather's hand.",
+                        "He vanished in the desert forty years ago. The map says where." },
+                new[] { "Cole Harlan, a prospector with nothing left to dig, offers his pickaxe.",
+                        "Weeks of sea, rail and sand later, they stand on a dune at dusk.",
+                        "Below them, the tip of a buried pyramid catches the last light." },
+                new[] { "At the pyramid's foot, a golden seal bars the way in.",
+                        "Cole digs. Ruby keeps watch. The seal will not break by hand.",
+                        "But every Vault Seal they find cracks it a little more." },
+                new[] { "The seal shatters. Blue fire runs along the walls.",
+                        "Two Anubis statues open their eyes and raise their hands.",
+                        "\"Prove you are not thieves.\" The trial begins." },
+                new[] { "Behind the guardians lie three chambers, each richer than the last.",
+                        "Crowns are the keys. The deeper the chamber, the more crowns it takes." },
+                new[] { "In the sealed tomb, beside the Pharaoh's crown, lies a dusty cowboy hat.",
+                        "Ruby's grandfather made it this far.",
+                        "The guardians bow. The worthy may leave with the gold." },
+            };
+            for (int i = 0; i < story.scenes.Length && i < beats.Length; i++) story.scenes[i].lines = beats[i];
+            story.controlHints = new[]
+            {
+                "Spin to dig. Every spin brings you closer to the buried door.",
+                "Each Vault Seal cracks the seal. Land three in one spin to break it and wake the guardians.",
+                "Crowns open the vault's chambers. Land enough of them to win these jackpots.",
+            };
+        }
+
         private static StoryDefinition CreateStory()
         {
             string path = DataPath + "RoyalVault_Story.asset";
@@ -132,6 +164,7 @@ namespace RoyalVault.EditorTools
                       StoryMoment.GrandJackpot),
             };
 
+            SetBeats(story);
             if (created) AssetDatabase.CreateAsset(story, path);
             EditorUtility.SetDirty(story);
             return story;

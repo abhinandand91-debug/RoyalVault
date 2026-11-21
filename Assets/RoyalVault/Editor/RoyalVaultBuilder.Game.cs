@@ -58,10 +58,12 @@ namespace RoyalVault.EditorTools
             // overlays
             BigWinView bigWin = BigWin(t, theme);
             PaytableView paytable = Paytable(t, theme);
+            ChapterCardView chapterCard = ChapterCard(t, theme);
+            CoachMarkView coachMarks = CoachMarks(t, theme);
 
             var presenter = root.AddComponent<WinPresenter>();
             var bootstrap = root.AddComponent<GameBootstrap>();
-            bootstrap.Setup(machine, theme, machineView, console, jackpots, presenter, bigWin, paytable, toast, new[] { left, right }, sealMeter, flameClash);
+            bootstrap.Setup(machine, theme, machineView, console, jackpots, presenter, bigWin, paytable, toast, new[] { left, right }, sealMeter, flameClash, chapterCard, coachMarks);
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             Object.DestroyImmediate(root);
@@ -239,6 +241,31 @@ namespace RoyalVault.EditorTools
             return emitter;
         }
 
+        // Glow, turning rays, the medallion with its light sweep, and the SPIN / STOP label.
+        private static SpinButtonView SpinButton(Transform parent, ThemeDefinition theme, Vector2 position)
+        {
+            Image glow = UiFactory.Image("Spin Glow", parent, theme.glow, position, new Vector2(330, 330));
+            glow.color = new Color(1f, 0.8f, 0.4f, 0.4f);
+            Image rays = UiFactory.Image("Spin Rays", parent, theme.rays, position, new Vector2(340, 340));
+            rays.material = theme.additive;
+            rays.color = new Color(1f, 0.82f, 0.45f, 0.35f);
+
+            Image medallion = UiFactory.Image("Spin", parent, theme.spinButton, position, new Vector2(236, 236));
+            medallion.preserveAspect = true;
+            medallion.material = theme.symbolMaterial;
+            Button button = UiFactory.Button(medallion);
+            button.transition = Selectable.Transition.None;
+
+            TextMeshProUGUI label = UiFactory.Text("Label", medallion.transform, theme.headingFont, "SPIN", 40, Color.white, new Vector2(0, -2), new Vector2(130, 60));
+            label.enableVertexGradient = true;
+            label.colorGradient = new VertexGradient(new Color32(255, 241, 193, 255), new Color32(255, 241, 193, 255), new Color32(196, 146, 62, 255), new Color32(196, 146, 62, 255));
+            label.characterSpacing = 8f;
+
+            var view = medallion.gameObject.AddComponent<SpinButtonView>();
+            view.Setup(button, glow, rays, medallion, label);
+            return view;
+        }
+
         private static JackpotPanelView Jackpots(Transform parent, ThemeDefinition theme)
         {
             RectTransform panel = UiFactory.Stretch("Jackpots", parent);
@@ -283,18 +310,7 @@ namespace RoyalVault.EditorTools
             TextMeshProUGUI winValue = Left("Win", console, theme.headingFont, "0", 34, theme.paleGold, -560, -482, 0);
             _ = balanceLabel;
 
-            // spin
-            Image glow = UiFactory.Image("Spin Glow", console, theme.glow, new Vector2(0, -460), new Vector2(330, 330));
-            glow.color = new Color(1f, 0.8f, 0.4f, 0.4f);
-            Image spinImage = UiFactory.Image("Spin", console, theme.spinButton, new Vector2(0, -460), new Vector2(206, 206));
-            spinImage.preserveAspect = true;
-            Button spinButton = UiFactory.Button(spinImage);
-            spinButton.transition = Selectable.Transition.SpriteSwap;
-            SpriteState state = spinButton.spriteState;
-            state.pressedSprite = theme.spinButtonPressed;
-            spinButton.spriteState = state;
-            var spin = spinImage.gameObject.AddComponent<SpinButtonView>();
-            spin.Setup(spinButton, glow);
+            SpinButtonView spin = SpinButton(console, theme, new Vector2(0, -460));
 
             // auto play and the bet stepper
             Image autoPill = Pill("Auto", console, theme, new Vector2(362, -471), new Vector2(168, 64));
@@ -430,6 +446,87 @@ namespace RoyalVault.EditorTools
             var view = overlay.gameObject.AddComponent<BigWinView>();
             view.Setup(group, banner, title, subtitle, amount, rays.rectTransform, coins, theme.coin, skip);
             view.SetupHeroes(heroes, motion, home);
+            return view;
+        }
+
+        // A full-screen click catcher that never tints.
+        private static Button TapButton(Image graphic)
+        {
+            Button button = UiFactory.Button(graphic);
+            button.transition = Selectable.Transition.None;
+            return button;
+        }
+
+        // A framed story chapter over the game: art in a window, chapter, title and typed beats.
+        private static ChapterCardView ChapterCard(Transform parent, ThemeDefinition theme)
+        {
+            RectTransform root = UiFactory.Stretch("Chapter Card", parent);
+            var group = root.gameObject.AddComponent<CanvasGroup>();
+            Image dim = Stretch("Dim", root, theme.white);
+            dim.color = new Color(0.01f, 0.01f, 0.02f, 0.78f);
+            dim.raycastTarget = true;
+
+            Image panel = UiFactory.Image("Panel", root, theme.popupPanel, new Vector2(0, 10), new Vector2(1320, 820));
+            panel.type = Image.Type.Sliced;
+            StoryCardView card = ChapterStory(panel.transform, theme);
+            TextMeshProUGUI prompt = UiFactory.Text("Continue", root, theme.labelFont, "TAP TO CONTINUE", 15, theme.gold, new Vector2(0, -448), new Vector2(400, 30), TextAlignmentOptions.Center, 30);
+
+            var view = root.gameObject.AddComponent<ChapterCardView>();
+            view.Setup(group, panel.rectTransform, card, TapButton(dim), prompt.gameObject.AddComponent<CanvasGroup>());
+            return view;
+        }
+
+        // The chapter's story card laid out inside the panel: a masked art window above the words.
+        private static StoryCardView ChapterStory(Transform panel, ThemeDefinition theme)
+        {
+            RectTransform rect = UiFactory.Rect("Story", panel, Vector2.zero, new Vector2(1320, 820));
+            var group = rect.gameObject.AddComponent<CanvasGroup>();
+            RectTransform window = UiFactory.Rect("Art Window", rect, new Vector2(0, 118), new Vector2(1060, 400));
+            window.gameObject.AddComponent<RectMask2D>();
+            Image art = Stretch("Art", window, null);
+            var fitter = art.gameObject.AddComponent<AspectRatioFitter>();
+            fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            fitter.aspectRatio = 1.5f;
+
+            TextMeshProUGUI chapter = UiFactory.Text("Chapter", rect, theme.labelFont, "CHAPTER III", 17, theme.gold, new Vector2(0, -118), new Vector2(900, 28), TextAlignmentOptions.Center, 40);
+            TextMeshProUGUI title = UiFactory.Text("Title", rect, theme.headingFont, "Title", 46, theme.paleGold, new Vector2(0, -164), new Vector2(1000, 64));
+            TextMeshProUGUI caption = UiFactory.Text("Caption", rect, theme.bodyFont, "", 29, new Color(0.9f, 0.86f, 0.8f, 1f), new Vector2(0, -250), new Vector2(960, 100), TextAlignmentOptions.Top);
+            caption.textWrappingMode = TextWrappingModes.Normal;
+            var typewriter = caption.gameObject.AddComponent<TypewriterText>();
+
+            var view = rect.gameObject.AddComponent<StoryCardView>();
+            view.Setup(group, art, new Image[0], chapter, title, caption, typewriter);
+            return view;
+        }
+
+        // Four shades around a spotlight, a ring of light and a message bubble.
+        private static CoachMarkView CoachMarks(Transform parent, ThemeDefinition theme)
+        {
+            RectTransform root = UiFactory.Stretch("Coach Marks", parent);
+            var group = root.gameObject.AddComponent<CanvasGroup>();
+            Image tap = Stretch("Tap", root, theme.white);
+            tap.color = new Color(0f, 0f, 0f, 0f);
+            tap.raycastTarget = true;
+            var shades = new RectTransform[4];
+            for (int i = 0; i < 4; i++)
+            {
+                Image shade = UiFactory.Image("Shade", root, theme.white, Vector2.zero, Vector2.zero);
+                shade.color = new Color(0.01f, 0.01f, 0.02f, 0.72f);
+                shades[i] = shade.rectTransform;
+            }
+            Image ring = UiFactory.Image("Ring", root, Sprite("Generated/ring"), Vector2.zero, Vector2.one * 200f);
+            ring.material = theme.additive;
+            ring.color = new Color(1f, 0.85f, 0.5f, 1f);
+
+            Image bubble = UiFactory.Image("Bubble", root, theme.popupPanel, Vector2.zero, new Vector2(880, 250));
+            bubble.type = Image.Type.Sliced;
+            bubble.pixelsPerUnitMultiplier = 3f;
+            TextMeshProUGUI message = UiFactory.Text("Message", bubble.transform, theme.bodyFont, "", 27, theme.ivory, new Vector2(0, 12), new Vector2(680, 104));
+            message.textWrappingMode = TextWrappingModes.Normal;
+            UiFactory.Text("Continue", bubble.transform, theme.labelFont, "TAP TO CONTINUE", 13, theme.gold, new Vector2(0, -60), new Vector2(400, 24), TextAlignmentOptions.Center, 30);
+
+            var view = root.gameObject.AddComponent<CoachMarkView>();
+            view.Setup(group, shades, ring.rectTransform, bubble.rectTransform, message, TapButton(tap));
             return view;
         }
 

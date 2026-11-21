@@ -119,8 +119,7 @@ MonoBehaviour:
   heroLeft: {fileID: 11400000, guid: ef808432880fa41b2b25aff5bf39c723, type: 2}
   heroRight: {fileID: 11400000, guid: 0fd0465fd0bda48d39cac191605af63b, type: 2}
   consoleBar: {fileID: 21300000, guid: 51ab14f97dd0441a9b3cc870d497b294, type: 3}
-  spinButton: {fileID: 21300000, guid: b6a015090805a456594f2bb64b40270f, type: 3}
-  spinButtonPressed: {fileID: 21300000, guid: 2ab9fc88a2635492b9202726cdd7470e, type: 3}
+  spinButton: {fileID: 21300000, guid: 13167cff996df45c3ad504f93d43272c, type: 3}
   pillButton: {fileID: 21300000, guid: 01e78dd3e624741a08d4fc9565b20c65, type: 3}
   roundButton: {fileID: 21300000, guid: 9c73eb5e69e7d484a90188bb29fa3342, type: 3}
   jackpotGrand: {fileID: 21300000, guid: eba32eec514c043d38001b20e3be44d6, type: 3}

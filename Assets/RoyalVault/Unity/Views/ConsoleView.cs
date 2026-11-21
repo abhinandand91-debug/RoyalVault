@@ -18,6 +18,8 @@ namespace RoyalVault.Unity
         [SerializeField] private TextMeshProUGUI totalBet;
         [SerializeField] private TextMeshProUGUI autoLabel;
         [SerializeField] private SpinButtonView spin;
+
+        public RectTransform SpinButtonRect => (RectTransform)spin.transform;
         [SerializeField] private Button betMinus;
         [SerializeField] private Button betPlus;
         [SerializeField] private Button auto;

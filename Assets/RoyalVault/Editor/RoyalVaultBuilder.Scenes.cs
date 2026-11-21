@@ -63,6 +63,62 @@ namespace RoyalVault.EditorTools
             camera.orthographic = true;
         }
 
+        // First-launch intro: its own story cards, letterbox bars, skip, continue and enter.
+        private static StoryIntroView StoryIntro(Transform parent, ThemeDefinition theme)
+        {
+            RectTransform root = UiFactory.Stretch("Story Intro", parent);
+            var group = root.gameObject.AddComponent<CanvasGroup>();
+            Image tap = Stretch("Tap", root, theme.white);
+            tap.color = new Color(0f, 0f, 0f, 1f);
+            tap.raycastTarget = true;
+            var cards = new[] { StoryCard("Intro Card A", root, theme), StoryCard("Intro Card B", root, theme) };
+
+            RectTransform letterbox = UiFactory.Stretch("Letterbox", root);
+            RectTransform top = Bar("Top Bar", letterbox, theme, 1f);
+            RectTransform bottom = Bar("Bottom Bar", letterbox, theme, 0f);
+            Button skip = TextButton("Skip", letterbox, theme, "SKIP STORY", new Vector2(820, 492), 16);
+            TextMeshProUGUI prompt = UiFactory.Text("Continue", letterbox, theme.labelFont, "TAP TO CONTINUE", 16, theme.gold, new Vector2(760, -492), new Vector2(340, 40), TextAlignmentOptions.Right, 30);
+            var promptGroup = prompt.gameObject.AddComponent<CanvasGroup>();
+            Button enter = EnterButton(letterbox, theme);
+
+            var view = root.gameObject.AddComponent<StoryIntroView>();
+            view.Setup(group, cards, top, bottom, TapButton(tap), skip, promptGroup, enter);
+            return view;
+        }
+
+        // A black letterbox bar pinned to the top (1) or bottom (0) edge; the intro animates its height.
+        private static RectTransform Bar(string name, Transform parent, ThemeDefinition theme, float edge)
+        {
+            Image bar = UiFactory.Image(name, parent, theme.white, Vector2.zero, Vector2.zero);
+            bar.color = Color.black;
+            RectTransform r = bar.rectTransform;
+            r.anchorMin = new Vector2(0f, edge);
+            r.anchorMax = new Vector2(1f, edge);
+            r.pivot = new Vector2(0.5f, edge);
+            r.anchoredPosition = Vector2.zero;
+            r.sizeDelta = Vector2.zero;
+            return r;
+        }
+
+        private static Button TextButton(string name, Transform parent, ThemeDefinition theme, string text, Vector2 position, float size)
+        {
+            TextMeshProUGUI label = UiFactory.Text(name, parent, theme.labelFont, text, size, theme.dimGold, position, new Vector2(260, 44), TextAlignmentOptions.Center, 30);
+            label.raycastTarget = true;
+            var button = label.gameObject.AddComponent<Button>();
+            button.targetGraphic = label;
+            return button;
+        }
+
+        private static Button EnterButton(Transform parent, ThemeDefinition theme)
+        {
+            Image pill = UiFactory.Image("Enter", parent, theme.pillButton, new Vector2(0, -470), new Vector2(380, 76), true);
+            pill.type = Image.Type.Sliced;
+            UiFactory.Text("Label", pill.transform, theme.headingFont, "ENTER THE VAULT", 22, theme.paleGold, Vector2.zero, new Vector2(380, 76), TextAlignmentOptions.Center, 26);
+            Button button = UiFactory.Button(pill);
+            pill.gameObject.SetActive(false);
+            return button;
+        }
+
         /// <summary>A full-screen story scene: backdrop, up to three standing figures, a fade and the captions.</summary>
         private static StoryCardView StoryCard(string name, Transform parent, ThemeDefinition theme)
         {
@@ -93,9 +149,10 @@ namespace RoyalVault.EditorTools
                                                      new Vector2(0, -358), new Vector2(880, 96), TextAlignmentOptions.Top);
             caption.textWrappingMode = TextWrappingModes.Normal;
             caption.lineSpacing = -6f;
+            var typewriter = caption.gameObject.AddComponent<TypewriterText>();
 
             var view = rect.gameObject.AddComponent<StoryCardView>();
-            view.Setup(group, art, figures, chapter, title, caption);
+            view.Setup(group, art, figures, chapter, title, caption, typewriter);
             return view;
         }
 
@@ -168,7 +225,8 @@ namespace RoyalVault.EditorTools
 
             var screen = root.AddComponent<LoadingScreen>();
             screen.Setup(group, logo.rectTransform, fillArea, fill, tip.rectTransform, shine.rectTransform, percent, tipText, dust, theme.glow, theme.loadingTips);
-            screen.SetupStory(told ? theme.story : null, cards, chrome);
+            StoryIntroView intro = told ? StoryIntro(t, theme) : null;
+            screen.SetupStory(told ? theme.story : null, cards, chrome, intro);
             var sound = new GameObject("Sound").AddComponent<SoundPlayer>();
             sound.Setup(theme.sounds);
             screen.SetupSound(sound);

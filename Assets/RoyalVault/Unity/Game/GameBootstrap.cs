@@ -42,6 +42,8 @@ namespace RoyalVault.Unity
         [SerializeField] private CharacterView[] characters = new CharacterView[0];
         [SerializeField] private SealMeterView sealMeter;
         [SerializeField] private FlameClashView flameClash;
+        [SerializeField] private ChapterCardView chapterCard;
+        [SerializeField] private CoachMarkView coachMarks;
 
         public GameSession Session { get; private set; }
         public SpinEngine Engine { get; private set; }
@@ -49,6 +51,7 @@ namespace RoyalVault.Unity
         public MachineDefinition Machine { get; private set; }
         public SoundDirector Sound { get; private set; }
         public WinShowcase Showcase { get; private set; }
+        public StoryDirector Story { get; private set; }
 
         /// <summary>Turns the win showcase on or off (it can also be ticked in the Inspector while playing).</summary>
         public bool ShowcaseWins { get => showcaseWins; set { showcaseWins = value; Showcase?.Arm(); } }
@@ -60,7 +63,7 @@ namespace RoyalVault.Unity
         public void Setup(MachineDefinitionAsset machineAsset, ThemeDefinition themeAsset, MachineView machineViewRef, ConsoleView consoleView,
                           JackpotPanelView jackpotView, WinPresenter winPresenter, BigWinView bigWinView, PaytableView paytableView,
                           MessageToast messageToast, CharacterView[] characterViews, SealMeterView sealMeterView,
-                          FlameClashView flameClashView = null)
+                          FlameClashView flameClashView = null, ChapterCardView chapterCardView = null, CoachMarkView coachMarkView = null)
         {
             machine = machineAsset;
             theme = themeAsset;
@@ -74,6 +77,8 @@ namespace RoyalVault.Unity
             characters = characterViews;
             sealMeter = sealMeterView;
             flameClash = flameClashView;
+            chapterCard = chapterCardView;
+            coachMarks = coachMarkView;
         }
 
         private void Awake()
@@ -106,7 +111,9 @@ namespace RoyalVault.Unity
                 flameClash.Bind(characters, theme.characterMagic);
                 flameClash.SetStoreEffects(theme.clashImpactVfx, theme.clashSparksVfx, theme.vfxScale);
             }
-            presenter.Bind(machineView, console, bigWin, jackpots, characters, flameClash);
+            Story = gameObject.AddComponent<StoryDirector>();
+            Story.Bind(theme.story, chapterCard, coachMarks, FirstVisitHints());
+            presenter.Bind(machineView, console, bigWin, jackpots, characters, flameClash, Story);
             // the guardians' flames flare each time a reel is anticipated
             machineView.AnticipationStarted += reel => { foreach (CharacterView c in characters) c.Surge(); };
             if (sealMeter != null) sealMeter.Bind(Machine, theme, machineView, Flow, Session);
@@ -114,9 +121,20 @@ namespace RoyalVault.Unity
             var player = gameObject.AddComponent<SoundPlayer>();
             player.Setup(theme.sounds);
             Sound = gameObject.AddComponent<SoundDirector>();
-            gameObject.AddComponent<RoundController>().Bind(Session, Flow, machineView, console, presenter, bigWin, paytable, toast);
+            gameObject.AddComponent<RoundController>().Bind(Session, Flow, machineView, console, presenter, bigWin, paytable, toast, Story);
             Sound.Bind(player, Machine, Session, Flow, machineView, console, bigWin, sealMeter, flameClash);
             Showcase = new WinShowcase(Engine, Session, Flow, toast, () => showcaseWins, () => showcaseOrder);
+        }
+
+        // Spin button, seal meter and jackpots, with the story's hint for each.
+        private StoryDirector.Hint[] FirstVisitHints()
+        {
+            string[] texts = theme.story != null ? theme.story.controlHints : new string[0];
+            RectTransform[] targets = { console.SpinButtonRect, sealMeter != null ? (RectTransform)sealMeter.transform : null, jackpots.TopPlaque };
+            bool[] above = { true, true, false };
+            var hints = new StoryDirector.Hint[Mathf.Min(texts.Length, targets.Length)];
+            for (int i = 0; i < hints.Length; i++) hints[i] = new StoryDirector.Hint { target = targets[i], text = texts[i], above = above[i] };
+            return hints;
         }
 
         /// <summary>Ticking or unticking the showcase in the Inspector while playing takes effect on the next spin.</summary>

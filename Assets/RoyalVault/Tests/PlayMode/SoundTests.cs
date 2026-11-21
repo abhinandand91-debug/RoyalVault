@@ -40,6 +40,7 @@ namespace RoyalVault.Tests
             yield return SceneManager.LoadSceneAsync("Game");
             yield return null;
             var game = Object.FindFirstObjectByType<GameBootstrap>();
+            game.Story.Mute();
             SoundPlayer player = game.Sound.Player;
 
             // a small line win: the reels spin, land one by one, and the win sounds

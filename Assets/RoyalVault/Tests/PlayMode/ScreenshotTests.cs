@@ -56,6 +56,13 @@ namespace RoyalVault.Tests
             while (!condition() && t < timeout) { t += Time.deltaTime; yield return null; }
         }
 
+        // Taps through the story until the condition holds.
+        private static IEnumerator AdvanceUntil(StoryIntroView intro, System.Func<bool> condition)
+        {
+            for (int i = 0; i < 40 && !condition(); i++) { intro.Advance(); yield return new WaitForSeconds(0.35f); }
+            Assert.IsTrue(condition(), "story did not advance");
+        }
+
         private static IEnumerator SpinTo(GameBootstrap game, int[] stops)
         {
             yield return WaitFor(() => game.Flow.State == SpinState.Idle);
@@ -71,21 +78,38 @@ namespace RoyalVault.Tests
             Directory.CreateDirectory(folder);
             PlayerPrefs.DeleteAll();
 
-            // boot: the loading screen part-way
+            // first launch: the story intro, told beat by beat, then Enter the Vault
             yield return SceneManager.LoadSceneAsync("Boot");
             UseTarget(1920, 1080);
-            yield return new WaitForSeconds(1.3f);
+            var intro = Object.FindFirstObjectByType<StoryIntroView>();
+            yield return WaitFor(() => intro.IsPlaying);
+            yield return new WaitForSeconds(2.4f);
             yield return Shot("01_loading");
-            // the story's intro: the second scene follows the first
-            yield return new WaitForSeconds(5f);
+            yield return AdvanceUntil(intro, () => intro.Page == 1);
+            yield return new WaitForSeconds(2.4f);
             yield return Shot("00_story_scene_2");
+            yield return AdvanceUntil(intro, () => intro.ShowsEnter);
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot("01b_story_enter");
+            intro.Enter();
 
             // the game scene arrives on its own
             yield return WaitFor(() => SceneManager.GetActiveScene().name == "Game");
             yield return null;
             UseTarget(1920, 1080);
             var game = Object.FindFirstObjectByType<GameBootstrap>();
+
+            // the first visit: chapter III over the game, then the hints
+            var chapter = Object.FindFirstObjectByType<ChapterCardView>();
+            yield return WaitFor(() => chapter.IsShowing);
+            yield return new WaitForSeconds(2.6f);
+            yield return Shot("25_chapter_card");
+            var coach = Object.FindFirstObjectByType<CoachMarkView>();
+            for (int i = 0; i < 12 && !coach.IsShowing; i++) { chapter.Advance(); yield return new WaitForSeconds(0.3f); }
             yield return new WaitForSeconds(0.5f);
+            yield return Shot("26_coach_mark");
+            game.Story.Mute();
+            yield return new WaitForSeconds(0.6f);
             yield return Shot("02_idle");
 
             // a spin in motion, then a line win being shown

@@ -71,7 +71,6 @@ namespace RoyalVault.Unity
         [Header("Interface")]
         public Sprite consoleBar;
         public Sprite spinButton;
-        public Sprite spinButtonPressed;
         public Sprite pillButton;
         public Sprite roundButton;
         public Sprite jackpotGrand;

@@ -137,8 +137,7 @@ namespace RoyalVault.EditorTools
             theme.heroLeft = CreateCharacterAnimation(Root + "Art.Private/Characters/Cole");
             theme.heroRight = CreateCharacterAnimation(Root + "Art.Private/Characters/Ruby");
             theme.consoleBar = Sprite("Generated/bar");
-            theme.spinButton = Sprite("UI/spin_btn");
-            theme.spinButtonPressed = Sprite("UI/spin_btn_pressed");
+            theme.spinButton = Sprite("UI/spin_medallion");
             theme.pillButton = Sprite("Generated/pill");
             theme.roundButton = Sprite("Generated/ring");
             theme.jackpotGrand = Sprite("UI/jackpot_grand");

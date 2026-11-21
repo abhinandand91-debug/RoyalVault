@@ -20,13 +20,15 @@ namespace RoyalVault.Unity
         private PaytableView paytable;
         private MessageToast toast;
         private long freeSpinRoundWin;
+        private StoryDirector story;
 
         /// <summary>Spins played automatically after the player starts auto play.</summary>
         public int AutoPlaySpins = 25;
 
         public void Bind(GameSession gameSession, SpinFlow spinFlow, MachineView machineView, ConsoleView consoleView, WinPresenter winPresenter,
-                         BigWinView bigWinView, PaytableView paytableView, MessageToast messageToast)
+                         BigWinView bigWinView, PaytableView paytableView, MessageToast messageToast, StoryDirector storyDirector = null)
         {
+            story = storyDirector;
             session = gameSession;
             flow = spinFlow;
             autoPlay = flow.Features.Get<AutoPlayFeature>();
@@ -60,11 +62,12 @@ namespace RoyalVault.Unity
             console.ClearWin();
             // a saved free spin round carries on
             if (session.FreeSpins.Remaining > 0) StartCoroutine(After(1.2f, () => flow.RequestSpin()));
+            else if (story != null) StartCoroutine(story.Welcome());
         }
 
         private void OnSpinPressed()
         {
-            if (paytable.IsOpen || bigWin.IsShowing) return;
+            if (paytable.IsOpen || bigWin.IsShowing || (story != null && story.IsTelling)) return;
             if (flow.State == SpinState.Spinning) { machine.Hurry(); return; }
             if (flow.State == SpinState.Presenting) return;
             flow.RequestSpin();
@@ -104,6 +107,7 @@ namespace RoyalVault.Unity
             // free spins awarded from a paid spin: announce the round
             if (!context.IsFreeSpin && outcome.FreeSpinsAwarded > 0)
             {
+                if (story != null) yield return story.TellOnce(StoryMoment.FreeSpins);
                 freeSpinRoundWin = 0;
                 yield return bigWin.ShowTitle(outcome.FreeSpinsAwarded + " FREE SPINS", "EVERY WIN x" + session.Machine.FreeSpinMultiplier, 0, 2.2f,
                                              CelebrationKind.FreeSpinsAwarded);

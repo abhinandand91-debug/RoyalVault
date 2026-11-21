@@ -34,15 +34,12 @@ namespace RoyalVault.Unity
         [Header("Sound")]
         [SerializeField] private SoundPlayer sound;
 
-        private const string IntroSeenKey = "royalvault.story.intro.seen";
-        private bool skip;
+        [SerializeField] private StoryIntroView introView;
 
-        /// <summary>How long the story wants the screen kept up (0 when there is no story to tell).</summary>
-        public float StorySeconds { get; private set; }
-        /// <summary>True once the story has been told, or when there is none.</summary>
+        private const string IntroSeenKey = "royalvault.story.intro.seen";
+
+        // True once the story has been told, or when there is none.
         public bool StoryDone { get; private set; } = true;
-        /// <summary>True when the player chose to skip the rest of the story.</summary>
-        public bool Skipped { get; private set; }
 
         private readonly List<RectTransform> dust = new List<RectTransform>();
         private float shown;
@@ -70,8 +67,9 @@ namespace RoyalVault.Unity
             sound = player;
         }
 
-        public void SetupStory(StoryDefinition storyAsset, StoryCardView[] storyCards, CanvasGroup chrome)
+        public void SetupStory(StoryDefinition storyAsset, StoryCardView[] storyCards, CanvasGroup chrome, StoryIntroView intro = null)
         {
+            introView = intro;
             story = storyAsset;
             cards = storyCards;
             storyChrome = chrome;
@@ -81,50 +79,45 @@ namespace RoyalVault.Unity
         {
             if (sound != null && sound.Bank != null) sound.PlayMusic(sound.Bank.loadingMusic, 1.5f);
             SetProgress(0f);
-            for (int i = 0; i < 26; i++) dust.Add(UiFactory.Image("Dust", dustLayer, dustSprite, RandomDustPosition(true), Vector2.one * Random.Range(10f, 30f)).rectTransform);
-            var intro = story != null ? story.At(StoryMoment.Intro) : new (StoryDefinition.Scene, int)[0];
+            SpawnDust();
             foreach (StoryCardView card in cards) card.Group.alpha = 0f;
-            if (intro.Length > 0 && cards.Length > 0)
-            {
-                bool seen = PlayerPrefs.GetInt(IntroSeenKey, 0) == 1;
-                StoryDone = false;
-                StorySeconds = seen ? 0f : intro.Length * story.secondsPerScene;
-                tipText.text = seen ? "" : "CLICK TO CONTINUE";
-                StartCoroutine(TellIntro(intro, seen));
-            }
-            else if (tips.Length > 0) StartCoroutine(RotateTips());
+            var intro = story != null ? story.At(StoryMoment.Intro) : new (StoryDefinition.Scene, int)[0];
             if (storyChrome != null) storyChrome.alpha = intro.Length > 0 ? 1f : 0f;
+            if (intro.Length == 0 || cards.Length == 0) { if (tips.Length > 0) StartCoroutine(RotateTips()); return; }
+            StoryDone = false;
+            bool firstTime = PlayerPrefs.GetInt(IntroSeenKey, 0) == 0 && introView != null;
+            StartCoroutine(firstTime ? TellFirstTime(intro) : ShowLastScene(intro));
         }
 
-        private IEnumerator TellIntro((StoryDefinition.Scene scene, int number)[] intro, bool seen)
+        private void SpawnDust()
         {
-            int first = seen ? intro.Length - 1 : 0;
-            StoryCardView previous = null;
-            for (int i = first; i < intro.Length; i++)
-            {
-                StoryCardView card = cards[i % cards.Length];
-                // the incoming card goes just above the outgoing one (both stay under the logo and the bar)
-                if (previous != null && previous != card && card.transform.GetSiblingIndex() < previous.transform.GetSiblingIndex())
-                    card.transform.SetSiblingIndex(previous.transform.GetSiblingIndex());
-                card.Show(intro[i].scene, intro[i].number, story.chapterLabel, story.secondsPerScene);
-                if (sound != null) sound.Play(SoundCue.StoryPage);
-                StoryCardView fading = previous;
-                StartCoroutine(Tween.Run(previous == null ? 0.6f : 0.9f, k =>
-                {
-                    card.Group.alpha = k;
-                    if (fading != null && fading != card) fading.Group.alpha = 1f - k;
-                }, Ease.InOutSine));
-                previous = card;
-                if (i == intro.Length - 1) PlayerPrefs.SetInt(IntroSeenKey, 1);
-                if (seen) break;
+            for (int i = 0; i < 26; i++)
+                dust.Add(UiFactory.Image("Dust", dustLayer, dustSprite, RandomDustPosition(true), Vector2.one * Random.Range(10f, 30f)).rectTransform);
+        }
 
-                skip = false;
-                float t = 0f;
-                while (t < story.secondsPerScene && !skip) { t += Time.deltaTime; yield return null; }
-                if (skip && i == intro.Length - 1) Skipped = true;
-            }
-            tipText.text = "";
+        // First launch: the whole intro, paced by the player, while the game loads underneath.
+        private IEnumerator TellFirstTime((StoryDefinition.Scene scene, int number)[] intro)
+        {
+            introView.PageTurned += PlayPageSound;
+            yield return introView.Tell(story, intro);
+            PlayerPrefs.SetInt(IntroSeenKey, 1);
+            PlayerPrefs.Save();
+            yield return ShowLastScene(intro);
+        }
+
+        // Returning players see the last intro scene behind the bar.
+        private IEnumerator ShowLastScene((StoryDefinition.Scene scene, int number)[] intro)
+        {
+            var last = intro[intro.Length - 1];
+            StoryCardView card = cards[0];
+            card.Show(last.scene, last.number, story.chapterLabel, story.secondsPerScene);
             StoryDone = true;
+            yield return Tween.Run(0.6f, k => card.Group.alpha = k, Ease.InOutSine);
+        }
+
+        private void PlayPageSound()
+        {
+            if (sound != null) sound.Play(SoundCue.StoryPage);
         }
 
         /// <summary>Shows 0..1 of the loading done.</summary>
@@ -147,7 +140,6 @@ namespace RoyalVault.Unity
         private void Update()
         {
             float time = Time.time;
-            if (!StoryDone && (Input.GetMouseButtonDown(0) || Input.anyKeyDown)) skip = true;
             if (!StoryDone && tipText.text.Length > 0) tipText.alpha = 0.45f + 0.35f * Mathf.Sin(time * 2.4f);
             // the logo breathes a little light
             logo.localScale = Vector3.one * (1f + 0.012f * Mathf.Sin(time * 1.6f));

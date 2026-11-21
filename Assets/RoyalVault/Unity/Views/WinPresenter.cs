@@ -18,11 +18,13 @@ namespace RoyalVault.Unity
         private JackpotPanelView jackpots;
         private CharacterView[] characters;
         private FlameClashView clash;
+        private StoryDirector story;
         private Coroutine routine;
 
         public void Bind(MachineView machineView, ConsoleView consoleView, BigWinView bigWinView, JackpotPanelView jackpotView,
-                         CharacterView[] characterViews, FlameClashView flameClash = null)
+                         CharacterView[] characterViews, FlameClashView flameClash = null, StoryDirector storyDirector = null)
         {
+            story = storyDirector;
             clash = flameClash;
             machine = machineView;
             console = consoleView;
@@ -39,6 +41,9 @@ namespace RoyalVault.Unity
         }
 
         /// <summary>Stops showing the previous win (a new spin is starting).</summary>
+        // The chapter told the first time the Major or Grand jackpot is won.
+        private static StoryMoment JackpotMoment(int tier) => tier == 1 ? StoryMoment.MajorJackpot : StoryMoment.GrandJackpot;
+
         public void Cancel()
         {
             if (routine != null) StopCoroutine(routine);
@@ -77,6 +82,7 @@ namespace RoyalVault.Unity
                 if (outcome.JackpotTier >= 0) jackpots.Celebrate(outcome.JackpotTier);
                 string jackpotName = outcome.JackpotTier >= 0 ? context.Session.Machine.JackpotTiers[outcome.JackpotTier].Name : null;
                 yield return bigWin.ShowWin(outcome.Tier, outcome.TotalWin, jackpotName);
+                if (story != null && outcome.JackpotTier >= 1) yield return story.TellOnce(JackpotMoment(outcome.JackpotTier));
             }
 
             onShown();
