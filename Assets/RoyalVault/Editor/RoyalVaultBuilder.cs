@@ -133,6 +133,7 @@ namespace RoyalVault.EditorTools
             theme.character = AssetDatabase.LoadAssetAtPath<Sprite>(Root + "Art.Private/Characters/anubis.png");
             theme.characterAnimation = CreateCharacterAnimation(Root + "Art.Private/Characters/Anubis");
             theme.story = CreateStory();
+            theme.sounds = CreateSounds();
             theme.heroLeft = CreateCharacterAnimation(Root + "Art.Private/Characters/Cole");
             theme.heroRight = CreateCharacterAnimation(Root + "Art.Private/Characters/Ruby");
             theme.consoleBar = Sprite("Generated/bar");

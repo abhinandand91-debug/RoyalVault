@@ -34,6 +34,11 @@ namespace RoyalVault.Unity
         private float shake;
         private Coroutine routine;
 
+        /// <summary>A seal landed and cracked the seal further (the stage, 1 = first crack).</summary>
+        public event System.Action<int> Cracked;
+        /// <summary>Enough seals landed: the seal breaks and the vault opens.</summary>
+        public event System.Action Broke;
+
         /// <summary>Seals counted this spin.</summary>
         public int Count => lit;
         /// <summary>True while the seal is broken and the vault is open (a free spin round).</summary>
@@ -123,6 +128,7 @@ namespace RoyalVault.Unity
             shake = 1f;
             if (routine != null) StopCoroutine(routine);
             routine = StartCoroutine(lit >= needed ? Shatter() : Pulse(lit));
+            if (lit >= needed) Broke?.Invoke(); else Cracked?.Invoke(lit);
         }
 
         private IEnumerator Pulse(int stage)

@@ -111,6 +111,7 @@ MonoBehaviour:
   symbolMaterial: {fileID: 2100000, guid: 7284114aa04e14d309421c3aa0c1a3d5, type: 2}
   rays: {fileID: 21300000, guid: 5d0cc192600e942708d3d6aabaf48c8b, type: 3}
   story: {fileID: 11400000, guid: ced7b3d86de1841f9bd3e7d24fd11d34, type: 2}
+  sounds: {fileID: 11400000, guid: 89b77e2e548124804a9d37d2e28379ea, type: 2}
   heroLeft: {fileID: 11400000, guid: ef808432880fa41b2b25aff5bf39c723, type: 2}
   heroRight: {fileID: 11400000, guid: 0fd0465fd0bda48d39cac191605af63b, type: 2}
   consoleBar: {fileID: 21300000, guid: 51ab14f97dd0441a9b3cc870d497b294, type: 3}

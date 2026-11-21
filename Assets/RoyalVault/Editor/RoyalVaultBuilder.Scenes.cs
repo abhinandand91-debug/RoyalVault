@@ -169,6 +169,9 @@ namespace RoyalVault.EditorTools
             var screen = root.AddComponent<LoadingScreen>();
             screen.Setup(group, logo.rectTransform, fillArea, fill, tip.rectTransform, shine.rectTransform, percent, tipText, dust, theme.glow, theme.loadingTips);
             screen.SetupStory(told ? theme.story : null, cards, chrome);
+            var sound = new GameObject("Sound").AddComponent<SoundPlayer>();
+            sound.Setup(theme.sounds);
+            screen.SetupSound(sound);
 
             var entry = new GameObject("AppEntry").AddComponent<AppEntry>();
             entry.Setup(screen, "Game");

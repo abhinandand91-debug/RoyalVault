@@ -58,6 +58,7 @@ namespace RoyalVault.Unity
         [Tooltip("Material for reel symbols (RoyalVault/UI Symbol): the shine sweep and flash")] public Material symbolMaterial;
         [Tooltip("Rays drawn behind the grand symbols when they win")] public Sprite rays;
         [Tooltip("Optional story told on the loading screen and at game moments")] public StoryDefinition story;
+        [Tooltip("The game's sounds and music; empty cues are silent")] public SoundBank sounds;
         [Tooltip("Optional hero who celebrates big wins on the left (the prospector)")] public CharacterAnimation heroLeft;
         [Tooltip("Optional hero who celebrates big wins on the right (the sharpshooter, mirrored to face the centre)")] public CharacterAnimation heroRight;
 

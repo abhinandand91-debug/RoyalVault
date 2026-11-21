@@ -31,6 +31,9 @@
 # The game runs without it: the guardian niches stay empty.
 /Assets/RoyalVault/Art.Private/
 /Assets/RoyalVault/Art.Private.meta
+# The purchased Crowns of Kemet pack itself, if it is imported into the project
+/Assets/RSG_Crowns_of_Kemet/
+/Assets/RSG_Crowns_of_Kemet.meta
 
 # Crash and build reports
 crashlytics-build.properties

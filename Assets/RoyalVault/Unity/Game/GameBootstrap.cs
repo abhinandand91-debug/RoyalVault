@@ -35,6 +35,7 @@ namespace RoyalVault.Unity
         public SpinEngine Engine { get; private set; }
         public SpinFlow Flow { get; private set; }
         public MachineDefinition Machine { get; private set; }
+        public SoundDirector Sound { get; private set; }
 
         /// <summary>The machine to play, set before the object wakes (the boot scene or a test may choose).</summary>
         public MachineDefinitionAsset MachineAsset { get { return machine; } set { machine = value; } }
@@ -82,7 +83,12 @@ namespace RoyalVault.Unity
             for (int i = 0; i < characters.Length; i++) characters[i].Bind(theme.character, theme.characterEffectAnchor, theme.characterMagic, theme.characterAnimation);
             presenter.Bind(machineView, console, bigWin, jackpots, characters);
             if (sealMeter != null) sealMeter.Bind(Machine, theme, machineView, Flow, Session);
+            // sound listens to everything above; the views stay silent themselves
+            var player = gameObject.AddComponent<SoundPlayer>();
+            player.Setup(theme.sounds);
+            Sound = gameObject.AddComponent<SoundDirector>();
             gameObject.AddComponent<RoundController>().Bind(Session, Flow, machineView, console, presenter, bigWin, paytable, toast);
+            Sound.Bind(player, Machine, Session, Flow, machineView, console, bigWin, sealMeter);
         }
 
         /// <summary>Testing aid: the next spin stops at these reel positions.</summary>

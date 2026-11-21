@@ -13,6 +13,9 @@ namespace RoyalVault.Unity
     /// heroes, they stride in at either side of the banner and play their action (the prospector shoulders his
     /// pickaxe, the sharpshooter spins her revolver) for as long as the celebration lasts.
     /// </summary>
+    /// <summary>What a celebration is announcing.</summary>
+    public enum CelebrationKind { BigWin, MegaWin, EpicWin, Jackpot, FreeSpinsAwarded, FreeSpinsTotal, Title }
+
     public sealed class BigWinView : MonoBehaviour
     {
         [SerializeField] private CanvasGroup group;
@@ -33,6 +36,11 @@ namespace RoyalVault.Unity
         private bool skipped;
 
         public bool IsShowing { get; private set; }
+
+        /// <summary>A celebration opens (what it announces, and whether an amount counts up).</summary>
+        public event System.Action<CelebrationKind, bool> Opened;
+        /// <summary>The celebration has faded away.</summary>
+        public event System.Action Closed;
 
         public void Setup(CanvasGroup canvasGroup, Image bannerImage, TextMeshProUGUI titleText, TextMeshProUGUI subtitleText,
                           CountingText amountText, RectTransform raysRect, RectTransform coins, Sprite coin, Button skipButton)
@@ -94,16 +102,18 @@ namespace RoyalVault.Unity
         {
             string heading = jackpotName != null ? jackpotName + " JACKPOT" : tier == WinTier.Epic ? "EPIC WIN" : tier == WinTier.Mega ? "MEGA WIN" : null;
             float seconds = jackpotName != null ? 5f : tier == WinTier.Epic ? 5f : tier == WinTier.Mega ? 4f : 3f;
-            yield return Show(heading, null, value, seconds, true);
+            CelebrationKind kind = jackpotName != null ? CelebrationKind.Jackpot : tier == WinTier.Epic ? CelebrationKind.EpicWin
+                                 : tier == WinTier.Mega ? CelebrationKind.MegaWin : CelebrationKind.BigWin;
+            yield return Show(heading, null, value, seconds, true, kind);
         }
 
         /// <summary>A short title card without an amount (or with one when <paramref name="value"/> is above 0).</summary>
-        public IEnumerator ShowTitle(string heading, string line, long value, float seconds)
+        public IEnumerator ShowTitle(string heading, string line, long value, float seconds, CelebrationKind kind = CelebrationKind.Title)
         {
-            yield return Show(heading, line, value, seconds, value > 0);
+            yield return Show(heading, line, value, seconds, value > 0, kind);
         }
 
-        private IEnumerator Show(string heading, string line, long value, float countSeconds, bool coinsOn)
+        private IEnumerator Show(string heading, string line, long value, float countSeconds, bool coinsOn, CelebrationKind kind)
         {
             IsShowing = true;
             skipped = false;
@@ -119,6 +129,7 @@ namespace RoyalVault.Unity
             subtitle.text = line ?? "";
             amount.gameObject.SetActive(value > 0);
             if (value > 0) amount.Roll(0, value, countSeconds);
+            Opened?.Invoke(kind, value > 0);
 
             RectTransform hero = heading == null ? banner.rectTransform : title.rectTransform;
             float clock = 0f;
@@ -155,6 +166,7 @@ namespace RoyalVault.Unity
             foreach (RectTransform coin in coins) coin.gameObject.SetActive(false);
             Hide();
             IsShowing = false;
+            Closed?.Invoke();
         }
 
         private IEnumerator Coin()

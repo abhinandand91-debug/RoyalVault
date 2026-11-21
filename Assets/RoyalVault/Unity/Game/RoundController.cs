@@ -20,7 +20,6 @@ namespace RoyalVault.Unity
         private PaytableView paytable;
         private MessageToast toast;
         private long freeSpinRoundWin;
-        private bool soundOn = true;
 
         /// <summary>Spins played automatically after the player starts auto play.</summary>
         public int AutoPlaySpins = 25;
@@ -43,7 +42,6 @@ namespace RoyalVault.Unity
             console.BetDownPressed += () => { if (flow.State == SpinState.Idle) session.Bet.Decrease(); };
             console.AutoPressed += OnAutoPressed;
             console.MenuPressed += () => { if (flow.State == SpinState.Idle) paytable.Open(); };
-            console.SoundPressed += () => { soundOn = !soundOn; AudioListener.volume = soundOn ? 1f : 0f; console.SetSoundOn(soundOn); };
 
             session.Wallet.Changed += value => console.SetBalance(value, 0.6f);
             session.Bet.Changed += bet => { console.SetBet(bet); session.Save(); };
@@ -59,7 +57,6 @@ namespace RoyalVault.Unity
             console.SetBet(session.Bet);
             console.SetFreeSpins(session.FreeSpins, session.Machine.FreeSpinMultiplier);
             console.SetAuto(false, 0);
-            console.SetSoundOn(true);
             console.ClearWin();
             // a saved free spin round carries on
             if (session.FreeSpins.Remaining > 0) StartCoroutine(After(1.2f, () => flow.RequestSpin()));
@@ -108,16 +105,17 @@ namespace RoyalVault.Unity
             if (!context.IsFreeSpin && outcome.FreeSpinsAwarded > 0)
             {
                 freeSpinRoundWin = 0;
-                yield return bigWin.ShowTitle(outcome.FreeSpinsAwarded + " FREE SPINS", "EVERY WIN x" + session.Machine.FreeSpinMultiplier, 0, 2.2f);
+                yield return bigWin.ShowTitle(outcome.FreeSpinsAwarded + " FREE SPINS", "EVERY WIN x" + session.Machine.FreeSpinMultiplier, 0, 2.2f,
+                                             CelebrationKind.FreeSpinsAwarded);
             }
             else if (context.IsFreeSpin && outcome.FreeSpinsAwarded > 0)
             {
-                yield return bigWin.ShowTitle("+" + outcome.FreeSpinsAwarded + " FREE SPINS", null, 0, 1.6f);
+                yield return bigWin.ShowTitle("+" + outcome.FreeSpinsAwarded + " FREE SPINS", null, 0, 1.6f, CelebrationKind.FreeSpinsAwarded);
             }
             // the last free spin: the round's total
             if (context.IsFreeSpin && session.FreeSpins.Remaining == 0)
             {
-                yield return bigWin.ShowTitle("FREE SPINS WIN", null, freeSpinRoundWin, 2.5f);
+                yield return bigWin.ShowTitle("FREE SPINS WIN", null, freeSpinRoundWin, 2.5f, CelebrationKind.FreeSpinsTotal);
                 freeSpinRoundWin = 0;
             }
 

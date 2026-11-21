@@ -37,6 +37,28 @@ instead of the built-in pulse.
 
 ![Symbols celebrating](docs/screenshots/symbol_fx_closeup.jpg)
 
+## Sound
+
+The game's sound is data and plumbing, ready for any sound pack. A `SoundBank` ScriptableObject
+(`Data/RoyalVault_Sounds.asset`) lists every moment as a `SoundCue` (buttons, reel spin and stops, wild / seal / crown
+landing, seal cracks and break, small and big wins, jackpots, coin shower, free spins, story pages, the guardians'
+flame) plus three music loops (loading, base game, free spins). Each cue takes several clips (one plays at random), a
+volume and a pitch variance; an empty cue is silent. `SoundPlayer` plays it (a pool of effect channels, looping
+effects, music that cross-fades) and keeps the player's mute between sessions; `SoundDirector`, added by the
+composition root, listens to the events the game already has and asks for the right cue, so no view knows about
+sound.
+
+To add a pack, drop its files anywhere under `Assets/RoyalVault/Art.Private/Audio/` (git-ignored, like the licensed
+art) and run **Royal Vault > Build All**: files are filled in by name.
+
+| File name starts with | Goes to |
+|---|---|
+| `Music_Loading`, `Music_Base`, `Music_FreeSpins` | the music loops |
+| a cue's name, e.g. `ReelStop_01`, `ReelStop_02`, `BigWin`, `SealCrack` | that cue (every match is a variation) |
+
+Clips assigned by hand in the Inspector are kept. Music imports as streaming Vorbis, effects decompressed on load.
+The `SoundTests` PlayMode tests spin forced outcomes and check that every moment reaches the player.
+
 ## The story
 
 **Gold Rush to the Pharaoh's Vault.** A prospector, Cole Harlan, and a sharpshooter, Ruby Vance, follow a map out of

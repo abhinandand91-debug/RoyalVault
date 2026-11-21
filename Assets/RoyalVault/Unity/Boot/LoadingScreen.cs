@@ -31,6 +31,8 @@ namespace RoyalVault.Unity
         [SerializeField] private StoryDefinition story;
         [SerializeField] private StoryCardView[] cards = new StoryCardView[0];
         [SerializeField] private CanvasGroup storyChrome;
+        [Header("Sound")]
+        [SerializeField] private SoundPlayer sound;
 
         private const string IntroSeenKey = "royalvault.story.intro.seen";
         private bool skip;
@@ -63,6 +65,11 @@ namespace RoyalVault.Unity
             tips = tipLines;
         }
 
+        public void SetupSound(SoundPlayer player)
+        {
+            sound = player;
+        }
+
         public void SetupStory(StoryDefinition storyAsset, StoryCardView[] storyCards, CanvasGroup chrome)
         {
             story = storyAsset;
@@ -72,6 +79,7 @@ namespace RoyalVault.Unity
 
         private void Start()
         {
+            if (sound != null && sound.Bank != null) sound.PlayMusic(sound.Bank.loadingMusic, 1.5f);
             SetProgress(0f);
             for (int i = 0; i < 26; i++) dust.Add(UiFactory.Image("Dust", dustLayer, dustSprite, RandomDustPosition(true), Vector2.one * Random.Range(10f, 30f)).rectTransform);
             var intro = story != null ? story.At(StoryMoment.Intro) : new (StoryDefinition.Scene, int)[0];
@@ -99,6 +107,7 @@ namespace RoyalVault.Unity
                 if (previous != null && previous != card && card.transform.GetSiblingIndex() < previous.transform.GetSiblingIndex())
                     card.transform.SetSiblingIndex(previous.transform.GetSiblingIndex());
                 card.Show(intro[i].scene, intro[i].number, story.chapterLabel, story.secondsPerScene);
+                if (sound != null) sound.Play(SoundCue.StoryPage);
                 StoryCardView fading = previous;
                 StartCoroutine(Tween.Run(previous == null ? 0.6f : 0.9f, k =>
                 {
@@ -131,6 +140,7 @@ namespace RoyalVault.Unity
 
         public IEnumerator FadeOut()
         {
+            if (sound != null) sound.PlayMusic(null, 0.45f);
             yield return Tween.Run(0.45f, k => group.alpha = 1f - k, Ease.InOutSine);
         }
 

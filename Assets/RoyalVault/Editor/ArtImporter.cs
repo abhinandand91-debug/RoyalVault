@@ -12,6 +12,21 @@ namespace RoyalVault.EditorTools
     {
         private const string Art = "Assets/RoyalVault/Art";
 
+        /// <summary>Licensed audio: music streams from disk, effects load decompressed so they start instantly.</summary>
+        private void OnPreprocessAudio()
+        {
+            if (!assetPath.StartsWith(Art + ".Private/Audio") || !assetImporter.importSettingsMissing) return;
+            var importer = (AudioImporter)assetImporter;
+            bool music = System.IO.Path.GetFileName(assetPath).StartsWith("Music_", System.StringComparison.OrdinalIgnoreCase);
+            AudioImporterSampleSettings settings = importer.defaultSampleSettings;
+            settings.loadType = music ? AudioClipLoadType.Streaming : AudioClipLoadType.DecompressOnLoad;
+            settings.compressionFormat = AudioCompressionFormat.Vorbis;
+            settings.quality = music ? 0.6f : 0.8f;
+            importer.defaultSampleSettings = settings;
+            importer.forceToMono = false;
+            importer.loadInBackground = music;
+        }
+
         private void OnPreprocessTexture()
         {
             if (!assetPath.StartsWith(Art) || !assetImporter.importSettingsMissing) return;
