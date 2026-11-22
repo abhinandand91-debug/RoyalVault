@@ -98,7 +98,6 @@ namespace RoyalVault.Unity
             }
 
             Vector2 windowSize = FitWindow();
-            BuildHousing(windowSize);
             BuildCells(windowSize);
             RectTransform fxBack = UiFactory.Rect("Symbol Light", transform, Vector2.zero, Vector2.zero);
             BuildReels(windowSize);
@@ -109,6 +108,7 @@ namespace RoyalVault.Unity
             nextGlint = Time.time + 2f;
             paylineLayer = UiFactory.Rect("Paylines", transform, Vector2.zero, ((RectTransform)transform).rect.size);
             BuildFrame(windowSize);
+            BuildHousing(windowSize);
         }
 
         // The largest cell that fits the reel area, and the window around the cells
@@ -150,7 +150,8 @@ namespace RoyalVault.Unity
             }
         }
 
-        // Stone housing behind the reels: its pylons, lintel and sill keep their size around a window that fits the cells
+        // Stone housing over the edges of the reels: a soft shadow just inside its window, then the pylons, lintel and sill,
+        // which keep their size and reach a little over the cells so the reels sit inside them
         private void BuildHousing(Vector2 windowSize)
         {
             if (theme.reelHousing == null)
@@ -158,12 +159,18 @@ namespace RoyalVault.Unity
                 return;
             }
 
-            Image housing = UiFactory.Image("Housing", transform, theme.reelHousing, windowCentre, windowSize);
+            Vector2 opening = windowSize - Vector2.one * (theme.housingOverlap * 2f);
+            if (theme.windowShadow != null)
+            {
+                Image shadow = UiFactory.Image("Window Shadow", transform, theme.windowShadow, windowCentre, opening);
+                shadow.type = Image.Type.Sliced;
+            }
+
+            Image housing = UiFactory.Image("Housing", transform, theme.reelHousing, windowCentre, opening);
             housing.type = Image.Type.Sliced;
             housing.pixelsPerUnitMultiplier = 1f / theme.housingBorderScale;
             Vector4 b = theme.reelHousing.border * theme.housingBorderScale; // left, bottom, right, top
-            const float margin = 10f;
-            housing.rectTransform.sizeDelta = windowSize + new Vector2(b.x + b.z + margin * 2f, b.y + b.w + margin * 2f);
+            housing.rectTransform.sizeDelta = opening + new Vector2(b.x + b.z, b.y + b.w);
             housing.rectTransform.anchoredPosition = windowCentre + new Vector2((b.z - b.x) * 0.5f, (b.w - b.y) * 0.5f);
         }
 

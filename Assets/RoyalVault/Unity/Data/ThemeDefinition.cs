@@ -58,8 +58,10 @@ namespace RoyalVault.Unity
         public Sprite reelCell;
         public Sprite logo;
         public Sprite niche;
-        [Tooltip("Stone housing drawn behind the reels (9-sliced around the window), used instead of a frame over them")] public Sprite reelHousing;
+        [Tooltip("Stone housing with an open window, drawn over the edges of the reels (9-sliced around the window)")] public Sprite reelHousing;
         [Tooltip("How large the housing's 9-slice borders draw (1 = the art's own pixels)")] public float housingBorderScale = 1f;
+        [Tooltip("How far the housing reaches over the edge of the reels, in canvas pixels, so they sit inside it")] public float housingOverlap = 8f;
+        [Tooltip("Soft shadow just inside the reel window (9-sliced), so the reels look set back into the housing")] public Sprite windowShadow;
         [Tooltip("Optional guardian character (licensed art may be missing in a public checkout)")] public Sprite character;
         [Tooltip("Where the character's magic burns, as a share of its art (0,0 = bottom left)")] public Vector2 characterEffectAnchor = new Vector2(0.89f, 0.837f);
         [Tooltip("Optional baked animation for the character; without it the still art breathes procedurally")] public CharacterAnimation characterAnimation;

@@ -27,6 +27,15 @@ namespace RoyalVault.EditorTools
             Write("emerald_plaque_edge", 128, 128, (x, y) => RoundedRect(x, y, 128, 128, 18f, Color.clear, new Color32(214, 170, 92, 255), 3f));
             Write("emerald_disc", 256, 256, EmeraldDiscPixel);
             Write("spin_wings", 512, 192, SpinWingsPixel);
+            Write("window_shadow", 64, 64, WindowShadowPixel);
+        }
+
+        // Dark at the edge, fading out over 24 pixels: 9-sliced inside the reel window
+        private static Color WindowShadowPixel(int x, int y)
+        {
+            float edge = Mathf.Min(Mathf.Min(x, 63 - x), Mathf.Min(y, 63 - y));
+            float t = 1f - Mathf.Clamp01(edge / 24f);
+            return new Color(0f, 0f, 0f, 0.6f * t * t);
         }
 
         // A dark emerald cell with a faint lighter edge, like the reel bands in the mockup
@@ -92,6 +101,9 @@ namespace RoyalVault.EditorTools
             EnsureSpriteBorder(ArtPath + "Emerald/Environment/reel_housing.png", new Vector4(231, 127, 231, 135));
             theme.reelHousing = Sprite("Emerald/Environment/reel_housing");
             theme.housingBorderScale = 1f;
+            theme.housingOverlap = 8f;
+            EnsureSpriteBorder(Generated + "window_shadow.png", new Vector4(24, 24, 24, 24));
+            theme.windowShadow = Sprite("Generated/window_shadow");
             theme.reelCell = Sprite("Generated/emerald_cell");
             theme.niche = null;
             theme.consoleBar = Sprite("Generated/emerald_bar");
@@ -130,6 +142,7 @@ namespace RoyalVault.EditorTools
         private static void SetArtDecoLayout(ThemeDefinition theme)
         {
             theme.reelHousing = null;
+            theme.windowShadow = null;
             theme.gold = new Color32(232, 199, 122, 255);
             theme.paleGold = new Color32(255, 231, 166, 255);
             theme.ivory = new Color32(243, 233, 210, 255);

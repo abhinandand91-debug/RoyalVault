@@ -106,6 +106,8 @@ MonoBehaviour:
   niche: {fileID: 0}
   reelHousing: {fileID: 21300000, guid: c6aaaad031ae3404794c9c0d0a0039af, type: 3}
   housingBorderScale: 1
+  housingOverlap: 8
+  windowShadow: {fileID: 21300000, guid: 2318cac7b78924aa8831ac43a3988005, type: 3}
   character: {fileID: 21300000, guid: 98663f0ca23be4091ab8354bcacca9a9, type: 3}
   characterEffectAnchor: {x: 0.89, y: 0.837}
   characterAnimation: {fileID: 11400000, guid: 148c3ddcc38204ef3a7dd9333d2621ae, type: 2}
