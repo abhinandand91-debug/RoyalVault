@@ -10,7 +10,14 @@ namespace RoyalVault.EditorTools
         private const string PrivateArt = "Assets/RoyalVault/Art.Private";
         private const float ShortSoundSeconds = 1.5f;
 
+        private const int MaxSize = 4096;
+        // Phones cannot show more detail than this on a full-screen background
+        private const int MobileBackgroundSize = 2048;
+
         private static readonly string[] Paintings = { "Art/Machine/bg", "Art/Story/scene_" };
+        // Animated characters and symbols: many large frames, soft painted detail
+        private static readonly string[] Frames = { "Art.Private/Characters/", "Art.Private/Symbols/" };
+        private static readonly string[] Backgrounds = { "Art/Machine/bg" };
 
         [MenuItem("Royal Vault/Apply Texture and Audio Budget")]
         public static void Apply()
@@ -44,7 +51,9 @@ namespace RoyalVault.EditorTools
 
         private static bool ApplyTexture(TextureImporter importer, string path)
         {
-            bool painting = IsPainting(path);
+            bool lighter = Matches(path, Paintings) || Matches(path, Frames);
+            TextureImporterFormat mobile = lighter ? TextureImporterFormat.ASTC_6x6 : TextureImporterFormat.ASTC_4x4;
+            int mobileSize = Matches(path, Backgrounds) ? MobileBackgroundSize : MaxSize;
             bool changed = false;
             if (importer.mipmapEnabled || importer.isReadable)
             {
@@ -59,9 +68,9 @@ namespace RoyalVault.EditorTools
                 changed = true;
             }
 
-            changed |= Platform(importer, "Standalone", TextureImporterFormat.BC7);
-            changed |= Platform(importer, "Android", painting ? TextureImporterFormat.ASTC_6x6 : TextureImporterFormat.ASTC_4x4);
-            changed |= Platform(importer, "iPhone", painting ? TextureImporterFormat.ASTC_6x6 : TextureImporterFormat.ASTC_4x4);
+            changed |= Platform(importer, "Standalone", TextureImporterFormat.BC7, MaxSize);
+            changed |= Platform(importer, "Android", mobile, mobileSize);
+            changed |= Platform(importer, "iPhone", mobile, mobileSize);
             if (changed)
             {
                 importer.SaveAndReimport();
@@ -70,10 +79,10 @@ namespace RoyalVault.EditorTools
             return changed;
         }
 
-        private static bool Platform(TextureImporter importer, string platform, TextureImporterFormat format)
+        private static bool Platform(TextureImporter importer, string platform, TextureImporterFormat format, int maxSize)
         {
             TextureImporterPlatformSettings settings = importer.GetPlatformTextureSettings(platform);
-            bool same = settings.overridden && settings.format == format && settings.maxTextureSize == 4096;
+            bool same = settings.overridden && settings.format == format && settings.maxTextureSize == maxSize;
             if (same)
             {
                 return false;
@@ -81,18 +90,18 @@ namespace RoyalVault.EditorTools
 
             settings.overridden = true;
             settings.format = format;
-            settings.maxTextureSize = 4096;
+            settings.maxTextureSize = maxSize;
             settings.compressionQuality = 100;
             importer.SetPlatformTextureSettings(settings);
             return true;
         }
 
-        // Large opaque paintings compress with bigger blocks; their soft detail hides it
-        private static bool IsPainting(string path)
+        // Large paintings and animation frames compress with bigger blocks on mobile; their soft detail hides it
+        private static bool Matches(string path, string[] folders)
         {
-            foreach (string painting in Paintings)
+            foreach (string folder in folders)
             {
-                if (path.Contains(painting))
+                if (path.Contains(folder))
                 {
                     return true;
                 }
