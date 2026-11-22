@@ -78,6 +78,8 @@ namespace RoyalVault.Unity
         public Sprite cardFace;
         public Sprite cardBack;
         public Sprite[] suits = new Sprite[4];
+        [Tooltip("A sealed urn in the Treasury")] public Sprite urn;
+        [Tooltip("The guardian's eye that ends a Treasury round (white, tinted in game)")] public Sprite eye;
         public Sprite bigWinBanner;
         public Sprite coin;
         public Sprite sparkle;

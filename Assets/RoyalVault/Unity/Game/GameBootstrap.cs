@@ -43,6 +43,7 @@ namespace RoyalVault.Unity
         [SerializeField] private GuardianFireView guardianFire;
         [SerializeField] private RelicRevealView relicReveal;
         [SerializeField] private GambleView gambleView;
+        [SerializeField] private TreasuryView treasuryView;
 
         public GameSession Session { get; private set; }
         public SpinEngine Engine { get; private set; }
@@ -88,7 +89,8 @@ namespace RoyalVault.Unity
                           JackpotPanelView jackpotView, WinPresenter winPresenter, BigWinView bigWinView, PaytableView paytableView,
                           MessageToast messageToast, CharacterView[] characterViews, SealMeterView sealMeterView,
                           FlameClashView flameClashView = null, ChapterCardView chapterCardView = null, CoachMarkView coachMarkView = null,
-                          GuardianFireView guardianFireView = null, RelicRevealView relicRevealView = null, GambleView gamble = null)
+                          GuardianFireView guardianFireView = null, RelicRevealView relicRevealView = null, GambleView gamble = null,
+                          TreasuryView treasury = null)
         {
             machine = machineAsset;
             theme = themeAsset;
@@ -107,6 +109,7 @@ namespace RoyalVault.Unity
             guardianFire = guardianFireView;
             relicReveal = relicRevealView;
             gambleView = gamble;
+            treasuryView = treasury;
         }
 
         private void Awake()
@@ -205,6 +208,13 @@ namespace RoyalVault.Unity
                 round.SetGamble(Gamble, gambleView);
                 Sound.ListenTo(gambleView);
             }
+
+            if (treasuryView != null)
+            {
+                treasuryView.Bind(theme);
+                round.SetTreasury(treasuryView);
+                Sound.ListenTo(treasuryView);
+            }
             Showcase = new WinShowcase(Engine, Session, Flow, toast, () => showcaseWins, () => showcaseOrder);
         }
 
@@ -248,6 +258,12 @@ namespace RoyalVault.Unity
         public void ForceRelic(string symbolId)
         {
             Flow.Features.Get<ExpandingSymbolFeature>().ForcedRelic = Machine.SymbolIndex(symbolId);
+        }
+
+        // Testing aid: the next base-game spin opens the Treasury
+        public void ForceTreasury()
+        {
+            Flow.Features.Get<TreasuryFeature>().ForceNext = true;
         }
 
         // Testing aid: the next losing base-game spin gets Guardian's Fire

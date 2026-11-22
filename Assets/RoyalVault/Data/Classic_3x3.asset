@@ -87,7 +87,16 @@ MonoBehaviour:
   gambleEnabled: 1
   gambleMaxRounds: 5
   gambleMaxWinTotalBets: 50
-  presetVersion: 4
+  treasuryEnabled: 0
+  treasuryKeySymbol: vault_key
+  treasuryKeyReels: 000000000200000004000000
+  treasuryUrns: 12
+  treasuryEyes: 2
+  treasuryShields: 1
+  treasuryMultipliers: 1
+  treasuryCreditValues: 010000000200000003000000050000000a00000014000000
+  treasuryCreditWeights: 1e00000019000000140000000e0000000800000003000000
+  presetVersion: 5
   lineBets: 0100000002000000050000000a000000190000003200000064000000
   defaultLineBetIndex: 2
   startBalance: 20000

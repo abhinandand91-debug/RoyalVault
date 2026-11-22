@@ -53,6 +53,8 @@ namespace RoyalVault.Unity
 
         private void OnDestroy()
         {
+            glint.Stop();
+            landing.Stop();
             if (own != null)
             {
                 Destroy(own);

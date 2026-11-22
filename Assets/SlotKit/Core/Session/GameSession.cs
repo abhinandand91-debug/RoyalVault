@@ -12,6 +12,8 @@ namespace SlotKit
         public int freeSpins;
         // The free spin round's relic symbol plus one, so saves made before relics existed read as none
         public int freeSpinRelicPlusOne;
+        // Credits from a Treasury round that had not been shown when the game closed
+        public long treasuryPending;
     }
 
     // Where the session is saved; the game uses PlayerPrefs, tests use memory
@@ -49,6 +51,7 @@ namespace SlotKit
         public BetModel Bet { get; }
         public JackpotPool Jackpots { get; }
         public FreeSpinState FreeSpins { get; }
+        public TreasuryState Treasury { get; } = new TreasuryState();
 
         public GameSession(MachineDefinition machine, ISaveStore store)
         {
@@ -59,6 +62,12 @@ namespace SlotKit
             Bet = new BetModel(machine, saved != null ? saved.lineBetIndex : machine.DefaultLineBetIndex);
             Jackpots = new JackpotPool(machine.JackpotTiers, saved?.jackpots);
             FreeSpins = new FreeSpinState(saved != null ? saved.freeSpins : 0, saved != null ? saved.freeSpinRelicPlusOne - 1 : -1);
+            // a round won before the game closed is paid now rather than lost
+            if (saved != null && saved.treasuryPending > 0)
+            {
+                Wallet.Credit(saved.treasuryPending);
+                Save();
+            }
         }
 
         public void Save()
@@ -70,6 +79,7 @@ namespace SlotKit
                 jackpots = Jackpots.Values(),
                 freeSpins = FreeSpins.Remaining,
                 freeSpinRelicPlusOne = FreeSpins.Relic + 1,
+                treasuryPending = Treasury.Pending,
             });
         }
     }

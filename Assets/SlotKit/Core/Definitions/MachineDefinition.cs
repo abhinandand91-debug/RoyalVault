@@ -55,6 +55,25 @@ namespace SlotKit
         public int MaxWinTotalBets = 50;
     }
 
+    // The Treasury pick bonus: which symbol opens it on which reels, and what its urns hold
+    public sealed class TreasurySettings
+    {
+        public bool Enabled;
+        public string KeySymbol = "vault_key";
+        // Reels (0 = leftmost) that must each show a key
+        public int[] KeyReels = { 0, 2, 4 };
+        public int Urns = 12;
+        // Urns that end the round
+        public int Eyes = 2;
+        // Urns that block the next eye
+        public int Shields = 1;
+        // Urns that add one to the round's multiplier
+        public int Multipliers = 1;
+        // The rest hold credits: one of these many total bets, picked by the matching weight
+        public int[] CreditValues = { 1, 2, 3, 5, 10, 20 };
+        public int[] CreditWeights = { 30, 25, 20, 14, 8, 3 };
+    }
+
     public sealed class MachineDefinition
     {
         public string Name = "Machine";
@@ -84,6 +103,7 @@ namespace SlotKit
         public string[] ExpandingSymbolPool = new string[0];
         // Double-or-nothing on a base-game win (turn off where gambles are not allowed)
         public GambleSettings Gamble = new GambleSettings();
+        public TreasurySettings Treasury = new TreasurySettings();
 
         public int SymbolIndex(string id)
         {
@@ -166,7 +186,40 @@ namespace SlotKit
                 errors.Add("The default line bet is out of range.");
             }
 
+            ValidateTreasury(errors);
             return errors;
+        }
+
+        private void ValidateTreasury(List<string> errors)
+        {
+            if (!Treasury.Enabled)
+            {
+                return;
+            }
+
+            if (SymbolIndex(Treasury.KeySymbol) < 0)
+            {
+                errors.Add($"The Treasury key symbol {Treasury.KeySymbol} is not on this machine.");
+            }
+
+            foreach (int reel in Treasury.KeyReels)
+            {
+                if (reel < 0 || reel >= Reels)
+                {
+                    errors.Add($"The Treasury key reel {reel + 1} is outside the grid.");
+                }
+            }
+
+            int special = Treasury.Eyes + Treasury.Shields + Treasury.Multipliers;
+            if (Treasury.Eyes < 1 || special >= Treasury.Urns)
+            {
+                errors.Add("The Treasury needs at least one eye and at least one urn of credits.");
+            }
+
+            if (Treasury.CreditValues.Length == 0 || Treasury.CreditValues.Length != Treasury.CreditWeights.Length)
+            {
+                errors.Add("The Treasury credit values and weights do not match.");
+            }
         }
     }
 }

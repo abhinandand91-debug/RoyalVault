@@ -28,6 +28,8 @@ namespace RoyalVault.Unity
         private RelicRevealView relicReveal;
         private GambleSession gamble;
         private GambleView gambleView;
+        private TreasuryView treasury;
+        private readonly WaitForSeconds keysGlow = new WaitForSeconds(1.3f);
         private long gambleWin;
         private long gambleBet;
         private Action onReelsLanded;
@@ -167,6 +169,12 @@ namespace RoyalVault.Unity
             session.Bet.Changed += bet => console.OfferGamble(false);
         }
 
+        // Opens the Treasury after a spin that won it
+        public void SetTreasury(TreasuryView view)
+        {
+            treasury = view;
+        }
+
         // Reveals the Sealed Relic when a free spin round begins
         public void SetRelicReveal(RelicRevealView reveal)
         {
@@ -217,7 +225,8 @@ namespace RoyalVault.Unity
         private void OfferGamble(SpinContext context)
         {
             SpinOutcome outcome = context.Outcome;
-            bool plain = !context.IsFreeSpin && outcome.FreeSpinsAwarded == 0 && outcome.JackpotTier < 0 && !autoPlay.Active;
+            bool plain = !context.IsFreeSpin && outcome.FreeSpinsAwarded == 0 && outcome.JackpotTier < 0 && outcome.Treasury == null
+                         && !autoPlay.Active;
             if (gamble == null || !plain || !gamble.Offers(outcome.TotalWin, outcome.TotalBet))
             {
                 return;
@@ -260,9 +269,31 @@ namespace RoyalVault.Unity
             return session.FreeSpins.Relic >= 0 ? "A SEALED<space=0.4em>RELIC AWAITS" : null;
         }
 
+        // The keys glow, the doors open, the urns are picked, and the round's credits are paid
+        private IEnumerator OpenTreasury(SpinContext context)
+        {
+            TreasuryRound round = session.Treasury.Round;
+            machine.HighlightCells(round.Keys, 1.4f);
+            yield return keysGlow;
+            yield return bigWin.ShowTitle("THE TREASURY", "THREE KEYS OPEN THE DOOR", 0, 1.8f, CelebrationKind.FreeSpinsAwarded);
+            if (treasury != null)
+            {
+                yield return treasury.Play(round, autoPlay.Active);
+            }
+
+            long paid = session.Treasury.Collect(session.Wallet);
+            console.SetWin(context.Outcome.TotalWin + paid);
+            session.Save();
+        }
+
         private IEnumerator Finish(SpinContext context)
         {
             SpinOutcome outcome = context.Outcome;
+            if (session.Treasury.Round != null)
+            {
+                yield return OpenTreasury(context);
+            }
+
             // free spins awarded from a paid spin: announce the round
             if (!context.IsFreeSpin && outcome.FreeSpinsAwarded > 0)
             {

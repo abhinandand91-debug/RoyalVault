@@ -96,6 +96,7 @@ namespace RoyalVault.Tests
             yield return LineWin();
             yield return GuardiansFire();
             yield return Gamble();
+            yield return Treasury();
             yield return BigWins();
             yield return Jackpot();
             yield return FreeSpins();
@@ -176,6 +177,42 @@ namespace RoyalVault.Tests
             yield return ShotWhen(() => game.Gamble.Rounds > 0, 0.8f, "33_gamble_card");
             game.Gamble.Collect();
             yield return WaitFor(() => !view.IsOpen, 10f);
+        }
+
+        // Keys on reels 1, 3 and 5 open the Treasury; urns are picked until the eye ends it
+        private static IEnumerator Treasury()
+        {
+            yield return WaitFor(() => game.Flow.State == SpinState.Idle);
+            var view = Object.FindFirstObjectByType<TreasuryView>(FindObjectsInactive.Include);
+            yield return SpinTo(game, new[] { 6, 0, 2, 0, 15 });
+            yield return ShotWhen(() => game.Session.Treasury.Round != null && Celebrating(), 0.7f, "34_treasury_title");
+            yield return ShotWhen(() => view.IsOpen, 1.2f, "35_treasury_board");
+            TreasuryRound round = game.Session.Treasury.Round;
+            var urns = new System.Collections.Generic.List<Button>();
+            foreach (Button button in view.GetComponentsInChildren<Button>(true))
+            {
+                if (button.name == "Hit")
+                {
+                    urns.Add(button);
+                }
+            }
+
+            int[] order = { 2, 9, 4, 7, 0, 11, 5, 1, 10, 3, 8, 6 };
+            for (int next = 0; next < round.Picks; next++)
+            {
+                Button urn = urns[order[next]];
+                yield return WaitFor(() => urn.interactable, 30f);
+                urn.onClick.Invoke();
+                if (next == 2 && round.Picks > 3)
+                {
+                    yield return new WaitForSeconds(1.1f);
+                    yield return Shot("36_treasury_picks");
+                }
+            }
+
+            yield return new WaitForSeconds(3.8f);
+            yield return Shot("37_treasury_total");
+            yield return WaitFor(() => game.Flow.State == SpinState.Idle && !view.IsOpen && game.Session.Treasury.Round == null);
         }
 
         private static Button ButtonNamed(string name)

@@ -74,6 +74,24 @@ namespace RoyalVault.Unity
         [Tooltip("The gamble may not grow a win past this many total bets")]
         [Min(2)] public int gambleMaxWinTotalBets = 50;
 
+        [Header("Treasury (pick bonus)")]
+        [Tooltip("A key symbol on every key reel of a base-game spin opens a pick-and-reveal round")]
+        public bool treasuryEnabled;
+        public string treasuryKeySymbol = "vault_key";
+        [Tooltip("Reels (0 = leftmost) that must each show a key")]
+        public int[] treasuryKeyReels = { 0, 2, 4 };
+        [Min(2)] public int treasuryUrns = 12;
+        [Tooltip("Urns that end the round")]
+        [Min(1)] public int treasuryEyes = 2;
+        [Tooltip("Urns that block the next eye")]
+        [Min(0)] public int treasuryShields = 1;
+        [Tooltip("Urns that add one to the round's multiplier")]
+        [Min(0)] public int treasuryMultipliers = 1;
+        [Tooltip("What the other urns hold, in total bets")]
+        public int[] treasuryCreditValues = { 1, 2, 3, 5, 10, 20 };
+        [Tooltip("How likely each credit value is, matching the list above")]
+        public int[] treasuryCreditWeights = { 30, 25, 20, 14, 8, 3 };
+
         [Tooltip("Version of the presets this asset was last brought up to; the builder adds new settings once")]
         [HideInInspector] public int presetVersion;
 
@@ -104,6 +122,18 @@ namespace RoyalVault.Unity
                 ExpandingFreeSpinSymbol = expandingFreeSpinSymbol,
                 ExpandingSymbolPool = (string[])expandingSymbolPool.Clone(),
                 Gamble = new GambleSettings { Enabled = gambleEnabled, MaxRounds = gambleMaxRounds, MaxWinTotalBets = gambleMaxWinTotalBets },
+                Treasury = new TreasurySettings
+                {
+                    Enabled = treasuryEnabled,
+                    KeySymbol = treasuryKeySymbol,
+                    KeyReels = (int[])treasuryKeyReels.Clone(),
+                    Urns = treasuryUrns,
+                    Eyes = treasuryEyes,
+                    Shields = treasuryShields,
+                    Multipliers = treasuryMultipliers,
+                    CreditValues = (int[])treasuryCreditValues.Clone(),
+                    CreditWeights = (int[])treasuryCreditWeights.Clone(),
+                },
             };
             for (int i = 0; i < symbols.Length; i++)
             {
@@ -158,9 +188,20 @@ namespace RoyalVault.Unity
         }
 
         // Brings an asset made from an older preset up to date once: 1 added random wilds, 2 rebalanced line pays for them,
-        // 3 added the Sealed Relic (which replaces the free spin multiplier) and rebalanced again, 4 added the gamble
+        // 3 added the Sealed Relic (which replaces the free spin multiplier) and rebalanced again, 4 added the gamble, 5 added the
+        // Treasury and trimmed line pays for it
         public void ApplyPresetChanges(MachineDefinition definition)
         {
+            TreasurySettings treasury = definition.Treasury;
+            treasuryEnabled = treasury.Enabled;
+            treasuryKeySymbol = treasury.KeySymbol;
+            treasuryKeyReels = (int[])treasury.KeyReels.Clone();
+            treasuryUrns = treasury.Urns;
+            treasuryEyes = treasury.Eyes;
+            treasuryShields = treasury.Shields;
+            treasuryMultipliers = treasury.Multipliers;
+            treasuryCreditValues = (int[])treasury.CreditValues.Clone();
+            treasuryCreditWeights = (int[])treasury.CreditWeights.Clone();
             gambleEnabled = definition.Gamble.Enabled;
             gambleMaxRounds = definition.Gamble.MaxRounds;
             gambleMaxWinTotalBets = definition.Gamble.MaxWinTotalBets;
@@ -181,7 +222,7 @@ namespace RoyalVault.Unity
             presetVersion = CurrentPresetVersion;
         }
 
-        public const int CurrentPresetVersion = 4;
+        public const int CurrentPresetVersion = 5;
 
         // Problems with this machine; empty when it is ready to play
         public List<string> Validate()

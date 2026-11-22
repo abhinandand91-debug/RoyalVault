@@ -133,6 +133,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: e6134dafb93854fa196645527c3a3013, type: 3}
   - {fileID: 21300000, guid: 6c3da6ccd110e49d8b746f29bba813e0, type: 3}
   - {fileID: 21300000, guid: e52b4e3c1482045a88d1bcd4737f88c5, type: 3}
+  urn: {fileID: 21300000, guid: 25b6fde6a2a0c4a5295512b18c29909a, type: 3}
+  eye: {fileID: 21300000, guid: a9355333f345b477d9b6a1a9cf568eb2, type: 3}
   bigWinBanner: {fileID: 21300000, guid: 275862cc3d97f437aad11f9077a1f685, type: 3}
   coin: {fileID: 21300000, guid: 75ce2bdfc962b40b1b35d8e868b63f7f, type: 3}
   sparkle: {fileID: 21300000, guid: dd2dc367e58834f309ccd2443873b815, type: 3}

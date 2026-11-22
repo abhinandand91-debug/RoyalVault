@@ -9,6 +9,8 @@ namespace SlotKit
         public long Hits;
         public long FreeSpinRounds;
         public long Jackpots;
+        public long Treasuries;
+        public long TreasuryReturned;
 
         // Return to player, in percent of everything wagered
         public double Rtp
@@ -28,7 +30,7 @@ namespace SlotKit
 
         public override string ToString()
         {
-            return $"{Spins:N0} paid spins: RTP {Rtp:F2}%, hit rate {HitRate:F1}%, free spin rounds {FreeSpinRounds:N0}, jackpots {Jackpots:N0}";
+            return $"{Spins:N0} paid spins: RTP {Rtp:F2}%, hit rate {HitRate:F1}%, free spin rounds {FreeSpinRounds:N0}, jackpots {Jackpots:N0}, treasuries {Treasuries:N0}";
         }
     }
 
@@ -72,6 +74,14 @@ namespace SlotKit
                 if (outcome.JackpotTier >= 0)
                 {
                     report.Jackpots++;
+                }
+
+                if (session.Treasury.Round != null)
+                {
+                    long paid = session.Treasury.Collect(session.Wallet);
+                    report.Returned += paid;
+                    report.TreasuryReturned += paid;
+                    report.Treasuries++;
                 }
             };
             flow.SpinFinished += context => free = context.ContinueAutomatically;

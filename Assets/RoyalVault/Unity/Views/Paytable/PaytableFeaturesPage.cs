@@ -17,11 +17,20 @@ namespace RoyalVault.Unity
             Panel(page, theme, -385f, IdOf(machine, SymbolKind.Wild), "WILD", WildText());
             Panel(page, theme, 0f, IdOf(machine, SymbolKind.Scatter), "VAULT SEAL", SealText(machine));
             Panel(page, theme, 385f, IdOf(machine, SymbolKind.Jackpot), "CROWN JACKPOTS", CrownText(machine));
+            float noteY = -246f;
+            if (machine.Treasury.Enabled)
+            {
+                string note = "A Vault Key on reels 1, 3 and 5 opens the Treasury: pick urns for credits, a multiplier or an ankh's shield, "
+                              + "until the guardian's eye is found.";
+                UiFactory.Text("Treasury", page, theme.bodyFont, note, 17f, theme.dimGold, new Vector2(0f, noteY), new Vector2(1200f, 26f));
+                noteY -= 26f;
+            }
+
             if (machine.Gamble.Enabled)
             {
                 string note = "After a win, gamble it on Ruby's Last Hand: call a colour to double it or a suit to quadruple it, up to "
                               + machine.Gamble.MaxRounds + " times.";
-                UiFactory.Text("Gamble", page, theme.bodyFont, note, 17f, theme.dimGold, new Vector2(0f, -250f), new Vector2(1100f, 26f));
+                UiFactory.Text("Gamble", page, theme.bodyFont, note, 17f, theme.dimGold, new Vector2(0f, noteY), new Vector2(1100f, 26f));
             }
         }
 

@@ -362,5 +362,53 @@ namespace RoyalVault.Tests
             Assert.IsTrue(game.Flow.RequestSpin(), "spins resume after the gamble");
             PlayerPrefs.DeleteAll();
         }
+
+        [UnityTest, Timeout(180000)]
+        public IEnumerator TheTreasuryOpensOnThreeKeysAndPaysWhenItsUrnsAreShown()
+        {
+            yield return LoadGame();
+            var game = Object.FindFirstObjectByType<GameBootstrap>();
+            var view = Object.FindFirstObjectByType<TreasuryView>(FindObjectsInactive.Include);
+            TreasuryRound round = null;
+            long win = 0;
+            game.Flow.SpinPaid += context =>
+            {
+                round = context.Outcome.Treasury;
+                win = context.Outcome.TotalWin;
+            };
+
+            yield return WaitFor(() => game.Flow.State == SpinState.Idle);
+            long start = game.Session.Wallet.Balance;
+            game.ForceNextStops(6, 0, 2, 0, 15);
+            Assert.IsTrue(game.Flow.RequestSpin());
+            yield return WaitFor(() => view.IsOpen, 30f);
+            Assert.IsNotNull(round, "keys on reels 1, 3 and 5 open the Treasury");
+            Assert.AreEqual(round.Amount, game.Session.Treasury.Pending, "held while the urns are shown");
+            long cost = game.Session.Bet.TotalBet;
+            Assert.AreEqual(start - cost + win, game.Session.Wallet.Balance, "not paid before the urns are opened");
+
+            var urns = new List<Button>();
+            foreach (Button button in view.GetComponentsInChildren<Button>(true))
+            {
+                if (button.name == "Hit")
+                {
+                    urns.Add(button);
+                }
+            }
+
+            Assert.AreEqual(12, urns.Count);
+            for (float t = 0f; view.IsOpen && t < 90f; t += Time.deltaTime)
+            {
+                Button closed = urns.Find(urn => urn.interactable);
+                closed?.onClick.Invoke();
+                yield return null;
+            }
+
+            Assert.IsFalse(view.IsOpen);
+            yield return WaitFor(() => game.Flow.State == SpinState.Idle, 10f);
+            Assert.AreEqual(start - cost + win + round.Amount, game.Session.Wallet.Balance, "the round is paid once");
+            Assert.AreEqual(0, game.Session.Treasury.Pending);
+            PlayerPrefs.DeleteAll();
+        }
     }
 }

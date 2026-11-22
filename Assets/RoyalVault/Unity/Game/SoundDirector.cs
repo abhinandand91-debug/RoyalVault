@@ -202,5 +202,32 @@ namespace RoyalVault.Unity
             gamble.Flipped += () => sound.Play(SoundCue.ReelStop, 0.6f, 1.25f);
             gamble.Settled += right => sound.Play(right ? SoundCue.SmallWin : SoundCue.AnticipationEnd);
         }
+
+        // The Treasury: an urn cracking, each prize, and the round's total
+        public void ListenTo(TreasuryView treasury)
+        {
+            treasury.Cracked += () => sound.Play(SoundCue.SealCrack, 0.8f);
+            treasury.Revealed += OnUrnRevealed;
+            treasury.Totalled += amount => sound.Play(SoundCue.FreeSpinsTotal);
+        }
+
+        private void OnUrnRevealed(UrnPrize prize, bool ends)
+        {
+            switch (prize)
+            {
+                case UrnPrize.Credits:
+                    sound.Play(SoundCue.SmallWin, 0.8f);
+                    break;
+                case UrnPrize.Multiplier:
+                    sound.Play(SoundCue.WildLand);
+                    break;
+                case UrnPrize.Shield:
+                    sound.Play(SoundCue.ScatterLand);
+                    break;
+                default:
+                    sound.Play(ends ? SoundCue.FlameClash : SoundCue.AnticipationEnd);
+                    break;
+            }
+        }
     }
 }

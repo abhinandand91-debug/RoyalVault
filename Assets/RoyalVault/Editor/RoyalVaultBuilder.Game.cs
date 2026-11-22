@@ -35,13 +35,15 @@ namespace RoyalVault.EditorTools
             BigWinView bigWin = BigWin(t, theme);
             RelicRevealView relicReveal = RelicReveal(t, theme);
             GambleView gamble = Gamble(t, theme);
+            TreasuryView treasury = Treasury(t, theme);
             PaytableView paytable = Paytable(t, theme);
             ChapterCardView chapterCard = ChapterCard(t, theme);
             CoachMarkView coachMarks = CoachMarks(t, theme);
 
             var presenter = root.AddComponent<WinPresenter>();
             root.AddComponent<GameBootstrap>().Setup(machine, theme, machineView, console, jackpots, presenter, bigWin, paytable, toast, guardians,
-                                                     sealMeter, flameClash, chapterCard, coachMarks, guardianFire, relicReveal, gamble);
+                                                     sealMeter, flameClash, chapterCard, coachMarks, guardianFire, relicReveal, gamble,
+                                                     treasury);
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             Object.DestroyImmediate(root);
             return prefab;

@@ -86,6 +86,8 @@ namespace SlotKit
         public ExpandingWin Expanded;
         // Cells a feature turned into wilds after the reels stopped (shown before the wins)
         public readonly List<GridPosition> AddedWilds = new List<GridPosition>();
+        // The Treasury round this spin opened, or null; it is paid apart from TotalWin, once its urns are shown
+        public TreasuryRound Treasury;
 
         public SpinOutcome(int[] stops, SymbolGrid grid, long lineBet, long totalBet)
         {

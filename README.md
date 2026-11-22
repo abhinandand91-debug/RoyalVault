@@ -201,13 +201,20 @@ Reel strips and pays were tuned by simulation and are checked by the tests (1,00
 
 | Machine | RTP | Hit rate | Free spins | Jackpots |
 |---|---|---|---|---|
-| Royal Vault 5 x 3 | about 95.7 % | 28.5 % | 1 in about 460 spins (8 / 12 / 20 with a Sealed Relic) | Minor 3, Major 4, Grand 5 crowns |
+| Royal Vault 5 x 3 | about 95.5 % | 28.5 % | 1 in about 460 spins (8 / 12 / 20 with a Sealed Relic) | Minor 3, Major 4, Grand 5 crowns |
 | Classic 3 x 3 | about 96.4 % | 10.9 % | 1 in about 690 spins (6 at x2) | Minor 3 crowns |
 
 Guardian's Fire (random wilds) rescues about 1 in 70 base-game spins on the 5 x 3 machine with 2 or 3 wilds. Each free
 spin round reveals a Sealed Relic: a regular symbol that, on 3 or more reels, covers them all and pays on every line
-(it replaces the old x2 free spin multiplier). The base game returns about 85% and free spins about 10.5%, so an average
-round pays roughly 48 times the total bet. The classic machine uses neither feature.
+(it replaces the old x2 free spin multiplier). The base game returns about 81%, free spins about 10% (an average round
+pays roughly 46 times the total bet) and the Treasury about 4.4%. The classic machine uses none of these features.
+
+The Treasury opens when a Vault Key lands on reels 1, 3 and 5 of a base-game spin, about 1 in 500 spins. Its 12 urns
+hold 2 guardian's eyes, an ankh that shields the player from one eye, a +1 multiplier and 8 credit prizes of 1 to 20
+total bets. SlotKit draws the whole board when the spin is decided; whichever urn the player taps shows the next prize,
+so choices change what is seen but not the odds. The first pick always pays, the round ends when an eye gets through, and
+an average round is worth about 22 total bets. The win is held in the save until the urns have been shown, so closing
+the game mid-round never loses it. Line pays were trimmed by about 5% to pay for it.
 
 Ruby's Last Hand, the gamble offered after a plain base-game win, is fair (a colour is right half the time and pays x2,
 a suit a quarter of the time and pays x4), so it does not change the RTP. It allows 5 calls and stops a win growing past

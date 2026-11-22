@@ -182,6 +182,8 @@ namespace RoyalVault.EditorTools
             theme.cardBack = Sprite("Generated/card_back");
             theme.suits = new[] { Sprite("Generated/suit_hearts"), Sprite("Generated/suit_diamonds"), Sprite("Generated/suit_clubs"), Sprite("Generated/suit_spades") };
             theme.roundButton = Sprite("Generated/ring");
+            theme.urn = Sprite("Generated/urn");
+            theme.eye = Sprite("Generated/eye");
             theme.jackpotGrand = Sprite("UI/jackpot_grand");
             theme.jackpotMinor = Sprite("UI/jackpot_minor");
             theme.popupPanel = Sprite("UI/popup_panel");
@@ -343,6 +345,7 @@ namespace RoyalVault.EditorTools
             Write("ring", 128, 128, (x, y) => RoundedRect(x, y, 128, 128, 63.5f, new Color32(28, 24, 32, 255), new Color32(232, 199, 122, 255), 3f));
             Write("card", 128, 128, (x, y) => RoundedRect(x, y, 128, 128, 18f, new Color32(14, 12, 18, 235), new Color32(150, 112, 52, 255), 2f));
             WriteCardTextures();
+            WriteTreasuryTextures();
             AssetDatabase.Refresh();
         }
 

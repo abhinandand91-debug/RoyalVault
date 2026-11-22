@@ -39,10 +39,10 @@ namespace RoyalVault.Core
                 Rows = 3,
                 Symbols = Symbols(new[]
                 {
-                    // line pays trimmed to pay for Guardian's Fire and the Sealed Relic, keeping the RTP near 95.6%
-                    Pay5(16, 40, 165), Pay5(16, 40, 165), Pay5(16, 55, 250), Pay5(28, 75, 275), Pay5(28, 90, 370),
-                    Pay5(45, 125, 460), Pay5(45, 150, 620), Pay5(60, 185, 740), Pay5(75, 250, 925), Pay5(90, 305, 1475),
-                    Pay5(125, 460, 3000), Pay5(150, 750, 7500),
+                    // line pays trimmed to pay for Guardian's Fire, the Sealed Relic and the Treasury, keeping the RTP near 95.6%
+                    Pay5(15, 40, 155), Pay5(15, 40, 155), Pay5(15, 50, 240), Pay5(25, 70, 260), Pay5(25, 85, 350),
+                    Pay5(45, 120, 435), Pay5(45, 140, 590), Pay5(55, 175, 705), Pay5(70, 240, 880), Pay5(85, 290, 1400),
+                    Pay5(120, 435, 2850), Pay5(140, 710, 7125),
                 }),
                 Strips = new[]
                 {
@@ -74,6 +74,8 @@ namespace RoyalVault.Core
                 ExpandingFreeSpinSymbol = true,
                 Gamble = new GambleSettings { Enabled = true },
                 RandomWilds = new RandomWildSettings { ChancePerMille = 20, MinWilds = 2, MaxWilds = 3 },
+                // a Vault Key on reels 1, 3 and 5 opens the Treasury, about once in 500 spins
+                Treasury = new TreasurySettings { Enabled = true },
             };
         }
 
