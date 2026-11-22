@@ -8,7 +8,7 @@ namespace GameKit
     public sealed class CountingText : MonoBehaviour
     {
         private readonly char[] buffer = new char[48];
-        private TextMeshProUGUI label;
+        [SerializeField] private TextMeshProUGUI label;
         private long written = long.MinValue;
         private double shown;
         private long target;
@@ -16,19 +16,17 @@ namespace GameKit
 
         public string Prefix = "";
 
-        private void Awake()
+        // Adds counting to a text and points it at that text
+        public static CountingText Attach(TextMeshProUGUI text)
         {
-            label = GetComponent<TextMeshProUGUI>();
+            var counting = text.gameObject.AddComponent<CountingText>();
+            counting.label = text;
+            return counting;
         }
 
         // Rolls to value over seconds (0 = at once)
         public void Set(long value, float seconds = 0f)
         {
-            if (label == null)
-            {
-                label = GetComponent<TextMeshProUGUI>();
-            }
-
             target = value;
             if (seconds <= 0f)
             {

@@ -53,7 +53,8 @@ namespace RoyalVault.EditorTools
 
         private static void Camera()
         {
-            var camera = new GameObject("Main Camera", typeof(Camera), typeof(AudioListener)).GetComponent<Camera>();
+            var cameraObject = new GameObject("Main Camera", typeof(AudioListener));
+            var camera = cameraObject.AddComponent<Camera>();
             camera.tag = "MainCamera";
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = Color.black;
@@ -68,7 +69,7 @@ namespace RoyalVault.EditorTools
         {
             RectTransform root = UiFactory.Stretch("Story Intro", parent);
             var group = root.gameObject.AddComponent<CanvasGroup>();
-            UiFactory.NestedCanvas(root.gameObject, true, true);
+            UiFactory.NestedCanvas(root.gameObject, true, group);
             Image tap = Stretch("Tap", root, theme.white);
             tap.color = new Color(0f, 0f, 0f, 1f);
             tap.raycastTarget = true;
@@ -126,7 +127,7 @@ namespace RoyalVault.EditorTools
             RectTransform rect = UiFactory.Stretch(name, parent);
             var group = rect.gameObject.AddComponent<CanvasGroup>();
             group.alpha = 0f;
-            UiFactory.NestedCanvas(rect.gameObject, false, true);
+            UiFactory.NestedCanvas(rect.gameObject, false, group);
 
             Image art = Stretch("Art", rect, null);
             var fitter = art.gameObject.AddComponent<AspectRatioFitter>();
@@ -151,7 +152,7 @@ namespace RoyalVault.EditorTools
                                                      new Vector2(0, -358), new Vector2(880, 96), TextAlignmentOptions.Top);
             caption.textWrappingMode = TextWrappingModes.Normal;
             caption.lineSpacing = -6f;
-            var typewriter = caption.gameObject.AddComponent<TypewriterText>();
+            var typewriter = TypewriterText.Attach(caption);
 
             var view = rect.gameObject.AddComponent<StoryCardView>();
             view.Setup(group, art, figures, chapter, title, caption, typewriter);

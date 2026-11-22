@@ -15,7 +15,7 @@ namespace RoyalVault.EditorTools
         {
             RectTransform overlay = UiFactory.Stretch("Ruby's Last Hand", parent);
             var group = overlay.gameObject.AddComponent<CanvasGroup>();
-            UiFactory.NestedCanvas(overlay.gameObject, true, true);
+            UiFactory.NestedCanvas(overlay.gameObject, true, group);
             Image dim = Stretch("Dim", overlay, theme.white);
             dim.color = new Color(0.01f, 0.01f, 0.02f, 0.86f);
             dim.raycastTarget = true;
@@ -79,7 +79,7 @@ namespace RoyalVault.EditorTools
             TextMeshProUGUI value = UiFactory.Text("Stake", overlay, theme.headingFont, "0", 46, theme.ivory, new Vector2(0, -172), new Vector2(500, 60));
             UiFactory.Text("Odds", overlay, theme.bodyFont, "A colour pays x2   ·   a suit pays x4", 21, theme.dimGold, new Vector2(0, -222),
                            new Vector2(800, 30));
-            return value.gameObject.AddComponent<CountingText>();
+            return CountingText.Attach(value);
         }
 
         // Red, black, then hearts, diamonds, clubs and spades, in GambleChoice order

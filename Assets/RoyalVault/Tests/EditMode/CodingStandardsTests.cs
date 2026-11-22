@@ -102,6 +102,38 @@ namespace RoyalVault.Tests
             AssertNone(violations, "frame methods with logic of their own");
         }
 
+        // Runtime code is handed its references when it is built; it never searches for components or objects
+        [Test]
+        public void RuntimeCodeNeverLooksUpComponents()
+        {
+            var violations = new List<string>();
+            foreach (string folder in RuntimeFolders)
+            {
+                string root = Path.Combine(Application.dataPath, folder);
+                if (!Directory.Exists(root))
+                {
+                    continue;
+                }
+
+                foreach (string path in Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories))
+                {
+                    string code = StripLiteralsAndComments(File.ReadAllText(path));
+                    foreach (Match match in Lookup.Matches(code))
+                    {
+                        violations.Add(Where(path, LineOf(code, match.Index)) + " " + match.Value);
+                    }
+                }
+            }
+
+            AssertNone(violations, "component or object lookups in runtime code");
+        }
+
+        private static readonly string[] RuntimeFolders = { "GameKit/Runtime", "GameKit/UIParticle", "SlotKit", "RoyalVault/Unity", "RoyalVault/Core" };
+
+        private static readonly Regex Lookup = new Regex(
+            @"\b(GetComponents?|GetComponents?InChildren|GetComponents?InParent|TryGetComponent|FindObjectsOfType|FindObjectOfType|FindFirstObjectByType"
+            + @"|FindAnyObjectByType|FindObjectsByType|FindWithTag|FindGameObjectsWithTag|FindGameObjectWithTag)\b|GameObject\.Find\(|transform\.Find\(");
+
         private static readonly Regex FrameMethod = new Regex(@"void\s+(Update|LateUpdate|FixedUpdate)\s*\(\s*\)\s*\{");
         private static readonly Regex NamedCall = new Regex(@"^[A-Za-z_][\w.]*\(.*\);$");
         private static readonly Regex FrameTime = new Regex(@"^(float|double)\s+\w+\s*=\s*Time\.[\w.]+\s*;$");

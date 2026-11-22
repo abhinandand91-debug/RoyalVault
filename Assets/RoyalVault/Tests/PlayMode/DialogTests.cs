@@ -41,7 +41,7 @@ namespace RoyalVault.Tests
             backdrop = backdropObject.GetComponent<Image>();
             backdrop.color = new Color(0f, 0f, 0f, 0f);
             manager = root.AddComponent<DialogManager>();
-            manager.Setup(backdrop);
+            manager.Setup(backdrop, backdropObject.GetComponent<Button>());
             manager.Opened += definition => log.Add("open " + definition.id);
             manager.Closed += definition => log.Add("close " + definition.id);
         }
@@ -54,13 +54,13 @@ namespace RoyalVault.Tests
 
         private TestDialog Dialog(string id, DialogLayer layer, DialogPolicy policy, int priority = 0, float backdropAlpha = 0.6f)
         {
-            var holder = new GameObject(id, typeof(RectTransform));
+            var holder = new GameObject(id, typeof(RectTransform), typeof(CanvasGroup));
             holder.transform.SetParent(root.transform, false);
             var view = holder.AddComponent<TestDialog>();
             DialogDefinition definition = DialogDefinition.Create(id, layer, policy);
             definition.priority = priority;
             definition.backdropAlpha = backdropAlpha;
-            view.SetupDialog(definition, (RectTransform)holder.transform, manager);
+            view.SetupDialog(definition, (RectTransform)holder.transform, manager, holder.GetComponent<CanvasGroup>());
             return view;
         }
 

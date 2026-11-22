@@ -246,7 +246,7 @@ namespace RoyalVault.EditorTools
         {
             RectTransform overlay = UiFactory.Stretch("Relic Reveal", parent);
             var group = overlay.gameObject.AddComponent<CanvasGroup>();
-            UiFactory.NestedCanvas(overlay.gameObject, true, true);
+            UiFactory.NestedCanvas(overlay.gameObject, true, group);
             Image dim = Stretch("Dim", overlay, theme.white);
             dim.color = new Color(0.01f, 0.01f, 0.02f, 0.82f);
             Button tap = UiFactory.Button(dim);
@@ -477,7 +477,7 @@ namespace RoyalVault.EditorTools
                                           new Vector2(0, top ? 23 : 20), new Vector2(sizes[i].x, 24), TextAlignmentOptions.Center, 30);
                 TextMeshProUGUI value = UiFactory.Text("Value", images[i].transform, theme.headingFont, "0", top ? 36 : 28, top ? theme.paleGold : theme.gold,
                                                        new Vector2(0, top ? -12 : -9), new Vector2(sizes[i].x, 48));
-                values[i] = value.gameObject.AddComponent<CountingText>();
+                values[i] = CountingText.Attach(value);
             }
             var view = panel.gameObject.AddComponent<JackpotPanelView>();
             view.Setup(images, names, values);
@@ -588,7 +588,7 @@ namespace RoyalVault.EditorTools
             divider.color = new Color(theme.gold.r, theme.gold.g, theme.gold.b, 0.5f);
             TextMeshProUGUI winLabel = Left("Win Label", console, theme.labelFont, "WIN", 15, theme.dimGold, layout.WinX, layout.LabelY, 28);
             TextMeshProUGUI win = Left("Win", console, theme.headingFont, "0", 34, theme.paleGold, layout.WinX, layout.ValueY, 0);
-            return (balance.gameObject.AddComponent<CountingText>(), winLabel, win.gameObject.AddComponent<CountingText>());
+            return (CountingText.Attach(balance), winLabel, CountingText.Attach(win));
         }
 
         private static (Button, Button, TextMeshProUGUI) BetStepper(RectTransform console, ThemeDefinition theme, ConsoleLayout layout)
@@ -662,11 +662,11 @@ namespace RoyalVault.EditorTools
             pill.raycastTarget = false;
             TextMeshProUGUI text = UiFactory.Text("Text", pill.transform, theme.bodyFont, "", 28, theme.ivory, Vector2.zero, new Vector2(680, 60));
             var group = pill.gameObject.AddComponent<CanvasGroup>();
-            UiFactory.NestedCanvas(pill.gameObject, false, true);
+            UiFactory.NestedCanvas(pill.gameObject, false, group);
             group.blocksRaycasts = false;
             var toast = pill.gameObject.AddComponent<MessageToast>();
             toast.Setup(text);
-            toast.SetupDialog(ToastDialog(), pill.rectTransform, dialogs);
+            toast.SetupDialog(ToastDialog(), pill.rectTransform, dialogs, group);
             return toast;
         }
 
@@ -674,7 +674,7 @@ namespace RoyalVault.EditorTools
         {
             RectTransform overlay = UiFactory.Stretch("Big Win", parent);
             var group = overlay.gameObject.AddComponent<CanvasGroup>();
-            UiFactory.NestedCanvas(overlay.gameObject, true, true);
+            UiFactory.NestedCanvas(overlay.gameObject, true, group);
             Image dim = Stretch("Dim", overlay, theme.white);
             dim.color = new Color(0.02f, 0.02f, 0.03f, 0.8f);
             Button skip = UiFactory.Button(dim);
@@ -766,7 +766,7 @@ namespace RoyalVault.EditorTools
             TextMeshProUGUI amount = UiFactory.Text("Amount", overlay, theme.displayFont, "0", 112, theme.paleGold, new Vector2(0, -90), new Vector2(1400, 150));
             amount.outlineWidth = 0.1f;
             amount.outlineColor = brown;
-            return (title, subtitle, amount.gameObject.AddComponent<CountingText>());
+            return (title, subtitle, CountingText.Attach(amount));
         }
 
         // A full-screen click catcher that never tints
@@ -782,7 +782,7 @@ namespace RoyalVault.EditorTools
         {
             RectTransform root = UiFactory.Stretch("Chapter Card", parent);
             var group = root.gameObject.AddComponent<CanvasGroup>();
-            UiFactory.NestedCanvas(root.gameObject, true, true);
+            UiFactory.NestedCanvas(root.gameObject, true, group);
             Image dim = Stretch("Dim", root, theme.white);
             dim.color = new Color(0.01f, 0.01f, 0.02f, 0.78f);
             dim.raycastTarget = true;
@@ -815,7 +815,7 @@ namespace RoyalVault.EditorTools
             TextMeshProUGUI title = UiFactory.Text("Title", rect, theme.headingFont, "Title", 44, theme.paleGold, new Vector2(0, -114), new Vector2(980, 56));
             TextMeshProUGUI caption = UiFactory.Text("Caption", rect, theme.bodyFont, "", 28, new Color(0.9f, 0.86f, 0.8f, 1f), new Vector2(0, -185), new Vector2(960, 70), TextAlignmentOptions.Top);
             caption.textWrappingMode = TextWrappingModes.Normal;
-            var typewriter = caption.gameObject.AddComponent<TypewriterText>();
+            var typewriter = TypewriterText.Attach(caption);
 
             var view = rect.gameObject.AddComponent<StoryCardView>();
             view.Setup(group, art, new Image[0], chapter, title, caption, typewriter);
@@ -827,7 +827,7 @@ namespace RoyalVault.EditorTools
         {
             RectTransform root = UiFactory.Stretch("Coach Marks", parent);
             var group = root.gameObject.AddComponent<CanvasGroup>();
-            UiFactory.NestedCanvas(root.gameObject, true, true);
+            UiFactory.NestedCanvas(root.gameObject, true, group);
             Image tap = Stretch("Tap", root, theme.white);
             tap.color = new Color(0f, 0f, 0f, 0f);
             tap.raycastTarget = true;
@@ -868,8 +868,8 @@ namespace RoyalVault.EditorTools
         private static PaytableView Paytable(Transform parent, ThemeDefinition theme, DialogManager dialogs)
         {
             RectTransform window = UiFactory.Stretch("Pay Table", parent);
-            window.gameObject.AddComponent<CanvasGroup>();
-            UiFactory.NestedCanvas(window.gameObject, true, true);
+            var group = window.gameObject.AddComponent<CanvasGroup>();
+            UiFactory.NestedCanvas(window.gameObject, true, group);
 
             Image panel = UiFactory.Image("Panel", window, theme.popupPanel, new Vector2(0, 10), new Vector2(1440, 900), true);
             panel.type = Image.Type.Sliced;
@@ -880,7 +880,7 @@ namespace RoyalVault.EditorTools
 
             var view = window.gameObject.AddComponent<PaytableView>();
             view.Setup(content, close);
-            view.SetupDialog(PaytableDialog(), panel.rectTransform, dialogs);
+            view.SetupDialog(PaytableDialog(), panel.rectTransform, dialogs, group);
             return view;
         }
     }

@@ -10,24 +10,22 @@ namespace GameKit
         [SerializeField] private float charactersPerSecond = 38f;
         [SerializeField] private float punctuationPause = 0.18f;
 
-        private TMP_Text text;
+        [SerializeField] private TMP_Text text;
         private float shown;
         private float pause;
 
         public bool IsTyping => text != null && text.maxVisibleCharacters < text.textInfo.characterCount;
 
-        private void Awake()
+        // Adds typing to a text and points it at that text
+        public static TypewriterText Attach(TMP_Text target)
         {
-            text = GetComponent<TMP_Text>();
+            var typewriter = target.gameObject.AddComponent<TypewriterText>();
+            typewriter.text = target;
+            return typewriter;
         }
 
         public void Play(string line)
         {
-            if (text == null)
-            {
-                Awake();
-            }
-
             text.text = line;
             text.maxVisibleCharacters = 0;
             text.ForceMeshUpdate();

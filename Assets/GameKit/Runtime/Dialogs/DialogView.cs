@@ -12,9 +12,9 @@ namespace GameKit
         [Tooltip("The part that moves; the backdrop stays put")]
         [SerializeField] private RectTransform panel;
         [SerializeField] private DialogManager manager;
+        [SerializeField] private CanvasGroup group;
 
         private readonly TweenGroup tweens = new TweenGroup(4);
-        private CanvasGroup group;
         private bool closeRequested;
 
         public DialogDefinition Definition => definition;
@@ -23,17 +23,25 @@ namespace GameKit
         // Closing has been asked for
         protected bool CloseRequested => closeRequested;
 
-        public void SetupDialog(DialogDefinition dialogDefinition, RectTransform movingPanel, DialogManager dialogManager)
+        public void SetupDialog(DialogDefinition dialogDefinition, RectTransform movingPanel, DialogManager dialogManager, CanvasGroup canvasGroup)
         {
             definition = dialogDefinition;
             panel = movingPanel;
             manager = dialogManager;
+            group = canvasGroup;
+            // set up while playing (tests, tools), Awake has already run without a group
+            if (Application.isPlaying)
+            {
+                Hide();
+            }
         }
 
         protected virtual void Awake()
         {
-            group = GetComponent<CanvasGroup>();
-            Hide();
+            if (group != null)
+            {
+                Hide();
+            }
         }
 
         // Asks the manager to show this dialog, in its turn

@@ -18,7 +18,7 @@ namespace RoyalVault.EditorTools
         {
             RectTransform overlay = UiFactory.Stretch("Treasury", parent);
             var group = overlay.gameObject.AddComponent<CanvasGroup>();
-            UiFactory.NestedCanvas(overlay.gameObject, true, true);
+            UiFactory.NestedCanvas(overlay.gameObject, true, group);
             TreasuryBackdrop(overlay, theme);
 
             UiFactory.Text("Title", overlay, theme.headingFont, "THE TREASURY", 56, theme.gold, new Vector2(0, 430), new Vector2(1100, 74),
@@ -153,7 +153,7 @@ namespace RoyalVault.EditorTools
                            TextAlignmentOptions.Center, 30);
             Image shield = UiFactory.Image("Shield", overlay, null, new Vector2(470, -440), new Vector2(76, 76));
             shield.preserveAspect = true;
-            return (value.gameObject.AddComponent<CountingText>(), multiplier, shield);
+            return (CountingText.Attach(value), multiplier, shield);
         }
     }
 }

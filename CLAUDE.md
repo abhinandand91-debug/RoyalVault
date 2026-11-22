@@ -131,10 +131,20 @@ The game will keep growing, so every runtime feature is written to scale from th
   `Tween.Custom(this, 0f, 1f, duration, (view, value) => view.SetGlow(value))`.
 - Cache `WaitForSeconds` and other yield instructions in fields.
 
-### 3. Cached References
+### 3. Assigned References
 
-- Never call `GetComponent`, `Find`, `FindObjectOfType` or `Camera.main` in hot paths.
-- Get references once in `Awake`, `Setup` or through serialized fields.
+- Runtime code never looks anything up: no `GetComponent` (or its `InChildren`, `InParent` and `Try` forms),
+  `GameObject.Find`, `transform.Find`, `FindObjectOfType`, `FindFirstObjectByType` or `Camera.main`, anywhere.
+- Every reference is a serialized field set when the object is built: the builder passes it through a `Setup` method,
+  or an `Attach` helper adds a component and points it at its target (`CountingText.Attach(label)`).
+- Code that adds a component at runtime keeps the instance `AddComponent` returns.
+- Tests and Editor tools may look things up. `CodingStandardsTests.RuntimeCodeNeverLooksUpComponents` enforces this.
+
+### 3b. Frame Methods
+
+- `Update`, `LateUpdate` and `FixedUpdate` only call named methods; reading the frame's time first is allowed.
+- Continuous motion (pulses, breathing, turning) is a looping tween from `UiMotion`, started on show and stopped on
+  hide through a `TweenGroup`, not a sine in `Update`. `CodingStandardsTests.FrameMethodsOnlyCallNamedMethods` enforces this.
 
 ### 4. Object Pooling
 

@@ -22,7 +22,7 @@ namespace RoyalVault.EditorTools
             Button tap = UiFactory.Button(backdrop);
             tap.transition = Selectable.Transition.None;
             var manager = root.AddComponent<DialogManager>();
-            manager.Setup(backdrop);
+            manager.Setup(backdrop, tap);
             return manager;
         }
 

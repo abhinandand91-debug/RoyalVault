@@ -228,7 +228,7 @@ namespace RoyalVault.EditorTools
                                           new Vector2(textX, top ? 30 : 24), new Vector2(textWidth, 22), TextAlignmentOptions.Center, 30);
                 TextMeshProUGUI value = UiFactory.Text("Value", plaques[i].transform, theme.headingFont, "0", top ? 44 : 32, top ? theme.paleGold : theme.ivory,
                                                        new Vector2(textX, top ? -12 : -10), new Vector2(textWidth, top ? 56 : 44));
-                values[i] = value.gameObject.AddComponent<CountingText>();
+                values[i] = CountingText.Attach(value);
             }
 
             var view = panel.gameObject.AddComponent<JackpotPanelView>();

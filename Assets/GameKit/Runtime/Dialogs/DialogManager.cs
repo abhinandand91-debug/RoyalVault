@@ -13,6 +13,7 @@ namespace GameKit
     {
         [Tooltip("Full-screen image sharing the dialogs' parent; it darkens behind them and catches taps")]
         [SerializeField] private Image backdrop;
+        [SerializeField] private Button backdropButton;
         [SerializeField, Range(0.05f, 1f)] private float backdropSeconds = 0.25f;
 
         private readonly Dictionary<DialogLayer, List<DialogHandle>> waiting = new Dictionary<DialogLayer, List<DialogHandle>>(3);
@@ -28,9 +29,10 @@ namespace GameKit
 
         public bool AnyOpen => open.Count > 0;
 
-        public void Setup(Image backdropImage)
+        public void Setup(Image backdropImage, Button backdropTap)
         {
             backdrop = backdropImage;
+            backdropButton = backdropTap;
             // made while playing (tests, tools), Awake has already run
             if (Application.isPlaying)
             {
@@ -50,9 +52,9 @@ namespace GameKit
                 return;
             }
 
-            if (backdrop.TryGetComponent(out Button tap))
+            if (backdropButton != null)
             {
-                tap.onClick.AddListener(BackdropTapped);
+                backdropButton.onClick.AddListener(BackdropTapped);
             }
 
             SetBackdrop(0f, false);

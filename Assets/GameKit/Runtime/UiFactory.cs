@@ -67,23 +67,19 @@ namespace GameKit
             return label;
         }
 
-        // Gives part of the screen its own canvas, so its changes rebuild only that part; clickable parts get a raycaster
-        public static Canvas NestedCanvas(GameObject target, bool clickable, bool hideWhenFaded = false)
+        // Gives a new part of the screen its own canvas, so its changes rebuild only that part; clickable parts get a
+        // raycaster, and with a group the canvas stops drawing while the group is faded out
+        public static Canvas NestedCanvas(GameObject target, bool clickable, CanvasGroup hideWhenFaded = null)
         {
-            Canvas canvas = target.GetComponent<Canvas>();
-            if (canvas == null)
-            {
-                canvas = target.AddComponent<Canvas>();
-            }
-
-            if (clickable && target.GetComponent<GraphicRaycaster>() == null)
+            var canvas = target.AddComponent<Canvas>();
+            if (clickable)
             {
                 target.AddComponent<GraphicRaycaster>();
             }
 
-            if (hideWhenFaded && target.GetComponent<CanvasAutoHide>() == null)
+            if (hideWhenFaded != null)
             {
-                target.AddComponent<CanvasAutoHide>();
+                target.AddComponent<CanvasAutoHide>().Setup(canvas, hideWhenFaded);
             }
 
             return canvas;
