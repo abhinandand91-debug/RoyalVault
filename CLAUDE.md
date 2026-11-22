@@ -120,6 +120,10 @@ The game will keep growing, so every runtime feature is written to scale from th
 - Use a PrimeTween `Sequence` instead of a coroutine when the timing is fixed.
 - Use a coroutine only when the code waits on the player or on game state (a tap, a reel landing, a scene load).
 - Keep the `Tween` or `Sequence` handle in a field and call `Stop()` on it when the animation is cancelled.
+- Common animations go through GameKit's `UiMotion` (fade, pop, punch, breathe, pulse, spin); a component keeps the
+  tweens it starts in a `TweenGroup` and stops them all when it hides or is disabled.
+- Tunable animations are `MotionPreset` assets (steps of fade, scale, move and rotate), played with `UiMotion.Play`.
+- Wait in coroutines with `Waits.Seconds(x)`, which shares one `WaitForSeconds` per duration.
 
 ### 2. No Allocations in Hot Paths
 
@@ -150,7 +154,17 @@ The game will keep growing, so every runtime feature is written to scale from th
 
 - Pool what is spawned often (win effects, coins, popups) instead of `Instantiate` and `Destroy`; one-off objects need no pool.
 - A pooled object resets all its state on reuse (tweens, coroutines, colours, subscriptions), and every pool has a size limit.
-- Use Unity's `UnityEngine.Pool.ObjectPool<T>`; `SymbolFxLayer` is the reference example.
+- Use Unity's `UnityEngine.Pool.ObjectPool<T>`; `SymbolFxLayer` and `UiVfx` are the reference examples.
+
+### 4b. Dialogs and Post-spin Moments
+
+- Every popup, overlay and toast is a `DialogView` shown through the `DialogManager`; none fades or orders itself.
+- A dialog's layer, queue policy (queue, replace, stack), priority, entry and exit motion and backdrop live in its
+  `DialogDefinition` asset; its own code only fills content (`OnOpening`, `Content`, `OnClosed`).
+- A dialog keeps its public coroutine (`ShowWin`, `Play`, `Tell`): it stores the request and yields on `Present()`.
+- Each moment after a spin's wins is an `IPresentationStep` (`Applies`, `Run`) added in `GameBootstrap`;
+  `RoundController.Finish` runs the steps in order and holds only flow control.
+- Buttons that should press in use `UiFactory.PressButton`; full-screen tap areas do not.
 
 ### 5. UI
 

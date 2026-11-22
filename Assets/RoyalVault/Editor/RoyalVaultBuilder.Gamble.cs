@@ -11,7 +11,7 @@ namespace RoyalVault.EditorTools
     {
         private static readonly Vector2 GambleCardSize = new Vector2(240, 336);
 
-        private static GambleView Gamble(Transform parent, ThemeDefinition theme)
+        private static GambleView Gamble(Transform parent, ThemeDefinition theme, DialogManager dialogs)
         {
             RectTransform overlay = UiFactory.Stretch("Ruby's Last Hand", parent);
             var group = overlay.gameObject.AddComponent<CanvasGroup>();
@@ -34,7 +34,8 @@ namespace RoyalVault.EditorTools
                            TextAlignmentOptions.Center, 14);
 
             var view = overlay.gameObject.AddComponent<GambleView>();
-            view.Setup(group, result, card, stake, calls, UiFactory.Button(collect), GambleHistory(overlay, theme), ruby);
+            view.Setup(result, card, stake, calls, UiFactory.PressButton(collect), GambleHistory(overlay, theme), ruby);
+            view.SetupDialog(OverlayDialog("Gamble", FadeIn("Overlay In", 0.3f), FadeOut("Overlay Out", 0.3f)), overlay, dialogs, group);
             return view;
         }
 
@@ -102,7 +103,7 @@ namespace RoyalVault.EditorTools
             pill.color = tint;
             UiFactory.Text("Label", pill.transform, theme.headingFont, label, 19, theme.paleGold, Vector2.zero, new Vector2(180, 64),
                            TextAlignmentOptions.Center, 10);
-            return UiFactory.Button(pill);
+            return UiFactory.PressButton(pill);
         }
 
         private static Button SuitCall(RectTransform overlay, ThemeDefinition theme, int suit, Vector2 position)
@@ -110,7 +111,7 @@ namespace RoyalVault.EditorTools
             Image ring = UiFactory.Image("Suit " + suit, overlay, theme.roundButton, position, Vector2.one * 76);
             Image icon = UiFactory.Image("Icon", ring.transform, theme.suits[suit], Vector2.zero, Vector2.one * 40);
             icon.color = suit < 2 ? new Color(0.95f, 0.35f, 0.38f, 1f) : new Color(0.92f, 0.9f, 0.86f, 1f);
-            return UiFactory.Button(ring);
+            return UiFactory.PressButton(ring);
         }
 
         // The last five cards turned, newest first

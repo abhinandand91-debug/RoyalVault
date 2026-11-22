@@ -1,4 +1,5 @@
 using GameKit;
+using PrimeTween;
 using RoyalVault.Unity;
 using TMPro;
 using UnityEditor;
@@ -44,13 +45,13 @@ namespace RoyalVault.EditorTools
             MessageToast toast = Toast(t, theme, dialogs);
 
             // overlays, last so they draw on top
-            BigWinView bigWin = BigWin(t, theme);
-            RelicRevealView relicReveal = RelicReveal(t, theme);
-            GambleView gamble = Gamble(t, theme);
-            TreasuryView treasury = Treasury(t, theme);
+            BigWinView bigWin = BigWin(t, theme, dialogs);
+            RelicRevealView relicReveal = RelicReveal(t, theme, dialogs);
+            GambleView gamble = Gamble(t, theme, dialogs);
+            TreasuryView treasury = Treasury(t, theme, dialogs);
             PaytableView paytable = Paytable(t, theme, dialogs);
-            ChapterCardView chapterCard = ChapterCard(t, theme);
-            CoachMarkView coachMarks = CoachMarks(t, theme);
+            ChapterCardView chapterCard = ChapterCard(t, theme, dialogs);
+            CoachMarkView coachMarks = CoachMarks(t, theme, dialogs);
 
             var presenter = root.AddComponent<WinPresenter>();
             root.AddComponent<GameBootstrap>().Setup(machine, theme, machineView, console, jackpots, presenter, bigWin, paytable, toast, guardians,
@@ -242,7 +243,7 @@ namespace RoyalVault.EditorTools
         }
 
         // The Sealed Relic's reveal: a card that flickers through the symbols and settles on the round's relic
-        private static RelicRevealView RelicReveal(Transform parent, ThemeDefinition theme)
+        private static RelicRevealView RelicReveal(Transform parent, ThemeDefinition theme, DialogManager dialogs)
         {
             RectTransform overlay = UiFactory.Stretch("Relic Reveal", parent);
             var group = overlay.gameObject.AddComponent<CanvasGroup>();
@@ -275,7 +276,8 @@ namespace RoyalVault.EditorTools
                                                      30, theme.ivory, new Vector2(0, -210), new Vector2(1100, 50));
 
             var view = overlay.gameObject.AddComponent<RelicRevealView>();
-            view.Setup(group, card.rectTransform, symbol, glow, caption, burst, tap);
+            view.Setup(card.rectTransform, symbol, glow, caption, burst, tap);
+            view.SetupDialog(OverlayDialog("Relic Reveal", FadeIn("Overlay In", 0.3f), FadeOut("Overlay Out", 0.3f)), overlay, dialogs, group);
             return view;
         }
 
@@ -541,7 +543,7 @@ namespace RoyalVault.EditorTools
             (Button gambleButton, AttentionHighlight gambleHighlight) = GambleButton(console, theme, layout.Gamble);
 
             var view = console.gameObject.AddComponent<ConsoleView>();
-            view.Setup(balance, winLabel, win, totalBet, autoText, spin, minus, plus, UiFactory.Button(autoPill), menu, sound, soundIcon);
+            view.Setup(balance, winLabel, win, totalBet, autoText, spin, minus, plus, UiFactory.PressButton(autoPill), menu, sound, soundIcon);
             view.SetupGamble(gambleButton, gambleHighlight);
             return view;
         }
@@ -636,7 +638,7 @@ namespace RoyalVault.EditorTools
         private static Button RoundButton(string name, Transform parent, ThemeDefinition theme, Vector2 position, float size, bool plus)
         {
             Image ring = UiFactory.Image(name, parent, theme.roundButton, position, Vector2.one * size);
-            Button button = UiFactory.Button(ring);
+            Button button = UiFactory.PressButton(ring);
             Image h = UiFactory.Image("Minus", ring.transform, theme.white, Vector2.zero, new Vector2(16, 2.5f));
             h.color = theme.gold;
             if (plus)
@@ -650,7 +652,7 @@ namespace RoyalVault.EditorTools
         private static Button IconButton(string name, Transform parent, ThemeDefinition theme, Sprite icon, Vector2 position, out Image iconImage)
         {
             Image ring = UiFactory.Image(name, parent, theme.roundButton, position, Vector2.one * 56);
-            Button button = UiFactory.Button(ring);
+            Button button = UiFactory.PressButton(ring);
             iconImage = UiFactory.Image("Icon", ring.transform, icon, Vector2.zero, Vector2.one * 30);
             iconImage.color = Color.white;
             return button;
@@ -670,7 +672,7 @@ namespace RoyalVault.EditorTools
             return toast;
         }
 
-        private static BigWinView BigWin(Transform parent, ThemeDefinition theme)
+        private static BigWinView BigWin(Transform parent, ThemeDefinition theme, DialogManager dialogs)
         {
             RectTransform overlay = UiFactory.Stretch("Big Win", parent);
             var group = overlay.gameObject.AddComponent<CanvasGroup>();
@@ -701,7 +703,9 @@ namespace RoyalVault.EditorTools
             UiParticleEmitter coins = CoinShower(overlay, theme);
 
             var view = overlay.gameObject.AddComponent<BigWinView>();
-            view.Setup(group, banner, title, subtitle, amount, rays.rectTransform, coins, skip);
+            view.Setup(banner, title, subtitle, amount, rays.rectTransform, coins, skip);
+            // the celebration pops its own heading in and keeps the heroes moving as it fades, so it has no presets
+            view.SetupDialog(OverlayDialog("Celebration", null, null), overlay, dialogs, group);
             if (ring != null)
             {
                 view.SetupRing(ring.rectTransform);
@@ -778,7 +782,7 @@ namespace RoyalVault.EditorTools
         }
 
         // A framed story chapter over the game: art in a window, chapter, title and typed beats
-        private static ChapterCardView ChapterCard(Transform parent, ThemeDefinition theme)
+        private static ChapterCardView ChapterCard(Transform parent, ThemeDefinition theme, DialogManager dialogs)
         {
             RectTransform root = UiFactory.Stretch("Chapter Card", parent);
             var group = root.gameObject.AddComponent<CanvasGroup>();
@@ -795,7 +799,8 @@ namespace RoyalVault.EditorTools
             TextMeshProUGUI prompt = UiFactory.Text("Continue", root, theme.labelFont, "TAP TO CONTINUE", 15, theme.gold, new Vector2(0, -448), new Vector2(400, 30), TextAlignmentOptions.Center, 30);
 
             var view = root.gameObject.AddComponent<ChapterCardView>();
-            view.Setup(group, panel.rectTransform, card, TapButton(dim), prompt.gameObject.AddComponent<CanvasGroup>());
+            view.Setup(card, TapButton(dim), prompt.gameObject.AddComponent<CanvasGroup>());
+            view.SetupDialog(OverlayDialog("Chapter Card", CardIn(), FadeOut("Card Out", 0.35f)), panel.rectTransform, dialogs, group);
             return view;
         }
 
@@ -823,7 +828,7 @@ namespace RoyalVault.EditorTools
         }
 
         // Four shades around a spotlight, a ring of light and a message bubble
-        private static CoachMarkView CoachMarks(Transform parent, ThemeDefinition theme)
+        private static CoachMarkView CoachMarks(Transform parent, ThemeDefinition theme, DialogManager dialogs)
         {
             RectTransform root = UiFactory.Stretch("Coach Marks", parent);
             var group = root.gameObject.AddComponent<CanvasGroup>();
@@ -860,7 +865,8 @@ namespace RoyalVault.EditorTools
             UiFactory.Text("Continue", bubble.transform, theme.labelFont, "TAP TO CONTINUE", 13, theme.gold, new Vector2(0, -60), new Vector2(400, 24), TextAlignmentOptions.Center, 30);
 
             var view = root.gameObject.AddComponent<CoachMarkView>();
-            view.Setup(group, shades, ring.rectTransform, bubble.rectTransform, message, TapButton(tap));
+            view.Setup(shades, ring.rectTransform, bubble.rectTransform, message, TapButton(tap));
+            view.SetupDialog(OverlayDialog("Coach Mark", FadeIn("Hint In", 0.3f), FadeOut("Hint Out", 0.25f, Ease.Linear)), root, dialogs, group);
             return view;
         }
 

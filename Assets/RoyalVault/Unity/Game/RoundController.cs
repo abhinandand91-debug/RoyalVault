@@ -20,16 +20,13 @@ namespace RoyalVault.Unity
         private BigWinView bigWin;
         private PaytableView paytable;
         private MessageToast toast;
-        private long freeSpinRoundWin;
         private StoryDirector story;
         private readonly WaitForSeconds autoSpinPause = new WaitForSeconds(0.35f);
         private readonly List<ILandingStep> landingSteps = new List<ILandingStep>();
         private SpinContext landing;
-        private RelicRevealView relicReveal;
         private GambleSession gamble;
         private GambleView gambleView;
-        private TreasuryView treasury;
-        private readonly WaitForSeconds keysGlow = new WaitForSeconds(1.3f);
+        private readonly List<IPresentationStep> presentationSteps = new List<IPresentationStep>();
         private long gambleWin;
         private long gambleBet;
         private Action onReelsLanded;
@@ -169,16 +166,13 @@ namespace RoyalVault.Unity
             session.Bet.Changed += bet => console.OfferGamble(false);
         }
 
-        // Opens the Treasury after a spin that won it
-        public void SetTreasury(TreasuryView view)
-        {
-            treasury = view;
-        }
+        // What the current free spin round has won, shared with the steps that announce and total it
+        public FreeSpinTally Tally { get; } = new FreeSpinTally();
 
-        // Reveals the Sealed Relic when a free spin round begins
-        public void SetRelicReveal(RelicRevealView reveal)
+        // Played after each spin's wins, in the order added, when they apply
+        public void AddPresentationStep(IPresentationStep step)
         {
-            relicReveal = reveal;
+            presentationSteps.Add(step);
         }
 
         // Shown between the reels landing and the wins, in the order added
@@ -210,7 +204,7 @@ namespace RoyalVault.Unity
             console.SetControls(false, false, session.Bet);
             if (context.IsFreeSpin)
             {
-                freeSpinRoundWin += context.Outcome.TotalWin;
+                Tally.Win += context.Outcome.TotalWin;
             }
 
             presenter.Present(context, autoPlay.Active || context.IsFreeSpin, flow.PresentationDone);
@@ -257,67 +251,16 @@ namespace RoyalVault.Unity
             session.Save();
         }
 
-        // The line under the free spins title: the multiplier when there is one, otherwise the relic
-        private string FreeSpinsLine()
-        {
-            if (session.Machine.FreeSpinMultiplier > 1)
-            {
-                return "EVERY WIN x" + session.Machine.FreeSpinMultiplier;
-            }
-
-            // a fixed gap: the heading font's kerning swallows a space after the D
-            return session.FreeSpins.Relic >= 0 ? "A SEALED<space=0.4em>RELIC AWAITS" : null;
-        }
-
-        // The keys glow, the doors open, the urns are picked, and the round's credits are paid
-        private IEnumerator OpenTreasury(SpinContext context)
-        {
-            TreasuryRound round = session.Treasury.Round;
-            machine.HighlightCells(round.Keys, 1.4f);
-            yield return keysGlow;
-            yield return bigWin.ShowTitle("THE TREASURY", "THREE KEYS OPEN THE DOOR", 0, 1.8f, CelebrationKind.FreeSpinsAwarded);
-            if (treasury != null)
-            {
-                yield return treasury.Play(round, autoPlay.Active);
-            }
-
-            long paid = session.Treasury.Collect(session.Wallet);
-            console.SetWin(context.Outcome.TotalWin + paid);
-            session.Save();
-        }
-
+        // Every presentation step that applies plays in turn; then the next free or auto spin starts, or the player
+        // gets the controls back (and the gamble, after a plain win)
         private IEnumerator Finish(SpinContext context)
         {
-            SpinOutcome outcome = context.Outcome;
-            if (session.Treasury.Round != null)
+            foreach (IPresentationStep step in presentationSteps)
             {
-                yield return OpenTreasury(context);
-            }
-
-            // free spins awarded from a paid spin: announce the round
-            if (!context.IsFreeSpin && outcome.FreeSpinsAwarded > 0)
-            {
-                if (story != null)
+                if (step.Applies(context))
                 {
-                    yield return story.TellOnce(StoryMoment.FreeSpins);
+                    yield return step.Run(context);
                 }
-
-                freeSpinRoundWin = 0;
-                yield return bigWin.ShowTitle(outcome.FreeSpinsAwarded + " FREE SPINS", FreeSpinsLine(), 0, 2.2f, CelebrationKind.FreeSpinsAwarded);
-                if (relicReveal != null && session.FreeSpins.Relic >= 0)
-                {
-                    yield return relicReveal.Play(session.FreeSpins.Relic);
-                }
-            }
-            else if (context.IsFreeSpin && outcome.FreeSpinsAwarded > 0)
-            {
-                yield return bigWin.ShowTitle("+" + outcome.FreeSpinsAwarded + " FREE SPINS", null, 0, 1.6f, CelebrationKind.FreeSpinsAwarded);
-            }
-            // the last free spin: the round's total
-            if (context.IsFreeSpin && session.FreeSpins.Remaining == 0)
-            {
-                yield return bigWin.ShowTitle("FREE SPINS WIN", null, freeSpinRoundWin, 2.5f, CelebrationKind.FreeSpinsTotal);
-                freeSpinRoundWin = 0;
             }
 
             if (context.ContinueAutomatically)

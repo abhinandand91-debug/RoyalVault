@@ -56,6 +56,34 @@ namespace RoyalVault.EditorTools
             return dialog;
         }
 
+        // Full-screen moments: one at a time, in the order asked for; each draws its own dim, so no shared backdrop
+        private static DialogDefinition OverlayDialog(string id, MotionPreset entry, MotionPreset exit)
+        {
+            DialogDefinition dialog = Dialog(id, DialogLayer.Overlay, DialogPolicy.Queue, entry, exit);
+            dialog.backdropAlpha = 0f;
+            dialog.closeOnBackdropTap = false;
+            dialog.blocksInput = true;
+            return dialog;
+        }
+
+        private static MotionPreset FadeIn(string name, float seconds)
+        {
+            return MotionAsset(name, MotionPreset.StepOf(MotionChannel.Fade, 0f, 1f, seconds, Ease.OutCubic));
+        }
+
+        private static MotionPreset FadeOut(string name, float seconds, Ease ease = Ease.InOutSine)
+        {
+            return MotionAsset(name, MotionPreset.StepOf(MotionChannel.Fade, 1f, 0f, seconds, ease));
+        }
+
+        // A story card fades in as its frame grows to size
+        private static MotionPreset CardIn()
+        {
+            return MotionAsset("Card In",
+                               MotionPreset.StepOf(MotionChannel.Fade, 0f, 1f, 0.45f, Ease.OutCubic),
+                               MotionPreset.StepOf(MotionChannel.Scale, 0.92f, 1f, 0.45f, Ease.OutCubic));
+        }
+
         // A motion preset asset, rewritten on every build so the code stays the source of truth for its defaults
         private static MotionPreset MotionAsset(string name, params MotionPreset.Step[] steps)
         {

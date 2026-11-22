@@ -11,7 +11,7 @@ namespace RoyalVault.Unity
 {
     // The Treasury: twelve sealed urns; each one the player opens shows the next prize SlotKit drew, until the guardian's
     // eye ends the round. The view never decides anything, it only shows the round
-    public sealed class TreasuryView : MonoBehaviour
+    public sealed class TreasuryView : DialogView
     {
         // The parts of one urn
         [Serializable]
@@ -28,7 +28,6 @@ namespace RoyalVault.Unity
 
         private static readonly Color EyeRed = new Color(1f, 0.22f, 0.18f, 1f);
 
-        [SerializeField] private CanvasGroup group;
         [SerializeField] private RectTransform board;
         [SerializeField] private TextMeshProUGUI prompt;
         [SerializeField] private CountingText collected;
@@ -64,13 +63,12 @@ namespace RoyalVault.Unity
         // The vault door turns open
         public event Action DoorOpened;
 
-        public bool IsOpen { get; private set; }
+        private TreasuryRound round;
+        private bool automatic;
 
-        public void Setup(CanvasGroup canvasGroup, RectTransform boardRect, TextMeshProUGUI promptText, CountingText collectedText,
-                          TextMeshProUGUI multiplierText, Image shieldIcon, UrnParts[] urnParts, UiParticleEmitter burstEmitter, Image flashImage,
-                          Button tap, Sprite[] crackSprites)
+        public void Setup(RectTransform boardRect, TextMeshProUGUI promptText, CountingText collectedText, TextMeshProUGUI multiplierText,
+                          Image shieldIcon, UrnParts[] urnParts, UiParticleEmitter burstEmitter, Image flashImage, Button tap, Sprite[] crackSprites)
         {
-            group = canvasGroup;
             board = boardRect;
             prompt = promptText;
             collected = collectedText;
@@ -102,15 +100,19 @@ namespace RoyalVault.Unity
             }
 
             tapArea.onClick.AddListener(() => skipped = true);
-            Hide();
         }
 
-        // Runs the whole round; automatic opens the urns without waiting for taps
-        public IEnumerator Play(TreasuryRound round, bool automatic)
+        // Waits its turn with the dialog manager, then runs the whole round; automatic opens the urns without waiting for taps
+        public IEnumerator Play(TreasuryRound treasuryRound, bool automaticPicks)
         {
-            totalBet = round.TotalBet;
-            Open();
-            yield return Tween.Alpha(group, 0f, 1f, 0.35f, Ease.OutCubic).ToYieldInstruction();
+            round = treasuryRound;
+            automatic = automaticPicks;
+            yield return Present();
+        }
+
+        // The door opens, urns are picked until the round ends, the board shows what was missed, and the total counts up
+        protected override IEnumerator Content()
+        {
             if (door != null)
             {
                 yield return OpenDoor();
@@ -126,18 +128,16 @@ namespace RoyalVault.Unity
                 ShowProgress(round, pick + 1);
             }
 
-            yield return Tween.Delay(0.6f).ToYieldInstruction();
+            yield return Waits.Seconds(0.6f);
             ShowUnopened(round);
             yield return Total(round);
             yield return Hold(automatic ? 1.6f : 3.5f);
-            yield return Tween.Alpha(group, 1f, 0f, 0.35f, Ease.InOutSine).ToYieldInstruction();
-            Hide();
         }
 
         // The door turns a third of a turn, swings towards the player and fades, showing the urns behind it
         private IEnumerator OpenDoor()
         {
-            yield return Tween.Delay(0.45f).ToYieldInstruction();
+            yield return Waits.Seconds(0.45f);
             DoorOpened?.Invoke();
             Tween.LocalEulerAngles(door.rectTransform, Vector3.zero, new Vector3(0f, 0f, -120f), 0.9f, Ease.InCubic);
             Tween.Scale(door.rectTransform, 1f, 2.3f, 0.9f, Ease.InCubic);
@@ -145,12 +145,9 @@ namespace RoyalVault.Unity
             door.gameObject.SetActive(false);
         }
 
-        private void Open()
+        protected override void OnOpening()
         {
-            IsOpen = true;
-            gameObject.SetActive(true);
-            transform.SetAsLastSibling();
-            group.blocksRaycasts = true;
+            totalBet = round.TotalBet;
             tapArea.gameObject.SetActive(false);
             prompt.text = "PICK AN URN";
             prompt.color = Color.white;
@@ -266,7 +263,7 @@ namespace RoyalVault.Unity
             foreach (Sprite crack in cracks)
             {
                 urn.crack.sprite = crack;
-                yield return Tween.Delay(0.09f).ToYieldInstruction();
+                yield return Waits.Seconds(0.09f);
             }
 
             urn.crack.enabled = false;
@@ -288,7 +285,7 @@ namespace RoyalVault.Unity
             else
             {
                 prompt.text = Caption(prize);
-                yield return Tween.Delay(0.35f).ToYieldInstruction();
+                yield return Waits.Seconds(0.35f);
             }
         }
 
@@ -305,7 +302,7 @@ namespace RoyalVault.Unity
             else
             {
                 Tween.Scale(shield.transform, 1f, 1.35f, 0.25f, Ease.OutCubic, cycles: 2, cycleMode: CycleMode.Yoyo);
-                yield return Tween.Delay(0.55f).ToYieldInstruction();
+                yield return Waits.Seconds(0.55f);
             }
         }
 
@@ -383,14 +380,14 @@ namespace RoyalVault.Unity
             if (x > 1)
             {
                 prompt.text = "TREASURE x" + x;
-                yield return Tween.Delay(0.6f).ToYieldInstruction();
+                yield return Waits.Seconds(0.6f);
             }
 
             prompt.text = "TREASURY WIN";
             collected.Set(round.Amount, 1.2f);
             Tween.Scale(collected.transform, 1f, 1.25f, 0.3f, Ease.OutCubic, cycles: 2, cycleMode: CycleMode.Yoyo);
             Totalled?.Invoke(round.Amount);
-            yield return Tween.Delay(1.2f).ToYieldInstruction();
+            yield return Waits.Seconds(1.2f);
         }
 
         private IEnumerator Hold(float seconds)
@@ -405,18 +402,18 @@ namespace RoyalVault.Unity
             tapArea.gameObject.SetActive(false);
         }
 
-        private void Hide()
+        protected override void OnClosed()
         {
-            IsOpen = false;
-            group.alpha = 0f;
-            group.blocksRaycasts = false;
-            for (int i = 0; i < pulses.Length; i++)
-            {
-                pulses[i].Stop();
-            }
+            StopPulses();
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            StopPulses();
+        }
+
+        private void StopPulses()
         {
             for (int i = 0; i < pulses.Length; i++)
             {

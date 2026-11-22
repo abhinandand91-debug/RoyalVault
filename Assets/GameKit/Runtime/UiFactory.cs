@@ -85,6 +85,14 @@ namespace GameKit
             return canvas;
         }
 
+        // A button that also presses in and springs back under the finger
+        public static Button PressButton(Image graphic)
+        {
+            Button button = Button(graphic);
+            ButtonFeedback.Attach(button);
+            return button;
+        }
+
         public static Button Button(Image graphic)
         {
             graphic.raycastTarget = true;

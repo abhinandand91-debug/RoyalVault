@@ -14,7 +14,7 @@ namespace RoyalVault.EditorTools
         private const int UrnCount = 12;
         private static readonly Vector2 UrnSize = new Vector2(150, 188);
 
-        private static TreasuryView Treasury(Transform parent, ThemeDefinition theme)
+        private static TreasuryView Treasury(Transform parent, ThemeDefinition theme, DialogManager dialogs)
         {
             RectTransform overlay = UiFactory.Stretch("Treasury", parent);
             var group = overlay.gameObject.AddComponent<CanvasGroup>();
@@ -51,7 +51,8 @@ namespace RoyalVault.EditorTools
 
             Sprite[] cracks = { Sprite("Generated/crack_1"), Sprite("Generated/crack_2"), Sprite("Generated/crack_3") };
             var view = overlay.gameObject.AddComponent<TreasuryView>();
-            view.Setup(group, board, prompt, collected, multiplier, shield, urns, burst, flash, tap, cracks);
+            view.Setup(board, prompt, collected, multiplier, shield, urns, burst, flash, tap, cracks);
+            view.SetupDialog(OverlayDialog("Treasury", FadeIn("Treasury In", 0.35f), FadeOut("Treasury Out", 0.35f)), overlay, dialogs, group);
             if (door != null)
             {
                 view.SetupDoor(door);

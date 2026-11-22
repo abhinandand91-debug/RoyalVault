@@ -201,7 +201,6 @@ namespace RoyalVault.Unity
 
             round.AddLandingStep(new RelicLandingStep(machineView));
             Sound.ListenToRelic(relicReveal, machineView);
-            round.SetRelicReveal(relicReveal);
             if (gambleView != null)
             {
                 gambleView.Bind(theme, theme.heroRight);
@@ -212,10 +211,22 @@ namespace RoyalVault.Unity
             if (treasuryView != null)
             {
                 treasuryView.Bind(theme);
-                round.SetTreasury(treasuryView);
                 Sound.ListenTo(treasuryView);
             }
+
+            AddPresentationSteps(round);
             Showcase = new WinShowcase(Engine, Session, Flow, toast, () => showcaseWins, () => showcaseOrder);
+        }
+
+        // The moments after a spin's wins, in the order they play: the Treasury, then free spins starting, more free spins,
+        // and a round's closing total
+        private void AddPresentationSteps(RoundController round)
+        {
+            var autoPlay = Flow.Features.Get<AutoPlayFeature>();
+            round.AddPresentationStep(new TreasuryStep(Session, machineView, bigWin, treasuryView, console, autoPlay));
+            round.AddPresentationStep(new FreeSpinsAwardedStep(Session, Story, bigWin, relicReveal, round.Tally));
+            round.AddPresentationStep(new FreeSpinsRetriggeredStep(bigWin));
+            round.AddPresentationStep(new FreeSpinsTotalStep(Session, bigWin, round.Tally));
         }
 
         // Spin button, seal meter and jackpots, with the story's hint for each

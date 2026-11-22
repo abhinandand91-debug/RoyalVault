@@ -1,15 +1,14 @@
 using System.Collections;
-using PrimeTween;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine;
 
 namespace GameKit
 {
-    // Dims everything except one control, rings it with light and explains it in a bubble
-    public sealed class CoachMarkView : MonoBehaviour
+    // Dims everything except one control, rings it with light and explains it in a bubble; its definition fades it in
+    // and out
+    public sealed class CoachMarkView : DialogView
     {
-        [SerializeField] private CanvasGroup group;
         [SerializeField] private RectTransform[] shades = new RectTransform[4];
         [SerializeField] private RectTransform ring;
         [SerializeField] private RectTransform bubble;
@@ -18,15 +17,19 @@ namespace GameKit
         [SerializeField] private float padding = 18f;
 
         private readonly TweenGroup tweens = new TweenGroup(2);
+        private readonly Vector3[] corners = new Vector3[4];
         private bool advance;
         private bool closeNow;
+        private bool waiting;
+        private RectTransform target;
+        private string text;
+        private bool above;
 
-        public bool IsShowing { get; private set; }
+        // A hint is on screen or waiting its turn
+        public bool IsShowing => IsOpen || waiting;
 
-        public void Setup(CanvasGroup canvasGroup, RectTransform[] shadeRects, RectTransform ringRect, RectTransform bubbleRect,
-                          TextMeshProUGUI messageText, Button tap)
+        public void Setup(RectTransform[] shadeRects, RectTransform ringRect, RectTransform bubbleRect, TextMeshProUGUI messageText, Button tap)
         {
-            group = canvasGroup;
             shades = shadeRects;
             ring = ringRect;
             bubble = bubbleRect;
@@ -34,43 +37,57 @@ namespace GameKit
             tapArea = tap;
         }
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             tapArea.onClick.AddListener(() => advance = true);
-            Hide();
         }
 
         public void Advance() => advance = true;
         public void CloseNow() => closeNow = true;
 
-        // Spotlights the target and waits for a tap; above = bubble over the target, otherwise below it
-        public IEnumerator Show(RectTransform target, string text, bool above)
+        // Waits its turn with the dialog manager, then spotlights the target until a tap; above = bubble over the target
+        public IEnumerator Show(RectTransform hintTarget, string hint, bool bubbleAbove)
         {
+            target = hintTarget;
+            text = hint;
+            above = bubbleAbove;
             closeNow = false;
+            waiting = true;
+            yield return Present();
+        }
+
+        protected override void OnOpening()
+        {
+            waiting = false;
             advance = false;
             Rect hole = Spotlight(target);
             message.text = text;
             // kept on screen: half the canvas less half the bubble and a margin
             float reach = Mathf.Max(0f, ((RectTransform)bubble.parent).rect.width * 0.5f - bubble.rect.width * 0.5f - 24f);
             bubble.anchoredPosition = new Vector2(Mathf.Clamp(hole.center.x, -reach, reach), above ? hole.yMax + 150f : hole.yMin - 150f);
-            IsShowing = true;
             tweens.Add(UiMotion.Breathe(ring, 1.05f, 1.6f));
-            group.blocksRaycasts = true;
-            transform.SetAsLastSibling();
-            yield return Tween.Alpha(group, 0f, 1f, 0.3f, Ease.OutCubic).ToYieldInstruction();
+        }
+
+        // Waits for a tap, or for the hint to be closed from outside
+        protected override IEnumerator Content()
+        {
             while (!advance && !closeNow)
             {
                 yield return null;
             }
+        }
 
-            yield return Tween.Alpha(group, 1f, 0f, 0.25f, Ease.Linear).ToYieldInstruction();
-            Hide();
+        protected override void OnClosed()
+        {
+            tweens.StopAll();
+            ring.localScale = Vector3.one;
         }
 
         // Four shades around the target leave a clear window over it
-        private Rect Spotlight(RectTransform target)
+        private Rect Spotlight(RectTransform spotlit)
         {
-            Rect hole = LocalRect(target);
+            Rect hole = LocalRect(spotlit);
             hole.xMin -= padding;
             hole.xMax += padding;
             hole.yMin -= padding;
@@ -86,10 +103,9 @@ namespace GameKit
             return hole;
         }
 
-        private Rect LocalRect(RectTransform target)
+        private Rect LocalRect(RectTransform rect)
         {
-            var corners = new Vector3[4];
-            target.GetWorldCorners(corners);
+            rect.GetWorldCorners(corners);
             Vector2 min = transform.InverseTransformPoint(corners[0]);
             Vector2 max = transform.InverseTransformPoint(corners[2]);
             return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
@@ -101,17 +117,9 @@ namespace GameKit
             shade.sizeDelta = new Vector2(Mathf.Max(0f, xMax - xMin), Mathf.Max(0f, yMax - yMin));
         }
 
-        private void Hide()
+        protected override void OnDisable()
         {
-            tweens.StopAll();
-            ring.localScale = Vector3.one;
-            IsShowing = false;
-            group.alpha = 0f;
-            group.blocksRaycasts = false;
-        }
-
-        private void OnDisable()
-        {
+            base.OnDisable();
             tweens.StopAll();
         }
     }

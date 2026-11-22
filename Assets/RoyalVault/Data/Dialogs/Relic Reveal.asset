@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff42d397738654003ad851557cc8addf, type: 3}
+  m_Name: Relic Reveal
+  m_EditorClassIdentifier: GameKit::GameKit.DialogDefinition
+  id: Relic Reveal
+  layer: 1
+  policy: 0
+  priority: 0
+  entry: {fileID: 11400000, guid: c47821b4d968f4f61910bb38c051ec4e, type: 2}
+  exit: {fileID: 11400000, guid: 7b139acb452454cf7b6b2fe00efd2288, type: 2}
+  backdropAlpha: 0
+  closeOnBackdropTap: 0
+  blocksInput: 1

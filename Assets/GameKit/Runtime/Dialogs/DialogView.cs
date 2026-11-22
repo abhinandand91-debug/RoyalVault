@@ -18,6 +18,8 @@ namespace GameKit
         private bool closeRequested;
 
         public DialogDefinition Definition => definition;
+        // The group that fades the whole dialog
+        protected CanvasGroup Group => group;
         public DialogManager Manager => manager;
         public bool IsOpen { get; private set; }
         // Closing has been asked for
@@ -62,12 +64,12 @@ namespace GameKit
             IsOpen = true;
             group.blocksRaycasts = definition.blocksInput;
             OnOpening();
-            yield return PlayMotion(definition.entry, 1f);
+            yield return PlayMotion(definition.entry);
             OnOpened();
             yield return Content();
             OnClosing();
             group.blocksRaycasts = false;
-            yield return PlayMotion(definition.exit, 0f);
+            yield return PlayMotion(definition.exit);
             Hide();
             OnClosed();
         }
@@ -97,13 +99,12 @@ namespace GameKit
         {
         }
 
-        // Without a preset the dialog simply appears or disappears
-        private IEnumerator PlayMotion(MotionPreset preset, float alphaWithout)
+        // Without a preset the dialog animates itself in its content
+        private IEnumerator PlayMotion(MotionPreset preset)
         {
             tweens.StopAll();
             if (preset == null || preset.steps.Length == 0)
             {
-                group.alpha = alphaWithout;
                 yield break;
             }
 

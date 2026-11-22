@@ -140,7 +140,7 @@ namespace RoyalVault.Unity
                 var position = new Vector2((i - (TabNames.Length - 1) * 0.5f) * (width + 14f), 186f);
                 Image pill = UiFactory.Image(TabNames[i] + " Tab", content, theme.pillButton, position, new Vector2(width, 50f));
                 pill.type = Image.Type.Sliced;
-                Button button = UiFactory.Button(pill);
+                Button button = UiFactory.PressButton(pill);
                 int index = i;
                 button.onClick.AddListener(() => ShowPage(index));
                 TextMeshProUGUI label = UiFactory.Text("Label", pill.transform, theme.headingFont, TabNames[i], 18f, theme.dimGold, Vector2.zero,

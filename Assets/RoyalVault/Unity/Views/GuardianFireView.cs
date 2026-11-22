@@ -69,7 +69,7 @@ namespace RoyalVault.Unity
             for (int i = 0; i < outcome.AddedWilds.Count; i++)
             {
                 StartCoroutine(Throw(i, outcome.AddedWilds[i], wild));
-                yield return Tween.Delay(stagger).ToYieldInstruction();
+                yield return Waits.Seconds(stagger);
             }
 
             while (flying > 0)
@@ -77,7 +77,7 @@ namespace RoyalVault.Unity
                 yield return null;
             }
 
-            yield return Tween.Delay(0.3f).ToYieldInstruction();
+            yield return Waits.Seconds(0.3f);
         }
 
         // One flame from alternating guardians to its cell

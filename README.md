@@ -152,9 +152,12 @@ animations are baked to frames like the guardians' (`CharacterAnimation`, set on
 
 ```
 Assets/GameKit         reusable in any Unity game, knows nothing about slots
-   GameKit               UiFactory, UiParticleEmitter, CountingText, TypewriterText, MessageToast,
-                         CoachMarkView, NumberFormat (UGUI, TextMeshPro and PrimeTween)
-   GameKit.UIParticle    UiVfx: plays ParticleSystem prefabs inside a UI canvas (needs com.coffee.ui-particle)
+   GameKit               UiFactory, UiParticleEmitter, CountingText, TypewriterText, NumberFormat,
+                         ButtonFeedback, Waits (UGUI, TextMeshPro and PrimeTween)
+     Motion              MotionPreset (ScriptableObject), UiMotion, TweenGroup
+     Dialogs             DialogDefinition (ScriptableObject), DialogView, DialogManager, DialogHandle;
+                         MessageToast and CoachMarkView are dialogs
+   GameKit.UIParticle    UiVfx: plays ParticleSystem prefabs inside a UI canvas, pooled (needs com.coffee.ui-particle)
 
 Assets/SlotKit         reusable in any slot game
    SlotKit.Core          plain C#, noEngineReferences
@@ -186,6 +189,15 @@ copied into another project as it is.
   pipeline in `GameBootstrap`; the engine and flow do not change. `FlowTests.NewFeature_PlugsInWithoutChangingTheFlow`
   shows a three-line example.
 - **Outcomes are decided before anything moves.** `SpinEngine` picks the stops; `ReelView` only animates to them.
+- **Dialogs.** The pay table, toast, celebrations, relic reveal, Ruby's Last Hand, the Treasury, chapter cards and
+  coach marks are `DialogView`s run by one `DialogManager`: one per layer, queued by priority, with a shared
+  backdrop. How each opens and closes is a `DialogDefinition` and `MotionPreset` assets in `Data/Dialogs` and
+  `Data/Motion`, tuned in the Inspector. A caller yields on the dialog's handle; it can stop waiting without leaving
+  the dialog half-shown.
+- **Post-spin moments are steps.** The Treasury, free spins starting, more free spins and a round's total are
+  `IPresentationStep`s that `RoundController` plays in order, like the landing steps; a new feature adds a step.
+- **References are assigned, never looked up.** Runtime code has no `GetComponent` or `Find`: the builder hands
+  every component its references, and `CodingStandardsTests` keeps it that way.
 - **Drag and drop.** `Prefabs/RoyalVaultGame.prefab` is the whole game; drop it in a scene, set its machine and
   theme, press Play.
 

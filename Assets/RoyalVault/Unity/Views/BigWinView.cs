@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using GameKit;
 using PrimeTween;
 using SlotKit;
@@ -14,9 +15,30 @@ namespace RoyalVault.Unity
         BigWin, MegaWin, EpicWin, Jackpot, FreeSpinsAwarded, FreeSpinsTotal, Title
     }
 
-    public sealed class BigWinView : MonoBehaviour
+    // One celebration waiting its turn: what it says, what it counts and for how long
+    public readonly struct Celebration
     {
-        [SerializeField] private CanvasGroup group;
+        public readonly string Heading;
+        public readonly string Line;
+        public readonly long Value;
+        public readonly float Seconds;
+        public readonly bool Coins;
+        public readonly CelebrationKind Kind;
+
+        public Celebration(string heading, string line, long value, float seconds, bool coins, CelebrationKind kind)
+        {
+            Heading = heading;
+            Line = line;
+            Value = value;
+            Seconds = seconds;
+            Coins = coins;
+            Kind = kind;
+        }
+    }
+
+    // A dialog on the overlay layer: it pops its heading in, counts, showers coins and poses the heroes, then fades away
+    public sealed class BigWinView : DialogView
+    {
         [SerializeField] private Image banner;
         [SerializeField] private TextMeshProUGUI title;
         [SerializeField] private TextMeshProUGUI subtitle;
@@ -31,22 +53,24 @@ namespace RoyalVault.Unity
         [SerializeField] private CharacterAnimation[] heroMotion = new CharacterAnimation[0];
         [SerializeField] private Vector2[] heroHome = new Vector2[0];
 
+        private readonly Queue<Celebration> requests = new Queue<Celebration>(4);
+        private Celebration current;
         private bool skipped;
         private float heroClock;
         private RectTransform popping;
         private readonly WaitForSeconds settle = new WaitForSeconds(0.6f);
 
-        public bool IsShowing { get; private set; }
+        // A celebration is on screen or waiting to be
+        public bool IsShowing => IsOpen || requests.Count > 0;
 
         // A celebration opens (what it announces, and whether an amount counts up)
         public event System.Action<CelebrationKind, bool> Opened;
         // The celebration has faded away
         public event System.Action Closed;
 
-        public void Setup(CanvasGroup canvasGroup, Image bannerImage, TextMeshProUGUI titleText, TextMeshProUGUI subtitleText,
-                          CountingText amountText, RectTransform raysRect, UiParticleEmitter coinShower, Button skipButton)
+        public void Setup(Image bannerImage, TextMeshProUGUI titleText, TextMeshProUGUI subtitleText, CountingText amountText,
+                          RectTransform raysRect, UiParticleEmitter coinShower, Button skipButton)
         {
-            group = canvasGroup;
             banner = bannerImage;
             title = titleText;
             subtitle = subtitleText;
@@ -87,22 +111,11 @@ namespace RoyalVault.Unity
             }
         }
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             skip.onClick.AddListener(() => skipped = true);
             coins.Intensity = 0f;
-            // starts hidden, unless the first activation is a celebration
-            if (!IsShowing)
-            {
-                Hide();
-            }
-        }
-
-        private void Hide()
-        {
-            group.alpha = 0f;
-            group.blocksRaycasts = false;
-            gameObject.SetActive(false);
         }
 
         // Celebrates a big win or a jackpot; finishes when the count is done and the player has seen it
@@ -112,13 +125,13 @@ namespace RoyalVault.Unity
             float seconds = jackpotName != null ? 5f : tier == WinTier.Epic ? 5f : tier == WinTier.Mega ? 4f : 3f;
             CelebrationKind kind = jackpotName != null ? CelebrationKind.Jackpot : tier == WinTier.Epic ? CelebrationKind.EpicWin
                                  : tier == WinTier.Mega ? CelebrationKind.MegaWin : CelebrationKind.BigWin;
-            yield return Show(heading, null, value, seconds, true, kind);
+            yield return Show(new Celebration(heading, null, value, seconds, true, kind));
         }
 
         // A short title card without an amount (or with one when value is above 0)
         public IEnumerator ShowTitle(string heading, string line, long value, float seconds, CelebrationKind kind = CelebrationKind.Title)
         {
-            yield return Show(heading, line, value, seconds, value > 0, kind);
+            yield return Show(new Celebration(heading, line, value, seconds, value > 0, kind));
         }
 
         public void SetupRing(RectTransform vaultRing)
@@ -126,38 +139,50 @@ namespace RoyalVault.Unity
             ring = vaultRing;
         }
 
-        private IEnumerator Show(string heading, string line, long value, float countSeconds, bool coinsOn, CelebrationKind kind)
+        // Waits its turn with the dialog manager, then runs until it has faded away
+        private IEnumerator Show(Celebration celebration)
         {
-            // without banner art a plain big win is spelled out
-            if (heading == null && banner.sprite == null)
-            {
-                heading = "BIG WIN";
-            }
+            requests.Enqueue(celebration);
+            yield return Present();
+        }
 
-            Open(heading, line, value, countSeconds);
-            Opened?.Invoke(kind, value > 0);
-            RectTransform hero = heading == null ? banner.rectTransform : title.rectTransform;
+        protected override void OnOpening()
+        {
+            current = requests.Dequeue();
+            // without banner art a plain big win is spelled out
+            string heading = current.Heading == null && banner.sprite == null ? "BIG WIN" : current.Heading;
+            Open(heading, current.Line, current.Value, current.Seconds);
+            Opened?.Invoke(current.Kind, current.Value > 0);
             heroClock = 0f;
-            popping = hero;
+            popping = heading == null ? banner.rectTransform : title.rectTransform;
+        }
+
+        // Pops in, holds while the amount counts, settles if skipped, then fades out with the heroes still moving
+        protected override IEnumerator Content()
+        {
+            long value = current.Value;
             yield return Tween.Custom(this, 0f, 1f, 0.35f, (view, k) => view.PopIn(k), Ease.Linear).ToYieldInstruction();
-            yield return Hold(value > 0 ? countSeconds + 1.4f : countSeconds, coinsOn ? countSeconds : 0f);
+            yield return Hold(value > 0 ? current.Seconds + 1.4f : current.Seconds, current.Coins ? current.Seconds : 0f);
             if (skipped && value > 0)
             {
                 amount.Set(value);
                 yield return settle;
             }
+
             yield return Tween.Custom(this, 0f, 1f, 0.3f, (view, k) => view.FadeOut(k), Ease.Linear).ToYieldInstruction();
-            Close();
+        }
+
+        protected override void OnClosed()
+        {
+            coins.Intensity = 0f;
+            coins.Clear();
+            Closed?.Invoke();
         }
 
         // Shows the BIG WIN artwork when there is no other heading
         private void Open(string heading, string line, long value, float countSeconds)
         {
-            IsShowing = true;
             skipped = false;
-            gameObject.SetActive(true);
-            transform.SetAsLastSibling();
-            group.blocksRaycasts = true;
             banner.gameObject.SetActive(heading == null);
             title.gameObject.SetActive(heading != null);
             title.text = heading ?? "";
@@ -172,7 +197,7 @@ namespace RoyalVault.Unity
 
         private void PopIn(float k)
         {
-            group.alpha = k;
+            Group.alpha = k;
             popping.localScale = Vector3.one * Mathf.LerpUnclamped(0.6f, 1f, Easing.Evaluate(k, Ease.OutBack));
         }
 
@@ -204,18 +229,10 @@ namespace RoyalVault.Unity
 
         private void FadeOut(float k)
         {
-            group.alpha = 1f - k;
+            Group.alpha = 1f - k;
             heroClock += Time.deltaTime;
             PoseHeroes(heroClock, 1f);
         }
 
-        private void Close()
-        {
-            coins.Intensity = 0f;
-            coins.Clear();
-            Hide();
-            IsShowing = false;
-            Closed?.Invoke();
-        }
     }
 }

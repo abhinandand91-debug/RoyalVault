@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using System;
-using PrimeTween;
+using GameKit;
 using SlotKit;
 using UnityEngine;
 
@@ -100,7 +100,7 @@ namespace RoyalVault.Unity
             }
 
             console.ShowWin(outcome.TotalWin, Mathf.Clamp(outcome.TotalWin / (float)Math.Max(1, outcome.TotalBet) * 0.25f, 0.4f, 2.5f));
-            yield return Tween.Delay(seconds).ToYieldInstruction();
+            yield return Waits.Seconds(seconds);
             machine.HideLines();
         }
 

@@ -10,7 +10,7 @@ using UnityEngine.UI;
 namespace RoyalVault.Unity
 {
     // Ruby's Last Hand: the player calls a colour or a suit, Ruby turns a card, and the win doubles, quadruples or is lost
-    public sealed class GambleView : MonoBehaviour
+    public sealed class GambleView : DialogView
     {
         // The parts of one drawn card
         [Serializable]
@@ -27,7 +27,6 @@ namespace RoyalVault.Unity
         private static readonly Color Red = new Color(0.72f, 0.08f, 0.12f, 1f);
         private static readonly Color Ink = new Color(0.1f, 0.09f, 0.12f, 1f);
 
-        [SerializeField] private CanvasGroup group;
         [SerializeField] private TextMeshProUGUI result;
         [SerializeField] private CardParts card;
         [SerializeField] private CountingText stake;
@@ -47,10 +46,9 @@ namespace RoyalVault.Unity
         // A call is settled: true when it was right
         public event Action<bool> Settled;
 
-        public void Setup(CanvasGroup canvasGroup, TextMeshProUGUI resultText, CardParts drawn, CountingText stakeText, Button[] callButtons,
-                          Button collectButton, CardParts[] previous, Image rubyImage)
+        public void Setup(TextMeshProUGUI resultText, CardParts drawn, CountingText stakeText, Button[] callButtons, Button collectButton,
+                          CardParts[] previous, Image rubyImage)
         {
-            group = canvasGroup;
             result = resultText;
             card = drawn;
             stake = stakeText;
@@ -77,35 +75,31 @@ namespace RoyalVault.Unity
             }
 
             collect.onClick.AddListener(Collect);
-            Hide();
         }
 
-        public bool IsOpen { get; private set; }
-
-        // Runs until the gamble ends, then closes
+        // Waits its turn with the dialog manager, then runs until the gamble ends; the definition fades it in and out
         public IEnumerator Play(GambleSession gamble)
         {
             session = gamble;
-            Open();
+            yield return Present();
+        }
+
+        // Calls are played until the session ends; the last card stays up a moment before the table closes
+        protected override IEnumerator Content()
+        {
             while (session.Active || busy)
             {
                 yield return null;
             }
 
             SetButtons(false);
-            yield return Tween.Delay(1.1f).ToYieldInstruction();
-            yield return Tween.Alpha(group, 1f, 0f, 0.3f, Ease.InOutSine).ToYieldInstruction();
-            Hide();
+            yield return Waits.Seconds(1.1f);
         }
 
-        private void Open()
+        protected override void OnOpening()
         {
-            IsOpen = true;
             busy = false;
             faceUp = false;
-            gameObject.SetActive(true);
-            transform.SetAsLastSibling();
-            group.blocksRaycasts = true;
             ShowFace(card, false);
             card.root.localScale = Vector3.one;
             result.text = "CALL THE CARD";
@@ -116,7 +110,6 @@ namespace RoyalVault.Unity
             }
 
             SetButtons(true);
-            Tween.Alpha(group, 0f, 1f, 0.3f, Ease.OutCubic);
         }
 
         private void Call(GambleChoice choice)
@@ -214,13 +207,6 @@ namespace RoyalVault.Unity
             }
 
             collect.interactable = live;
-        }
-
-        private void Hide()
-        {
-            IsOpen = false;
-            group.alpha = 0f;
-            group.blocksRaycasts = false;
         }
     }
 }

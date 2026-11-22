@@ -1,40 +1,40 @@
 using System.Collections;
 using GameKit;
-using PrimeTween;
 using UnityEngine.UI;
 using UnityEngine;
 
 namespace RoyalVault.Unity
 {
-    // A framed story chapter over the game, told beat by beat; a tap moves it on
-    public sealed class ChapterCardView : MonoBehaviour
+    // A framed story chapter over the game, told beat by beat; a tap moves it on. Its definition grows it in and fades
+    // it out
+    public sealed class ChapterCardView : DialogView
     {
-        [SerializeField] private CanvasGroup group;
-        [SerializeField] private RectTransform panel;
         [SerializeField] private StoryCardView card;
         [SerializeField] private Button tapArea;
         [SerializeField] private CanvasGroup continuePrompt;
 
+        private readonly TweenGroup tweens = new TweenGroup(2);
         private bool advance;
         private bool closeNow;
+        private bool waiting;
+        private StoryDefinition.Scene scene;
+        private int number;
+        private string chapterLabel;
 
-        public bool IsShowing { get; private set; }
+        // A chapter is on screen or waiting its turn
+        public bool IsShowing => IsOpen || waiting;
 
-        private readonly TweenGroup tweens = new TweenGroup(2);
-
-        public void Setup(CanvasGroup canvasGroup, RectTransform panelRect, StoryCardView storyCard, Button tap, CanvasGroup prompt)
+        public void Setup(StoryCardView storyCard, Button tap, CanvasGroup prompt)
         {
-            group = canvasGroup;
-            panel = panelRect;
             card = storyCard;
             tapArea = tap;
             continuePrompt = prompt;
         }
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             tapArea.onClick.AddListener(Advance);
-            SetVisible(false);
         }
 
         public void Advance() => advance = true;
@@ -42,26 +42,38 @@ namespace RoyalVault.Unity
         // Closes the card at once (testing, or when the story is turned off)
         public void CloseNow() => closeNow = true;
 
-        public IEnumerator Tell(StoryDefinition.Scene scene, int number, string chapterLabel)
+        // Waits its turn with the dialog manager, then tells the scene until the last beat is read
+        public IEnumerator Tell(StoryDefinition.Scene storyScene, int chapterNumber, string label)
         {
+            scene = storyScene;
+            number = chapterNumber;
+            chapterLabel = label;
             closeNow = false;
-            SetVisible(true);
+            waiting = true;
+            yield return Present();
+        }
+
+        protected override void OnOpening()
+        {
+            waiting = false;
+            advance = false;
             card.Group.alpha = 1f;
             card.Tell(scene, number, chapterLabel);
-            yield return Tween.Custom(this, 0f, 1f, 0.45f, (view, k) => view.Appear(k), Ease.OutCubic).ToYieldInstruction();
+            tweens.Add(UiMotion.Pulse(continuePrompt, 0.05f, 0.85f, 2.1f));
+        }
+
+        // Each tap shows the next beat; after the last one the card closes
+        protected override IEnumerator Content()
+        {
             while (!closeNow && (!TakeAdvance() || card.NextBeat()))
             {
                 yield return null;
             }
-
-            yield return Tween.Alpha(group, 1f, 0f, 0.35f, Ease.InOutSine).ToYieldInstruction();
-            SetVisible(false);
         }
 
-        private void Appear(float k)
+        protected override void OnClosed()
         {
-            group.alpha = k;
-            panel.localScale = Vector3.one * Mathf.Lerp(0.92f, 1f, k);
+            tweens.StopAll();
         }
 
         private bool TakeAdvance()
@@ -71,23 +83,9 @@ namespace RoyalVault.Unity
             return taken;
         }
 
-        private void SetVisible(bool visible)
+        protected override void OnDisable()
         {
-            tweens.StopAll();
-            if (visible)
-            {
-                tweens.Add(UiMotion.Pulse(continuePrompt, 0.05f, 0.85f, 2.1f));
-            }
-
-            IsShowing = visible;
-            gameObject.SetActive(true);
-            group.alpha = visible ? group.alpha : 0f;
-            group.blocksRaycasts = visible;
-            transform.SetAsLastSibling();
-        }
-
-        private void OnDisable()
-        {
+            base.OnDisable();
             tweens.StopAll();
         }
     }
