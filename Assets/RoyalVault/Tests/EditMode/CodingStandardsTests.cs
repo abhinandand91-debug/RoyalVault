@@ -75,6 +75,59 @@ namespace RoyalVault.Tests
             AssertNone(violations, "opening braces at the end of a line");
         }
 
+        // Update, LateUpdate and FixedUpdate only hand work to named methods (a frame's time may be read first)
+        [Test]
+        public void FrameMethodsOnlyCallNamedMethods()
+        {
+            var violations = new List<string>();
+            foreach (string path in SourceFiles())
+            {
+                string code = StripLiteralsAndComments(File.ReadAllText(path));
+                foreach (Match match in FrameMethod.Matches(code))
+                {
+                    int open = code.IndexOf('{', match.Index);
+                    int close = ClosingBrace(code, open);
+                    string body = code.Substring(open + 1, close - open - 1);
+                    foreach (string line in body.Split('\n'))
+                    {
+                        string statement = line.Trim();
+                        if (statement.Length > 0 && !NamedCall.IsMatch(statement) && !FrameTime.IsMatch(statement))
+                        {
+                            violations.Add(Where(path, LineOf(code, open)) + " " + statement);
+                        }
+                    }
+                }
+            }
+
+            AssertNone(violations, "frame methods with logic of their own");
+        }
+
+        private static readonly Regex FrameMethod = new Regex(@"void\s+(Update|LateUpdate|FixedUpdate)\s*\(\s*\)\s*\{");
+        private static readonly Regex NamedCall = new Regex(@"^[A-Za-z_][\w.]*\(.*\);$");
+        private static readonly Regex FrameTime = new Regex(@"^(float|double)\s+\w+\s*=\s*Time\.[\w.]+\s*;$");
+
+        private static int ClosingBrace(string code, int open)
+        {
+            int depth = 0;
+            for (int i = open; i < code.Length; i++)
+            {
+                if (code[i] == '{')
+                {
+                    depth++;
+                }
+                else if (code[i] == '}')
+                {
+                    depth--;
+                    if (depth == 0)
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            return code.Length - 1;
+        }
+
         private static IEnumerable<string> SourceFiles()
         {
             foreach (string root in Roots)

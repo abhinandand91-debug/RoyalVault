@@ -20,6 +20,8 @@ namespace RoyalVault.Unity
 
         public bool IsShowing { get; private set; }
 
+        private readonly TweenGroup tweens = new TweenGroup(2);
+
         public void Setup(CanvasGroup canvasGroup, RectTransform panelRect, StoryCardView storyCard, Button tap, CanvasGroup prompt)
         {
             group = canvasGroup;
@@ -71,6 +73,12 @@ namespace RoyalVault.Unity
 
         private void SetVisible(bool visible)
         {
+            tweens.StopAll();
+            if (visible)
+            {
+                tweens.Add(UiMotion.Pulse(continuePrompt, 0.05f, 0.85f, 2.1f));
+            }
+
             IsShowing = visible;
             gameObject.SetActive(true);
             group.alpha = visible ? group.alpha : 0f;
@@ -78,12 +86,9 @@ namespace RoyalVault.Unity
             transform.SetAsLastSibling();
         }
 
-        private void Update()
+        private void OnDisable()
         {
-            if (IsShowing)
-            {
-                continuePrompt.alpha = 0.45f + 0.4f * Mathf.Sin(Time.time * 3f);
-            }
+            tweens.StopAll();
         }
     }
 }

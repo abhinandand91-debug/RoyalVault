@@ -17,6 +17,12 @@ namespace GameKit
 
         private void LateUpdate()
         {
+            SyncCanvasToAlpha();
+        }
+
+        // The canvas draws only while its group can be seen
+        private void SyncCanvasToAlpha()
+        {
             if (group == null)
             {
                 return;

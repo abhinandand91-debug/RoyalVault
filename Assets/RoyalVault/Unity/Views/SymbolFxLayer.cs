@@ -166,7 +166,12 @@ namespace RoyalVault.Unity
 
         private void Update()
         {
-            float deltaTime = Time.deltaTime;
+            TickEffects(Time.deltaTime);
+        }
+
+        // Each live effect plays on; finished ones go back to their pool
+        private void TickEffects(float deltaTime)
+        {
             for (int i = live.Count - 1; i >= 0; i--)
             {
                 if (!live[i].Tick(deltaTime))

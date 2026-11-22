@@ -57,12 +57,18 @@ namespace GameKit
 
         private void Update()
         {
+            Advance(Time.deltaTime);
+        }
+
+        // Moves the shown number towards its target at the counting speed
+        private void Advance(float deltaTime)
+        {
             if (Done)
             {
                 return;
             }
 
-            double step = speed * Time.deltaTime;
+            double step = speed * deltaTime;
             shown = shown < target ? System.Math.Min(target, shown + step) : System.Math.Max(target, shown - step);
             Write();
         }

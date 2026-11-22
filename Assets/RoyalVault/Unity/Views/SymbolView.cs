@@ -179,12 +179,18 @@ namespace RoyalVault.Unity
 
         private void Update()
         {
+            FadeFlash(Time.deltaTime);
+        }
+
+        // The win flash fades; once nothing is lit the symbol goes back to the shared material so it batches again
+        private void FadeFlash(float deltaTime)
+        {
             if (own == null || image.material != own)
             {
                 return;
             }
 
-            flash = Mathf.MoveTowards(flash, 0f, Time.deltaTime * 2.2f);
+            flash = Mathf.MoveTowards(flash, 0f, deltaTime * 2.2f);
             own.SetFloat(Flash, flash);
             if (flash <= 0f && pulse == null && !glint.isAlive)
             {

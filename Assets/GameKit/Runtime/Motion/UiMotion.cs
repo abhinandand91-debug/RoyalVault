@@ -95,6 +95,12 @@ namespace GameKit
             return Tween.Alpha(graphic, high, low, period * 0.5f, Ease.InOutSine, cycles: -1, cycleMode: CycleMode.Yoyo, startDelay: delay);
         }
 
+        // A group's alpha swinging between high and low forever
+        public static Tween Pulse(CanvasGroup group, float low, float high, float period = 1.4f, float delay = 0f)
+        {
+            return Tween.Alpha(group, high, low, period * 0.5f, Ease.InOutSine, cycles: -1, cycleMode: CycleMode.Yoyo, startDelay: delay);
+        }
+
         // Turns forever at a steady speed; negative degrees turn clockwise
         public static Tween Spin(Transform target, float degreesPerSecond)
         {

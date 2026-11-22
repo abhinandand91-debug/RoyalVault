@@ -84,13 +84,25 @@ namespace GameKit
         private void Update()
         {
             float deltaTime = Time.deltaTime;
+            EmitDue(deltaTime);
+            AgeParticles(deltaTime);
+            RedrawWhileMoving();
+        }
+
+        // New particles at the emitter's rate
+        private void EmitDue(float deltaTime)
+        {
             pending += Rate * Intensity * deltaTime;
             while (pending >= 1f)
             {
                 pending -= 1f;
                 Spawn(false);
             }
+        }
 
+        // Each particle grows older and moves; the dead are dropped
+        private void AgeParticles(float deltaTime)
+        {
             for (int i = live.Count - 1; i >= 0; i--)
             {
                 Particle particle = live[i];
@@ -104,8 +116,11 @@ namespace GameKit
                 Move(ref particle, deltaTime);
                 live[i] = particle;
             }
+        }
 
-            // redraw while particles move, and once more after the last one dies
+        // Redraw while particles move, and once more after the last one dies
+        private void RedrawWhileMoving()
+        {
             if (live.Count > 0 || drawn)
             {
                 drawn = live.Count > 0;

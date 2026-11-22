@@ -17,6 +17,7 @@ namespace GameKit
         [SerializeField] private Button tapArea;
         [SerializeField] private float padding = 18f;
 
+        private readonly TweenGroup tweens = new TweenGroup(2);
         private bool advance;
         private bool closeNow;
 
@@ -53,6 +54,7 @@ namespace GameKit
             float reach = Mathf.Max(0f, ((RectTransform)bubble.parent).rect.width * 0.5f - bubble.rect.width * 0.5f - 24f);
             bubble.anchoredPosition = new Vector2(Mathf.Clamp(hole.center.x, -reach, reach), above ? hole.yMax + 150f : hole.yMin - 150f);
             IsShowing = true;
+            tweens.Add(UiMotion.Breathe(ring, 1.05f, 1.6f));
             group.blocksRaycasts = true;
             transform.SetAsLastSibling();
             yield return Tween.Alpha(group, 0f, 1f, 0.3f, Ease.OutCubic).ToYieldInstruction();
@@ -101,17 +103,16 @@ namespace GameKit
 
         private void Hide()
         {
+            tweens.StopAll();
+            ring.localScale = Vector3.one;
             IsShowing = false;
             group.alpha = 0f;
             group.blocksRaycasts = false;
         }
 
-        private void Update()
+        private void OnDisable()
         {
-            if (IsShowing)
-            {
-                ring.localScale = Vector3.one * (1f + 0.05f * Mathf.Sin(Time.time * 4f));
-            }
+            tweens.StopAll();
         }
     }
 }

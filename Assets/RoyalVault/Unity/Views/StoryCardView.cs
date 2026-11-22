@@ -130,7 +130,12 @@ namespace RoyalVault.Unity
 
         private void Update()
         {
-            float t = Time.time - shownAt;
+            Animate(Time.time - shownAt);
+        }
+
+        // The slow camera push, the figures' sway, and the words appearing one after another
+        private void Animate(float t)
+        {
             PushCamera(t);
             MoveFigures(t);
             Reveal(chapter, t - 0.25f);

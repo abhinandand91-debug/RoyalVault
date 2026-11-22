@@ -620,7 +620,13 @@ namespace RoyalVault.Unity
         // While the reels rest, a gem, crown or wild now and then catches the light
         private void Update()
         {
-            // the awaited reel's frame of light swells in and throbs; the others fade out
+            FadeAnticipation(Time.deltaTime);
+            GlintNow();
+        }
+
+        // The awaited reel's frame of light swells in and throbs; the others fade out
+        private void FadeAnticipation(float deltaTime)
+        {
             for (int r = 0; r < columns.Length; r++)
             {
                 float target = 0f;
@@ -629,9 +635,13 @@ namespace RoyalVault.Unity
                     float t = Time.time - awaitedSince;
                     target = Mathf.Min(1f, t * 5f) * (0.75f + 0.25f * Mathf.Sin(t * 9f));
                 }
-                columns[r].alpha = Mathf.MoveTowards(columns[r].alpha, target, Time.deltaTime * 4f);
+                columns[r].alpha = Mathf.MoveTowards(columns[r].alpha, target, deltaTime * 4f);
             }
+        }
 
+        // Every few seconds, while nothing else is happening, one resting gem or treasure catches the light
+        private void GlintNow()
+        {
             if (reels == null || Time.time < nextGlint)
             {
                 return;

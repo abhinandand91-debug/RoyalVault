@@ -234,7 +234,12 @@ namespace RoyalVault.Unity
 
         private void Update()
         {
-            float time = Time.time + phase;
+            Animate(Time.time + phase);
+        }
+
+        // The idle breath and pose, and the magic in the guardian's hand
+        private void Animate(float time)
+        {
             float breath = Mathf.Sin(time * 1.4f) * 0.5f + 0.5f;
             Pose(time, breath);
             if (hand == null)

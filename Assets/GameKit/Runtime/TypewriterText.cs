@@ -56,6 +56,12 @@ namespace GameKit
 
         private void Update()
         {
+            Type(Time.deltaTime);
+        }
+
+        // Reveals the characters due by now, after any pause at a sentence's end
+        private void Type(float deltaTime)
+        {
             if (!IsTyping)
             {
                 return;
@@ -63,10 +69,10 @@ namespace GameKit
 
             if (pause > 0f)
             {
-                pause -= Time.deltaTime;
+                pause -= deltaTime;
                 return;
             }
-            shown += Time.deltaTime * charactersPerSecond;
+            shown += deltaTime * charactersPerSecond;
             int visible = Mathf.Min(Mathf.FloorToInt(shown), text.textInfo.characterCount);
             if (visible > text.maxVisibleCharacters)
             {

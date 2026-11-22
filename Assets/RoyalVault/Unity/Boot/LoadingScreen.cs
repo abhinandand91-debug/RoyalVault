@@ -40,6 +40,7 @@ namespace RoyalVault.Unity
 
         private readonly List<Image> dust = new List<Image>();
         private float shown;
+        private readonly TweenGroup tweens = new TweenGroup(2);
         private int tipIndex;
 
         public void Setup(CanvasGroup canvasGroup, RectTransform logoRect, RectTransform fillAreaRect, Image fillImage, RectTransform tipRect,
@@ -74,6 +75,7 @@ namespace RoyalVault.Unity
 
         private void Start()
         {
+            StartLoops();
             if (sound != null && sound.Bank != null)
             {
                 sound.PlayMusic(sound.Bank.loadingMusic, 1.5f);
@@ -166,25 +168,44 @@ namespace RoyalVault.Unity
         private void Update()
         {
             float time = Time.time;
+            PulseTipText(time);
+            SweepShine(time);
+            DriftDust(time, Time.deltaTime);
+        }
+
+        // The logo breathes a little light and the bar's tip twinkles, for as long as the screen is up
+        private void StartLoops()
+        {
+            tweens.Add(UiMotion.Breathe(logo, 1.012f, 3.9f));
+            tweens.Add(UiMotion.Breathe(tip, 1.18f, 0.7f));
+        }
+
+        // While the story plays, the tip line glows softly
+        private void PulseTipText(float time)
+        {
             if (!StoryDone && tipText.text.Length > 0)
             {
                 tipText.alpha = 0.45f + 0.35f * Mathf.Sin(time * 2.4f);
             }
-            // the logo breathes a little light
-            logo.localScale = Vector3.one * (1f + 0.012f * Mathf.Sin(time * 1.6f));
-            // a soft light sweeps along the filled gold every two seconds
+        }
+
+        // A soft light sweeps along the filled gold every two seconds
+        private void SweepShine(float time)
+        {
             float width = fillArea.rect.width;
             float sweep = Mathf.Repeat(time * 0.55f, 1.3f) - 0.15f;
             shine.anchoredPosition = new Vector2(-width * 0.5f + width * shown * sweep, 0f);
             shine.gameObject.SetActive(shown > 0.05f);
-            // the tip twinkles
-            tip.localScale = Vector3.one * (1f + 0.18f * Mathf.Sin(time * 9f));
+        }
 
+        // Gold motes drift up and twinkle, starting again at the foot when they leave the top
+        private void DriftDust(float time, float deltaTime)
+        {
             foreach (Image mote in dust)
             {
                 RectTransform rect = mote.rectTransform;
                 float phase = Phase(rect);
-                Vector2 p = rect.anchoredPosition + new Vector2(Mathf.Sin(time + phase) * 6f, 38f) * Time.deltaTime;
+                Vector2 p = rect.anchoredPosition + new Vector2(Mathf.Sin(time + phase) * 6f, 38f) * deltaTime;
                 if (p.y > 560f)
                 {
                     p = RandomDustPosition(false);
@@ -218,6 +239,7 @@ namespace RoyalVault.Unity
         private void OnDestroy()
         {
             tipCycle.Stop();
+            tweens.StopAll();
         }
 
         private void NextTip()

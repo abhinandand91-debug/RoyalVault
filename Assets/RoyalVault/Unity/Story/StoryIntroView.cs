@@ -25,6 +25,8 @@ namespace RoyalVault.Unity
         private bool entered;
 
         public bool IsPlaying { get; private set; }
+
+        private readonly TweenGroup tweens = new TweenGroup(2);
         public int Page { get; private set; } = -1;
         public event Action PageTurned;
         public bool ShowsEnter => enterButton != null && enterButton.gameObject.activeSelf;
@@ -89,6 +91,7 @@ namespace RoyalVault.Unity
         private IEnumerator WaitForEnter()
         {
             enterButton.gameObject.SetActive(true);
+            tweens.StopAll();
             continuePrompt.alpha = 0f;
             Tween.Scale(enterButton.transform, 0f, 1f, 0.4f, Ease.OutBack);
             while (!entered && !skipped)
@@ -130,6 +133,7 @@ namespace RoyalVault.Unity
         {
             IsPlaying = true;
             Page = 0;
+            tweens.Add(UiMotion.Pulse(continuePrompt, 0.05f, 0.85f, 2.1f));
             gameObject.SetActive(true);
             group.alpha = 1f;
             group.blocksRaycasts = true;
@@ -144,6 +148,7 @@ namespace RoyalVault.Unity
 
         private void Hide()
         {
+            tweens.StopAll();
             group.alpha = 0f;
             group.blocksRaycasts = false;
             enterButton.gameObject.SetActive(false);
@@ -161,14 +166,9 @@ namespace RoyalVault.Unity
             bottomBar.sizeDelta = new Vector2(0f, barHeight * k);
         }
 
-        private void Update()
+        private void OnDisable()
         {
-            if (!IsPlaying || ShowsEnter)
-            {
-                return;
-            }
-
-            continuePrompt.alpha = 0.45f + 0.4f * Mathf.Sin(Time.time * 3f);
+            tweens.StopAll();
         }
     }
 }

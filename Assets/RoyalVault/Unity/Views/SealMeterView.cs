@@ -311,7 +311,13 @@ namespace RoyalVault.Unity
         private void Update()
         {
             float t = Time.time;
-            // a slow breath of light behind the seal; the open vault glows blue
+            BreatheLight(t);
+            Shake(t, Time.deltaTime);
+        }
+
+        // A slow breath of light behind the seal and in its cracks; the open vault glows blue
+        private void BreatheLight(float t)
+        {
             float breath = 0.5f + 0.5f * Mathf.Sin(t * 1.7f);
             Color m = magicColour;
             magic.color = new Color(m.r, m.g, m.b, open ? 0.55f + 0.3f * breath : 0.08f * lit + 0.04f * breath);
@@ -323,10 +329,14 @@ namespace RoyalVault.Unity
                     crack.color = open ? new Color(m.r + 0.3f, m.g + 0.15f, m.b, 0.9f) : new Color(1f, 0.85f, 0.5f, 0.75f + 0.25f * breath);
                 }
             }
+        }
 
+        // A struck seal trembles, settling over a third of a second
+        private void Shake(float t, float deltaTime)
+        {
             if (shake > 0f)
             {
-                shake = Mathf.MoveTowards(shake, 0f, Time.deltaTime * 3f);
+                shake = Mathf.MoveTowards(shake, 0f, deltaTime * 3f);
                 seal.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(t * 60f) * 4f * shake);
             }
             else
