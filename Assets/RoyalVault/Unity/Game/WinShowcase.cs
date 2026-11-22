@@ -129,7 +129,9 @@ namespace RoyalVault.Unity
             long big = tiers.Length > 0 ? tiers[0] * bet : long.MaxValue;
             long mega = tiers.Length > 1 ? tiers[1] * bet : long.MaxValue;
             long epic = tiers.Length > 2 ? tiers[2] * bet : long.MaxValue;
-            bool plain = jackpot < 0 && !freeSpins;
+            // a showcase lands only what it promises: never a Treasury round on top
+            bool treasury = TreasuryFeature.Opens(machine, outcome.Grid);
+            bool plain = jackpot < 0 && !freeSpins && !treasury;
 
             switch (kind)
             {
@@ -144,13 +146,13 @@ namespace RoyalVault.Unity
                 case ShowcaseWin.EpicWin:
                     return plain && win >= epic;
                 case ShowcaseWin.MinorJackpot:
-                    return !freeSpins && jackpot == 0;
+                    return !freeSpins && !treasury && jackpot == 0;
                 case ShowcaseWin.MajorJackpot:
-                    return !freeSpins && jackpot == 1 && machine.JackpotTiers.Length > 1;
+                    return !freeSpins && !treasury && jackpot == 1 && machine.JackpotTiers.Length > 1;
                 case ShowcaseWin.GrandJackpot:
-                    return !freeSpins && jackpot == 2 && machine.JackpotTiers.Length > 2;
+                    return !freeSpins && !treasury && jackpot == 2 && machine.JackpotTiers.Length > 2;
                 case ShowcaseWin.FreeSpins:
-                    return freeSpins && jackpot < 0;
+                    return freeSpins && !treasury && jackpot < 0;
                 default:
                     return false;
             }

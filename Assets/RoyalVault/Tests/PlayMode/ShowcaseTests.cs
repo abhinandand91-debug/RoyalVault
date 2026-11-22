@@ -22,7 +22,22 @@ namespace RoyalVault.Tests
                 t += Time.deltaTime;
                 yield return null;
             }
-            Assert.IsTrue(condition(), "timed out");
+            Assert.IsTrue(condition(), "timed out; " + GameState());
+        }
+
+        // What the game was doing, for a timeout's message
+        private static string GameState()
+        {
+            var game = Object.FindFirstObjectByType<GameBootstrap>();
+            if (game == null || game.Flow == null)
+            {
+                return "no game";
+            }
+
+            bool bigWin = Object.FindFirstObjectByType<BigWinView>(FindObjectsInactive.Include)?.IsShowing ?? false;
+            bool treasury = Object.FindFirstObjectByType<TreasuryView>(FindObjectsInactive.Include)?.IsOpen ?? false;
+            return "state " + game.Flow.State + ", free spins left " + game.Session.FreeSpins.Remaining + ", big win showing " + bigWin
+                   + ", treasury open " + treasury + ", treasury held " + (game.Session.Treasury.Round != null);
         }
 
         private static IEnumerator LoadGame()
@@ -53,7 +68,8 @@ namespace RoyalVault.Tests
             foreach (ShowcaseWin expected in order)
             {
                 yield return WaitFor(() => game.Flow.State == SpinState.Idle && game.Session.FreeSpins.Remaining == 0
-                                           && !Object.FindFirstObjectByType<BigWinView>(FindObjectsInactive.Include).IsShowing);
+                                           && !Object.FindFirstObjectByType<BigWinView>(FindObjectsInactive.Include).IsShowing
+                                           && game.Session.Treasury.Round == null);
                 Assert.AreEqual(expected, game.Showcase.Armed, "armed for " + expected);
                 paid = null;
                 Assert.IsTrue(game.Flow.RequestSpin());

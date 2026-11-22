@@ -85,6 +85,12 @@ namespace SlotKit
             }
         }
 
+        // Whether this grid opens the Treasury on a base-game spin
+        public static bool Opens(MachineDefinition machine, SymbolGrid grid)
+        {
+            return machine.Treasury.Enabled && Keys(machine, grid) != null;
+        }
+
         // Every key on the key reels, or null unless each key reel shows one
         private static List<GridPosition> Keys(MachineDefinition machine, SymbolGrid grid)
         {
