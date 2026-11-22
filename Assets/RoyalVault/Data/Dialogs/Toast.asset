@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff42d397738654003ad851557cc8addf, type: 3}
+  m_Name: Toast
+  m_EditorClassIdentifier: GameKit::GameKit.DialogDefinition
+  id: Toast
+  layer: 2
+  policy: 1
+  priority: 0
+  entry: {fileID: 11400000, guid: a2ebba9a0c4ff4abda020a5831ac0c69, type: 2}
+  exit: {fileID: 11400000, guid: f1ce6e801dfc647d991777eebb39cf0b, type: 2}
+  backdropAlpha: 0
+  closeOnBackdropTap: 0
+  blocksInput: 0

@@ -17,6 +17,7 @@ namespace RoyalVault.EditorTools
             EnsureFolder(Root + "Prefabs");
             GameObject root = OverlayCanvas("RoyalVaultGame");
             Transform t = root.transform;
+            DialogManager dialogs = Dialogs(root);
             bool emerald = theme.look == ThemeLook.Emerald;
             Backdrop(t, theme, Color.white);
             // the Art Deco guardians stand in niches behind the frame; the Emerald guardians stand in front of the housing
@@ -40,14 +41,14 @@ namespace RoyalVault.EditorTools
             SealMeterView sealMeter = SealMeter(console.transform, theme, LayoutFor(theme).Seal);
             FlameClashView flameClash = FlameClash(t, theme, machineRect);
             GuardianFireView guardianFire = GuardianFire(t, theme);
-            MessageToast toast = Toast(t, theme);
+            MessageToast toast = Toast(t, theme, dialogs);
 
             // overlays, last so they draw on top
             BigWinView bigWin = BigWin(t, theme);
             RelicRevealView relicReveal = RelicReveal(t, theme);
             GambleView gamble = Gamble(t, theme);
             TreasuryView treasury = Treasury(t, theme);
-            PaytableView paytable = Paytable(t, theme);
+            PaytableView paytable = Paytable(t, theme, dialogs);
             ChapterCardView chapterCard = ChapterCard(t, theme);
             CoachMarkView coachMarks = CoachMarks(t, theme);
 
@@ -655,7 +656,7 @@ namespace RoyalVault.EditorTools
             return button;
         }
 
-        private static MessageToast Toast(Transform parent, ThemeDefinition theme)
+        private static MessageToast Toast(Transform parent, ThemeDefinition theme, DialogManager dialogs)
         {
             Image pill = Pill("Message", parent, theme, new Vector2(0, -320), new Vector2(720, 64));
             pill.raycastTarget = false;
@@ -664,7 +665,8 @@ namespace RoyalVault.EditorTools
             UiFactory.NestedCanvas(pill.gameObject, false, true);
             group.blocksRaycasts = false;
             var toast = pill.gameObject.AddComponent<MessageToast>();
-            toast.Setup(group, text);
+            toast.Setup(text);
+            toast.SetupDialog(ToastDialog(), pill.rectTransform, dialogs);
             return toast;
         }
 
@@ -862,15 +864,12 @@ namespace RoyalVault.EditorTools
             return view;
         }
 
-        private static PaytableView Paytable(Transform parent, ThemeDefinition theme)
+        // The pay table window; the dialog manager's shared backdrop darkens the game behind it and closes it on a tap
+        private static PaytableView Paytable(Transform parent, ThemeDefinition theme, DialogManager dialogs)
         {
             RectTransform window = UiFactory.Stretch("Pay Table", parent);
-            var group = window.gameObject.AddComponent<CanvasGroup>();
+            window.gameObject.AddComponent<CanvasGroup>();
             UiFactory.NestedCanvas(window.gameObject, true, true);
-            Image dim = Stretch("Backdrop", window, theme.white);
-            dim.color = new Color(0.02f, 0.02f, 0.03f, 0.78f);
-            Button backdrop = UiFactory.Button(dim);
-            backdrop.transition = Selectable.Transition.None;
 
             Image panel = UiFactory.Image("Panel", window, theme.popupPanel, new Vector2(0, 10), new Vector2(1440, 900), true);
             panel.type = Image.Type.Sliced;
@@ -880,7 +879,8 @@ namespace RoyalVault.EditorTools
             Button close = IconButton("Close", panel.transform, theme, theme.iconClose, new Vector2(560, 248), out _);
 
             var view = window.gameObject.AddComponent<PaytableView>();
-            view.Setup(group, content, close, backdrop);
+            view.Setup(content, close);
+            view.SetupDialog(PaytableDialog(), panel.rectTransform, dialogs);
             return view;
         }
     }

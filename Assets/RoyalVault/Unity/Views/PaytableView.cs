@@ -9,16 +9,14 @@ using UnityEngine.UI;
 namespace RoyalVault.Unity
 {
     // The pay table window: symbols, features and paylines on tabs, written from the machine so it always matches the maths
-    public sealed class PaytableView : MonoBehaviour
+    public sealed class PaytableView : DialogView
     {
         private static readonly string[] TabNames = { "SYMBOLS", "FEATURES", "PAYLINES" };
         private static readonly Color ActiveTab = new Color(1f, 0.86f, 0.52f, 1f);
         private static readonly Color IdleTab = new Color(1f, 1f, 1f, 0.55f);
 
-        [SerializeField] private CanvasGroup group;
         [SerializeField] private RectTransform content;
         [SerializeField] private Button close;
-        [SerializeField] private Button backdrop;
 
         private readonly List<PayValues> pays = new List<PayValues>();
         private readonly List<CanvasGroup> pages = new List<CanvasGroup>();
@@ -27,28 +25,19 @@ namespace RoyalVault.Unity
         private BetModel bet;
         private ThemeDefinition theme;
         private TextMeshProUGUI betNote;
-        private Tween fade;
         private Tween pageFade;
         private int page;
 
-        public bool IsOpen { get; private set; }
-
-        public void Setup(CanvasGroup canvasGroup, RectTransform contentRect, Button closeButton, Button backdropButton)
+        public void Setup(RectTransform contentRect, Button closeButton)
         {
-            group = canvasGroup;
             content = contentRect;
             close = closeButton;
-            backdrop = backdropButton;
         }
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             close.onClick.AddListener(Close);
-            backdrop.onClick.AddListener(Close);
-            if (!IsOpen)
-            {
-                SetVisible(false);
-            }
         }
 
         public void Build(MachineDefinition machine, ThemeDefinition themeDefinition, BetModel betModel)
@@ -67,27 +56,27 @@ namespace RoyalVault.Unity
 
         public void Open()
         {
-            if (IsOpen)
+            if (!IsOpen)
             {
-                return;
+                Present();
             }
-
-            IsOpen = true;
-            gameObject.SetActive(true);
-            transform.SetAsLastSibling();
-            WriteValues();
-            Fade(1f);
         }
 
         public void Close()
         {
-            if (!IsOpen)
-            {
-                return;
-            }
+            RequestClose();
+        }
 
-            IsOpen = false;
-            Fade(0f);
+        // The pays are written for the bet being played as the window opens
+        protected override void OnOpening()
+        {
+            WriteValues();
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            pageFade.Stop();
         }
 
         // Shows the tab at index; the tab buttons and the screenshot test call it
@@ -166,24 +155,6 @@ namespace RoyalVault.Unity
             RectTransform rect = UiFactory.Rect(name, content, Vector2.zero, content.rect.size);
             pages.Add(rect.gameObject.AddComponent<CanvasGroup>());
             return rect;
-        }
-
-        private void Fade(float to)
-        {
-            group.blocksRaycasts = to > 0f;
-            fade.Stop();
-            fade = Tween.Alpha(group, group.alpha, to, 0.22f, Ease.OutCubic);
-            if (to <= 0f)
-            {
-                fade.OnComplete(this, view => view.SetVisible(false));
-            }
-        }
-
-        private void SetVisible(bool visible)
-        {
-            group.alpha = visible ? 1f : 0f;
-            group.blocksRaycasts = visible;
-            gameObject.SetActive(visible);
         }
     }
 }

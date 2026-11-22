@@ -4,6 +4,7 @@
     "references": [
         "SlotKit.Core",
         "GameKit",
+        "PrimeTween.Runtime",
         "RoyalVault.Core",
         "RoyalVault.Unity",
         "UnityEngine.UI",
