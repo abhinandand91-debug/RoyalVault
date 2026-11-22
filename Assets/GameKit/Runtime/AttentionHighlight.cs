@@ -16,10 +16,7 @@ namespace GameKit
         [SerializeField, Range(0.5f, 4f)] private float sweepEvery = 1.6f;
         [SerializeField, Range(1f, 1.2f)] private float breath = 1.06f;
 
-        private Sequence pop;
-        private Tween breathing;
-        private Tween pulse;
-        private Tween sweep;
+        private readonly TweenGroup tweens = new TweenGroup(5);
 
         public void Setup(RectTransform targetRect, Graphic haloGraphic, RectTransform shineRect)
         {
@@ -32,26 +29,22 @@ namespace GameKit
         {
             End();
             gameObject.SetActive(true);
-            pop = Sequence.Create()
-                .Chain(Tween.Scale(target, 0.4f, 1.18f, 0.22f, Ease.OutCubic))
-                .Chain(Tween.Scale(target, 1.18f, 1f, 0.28f, Ease.OutBack))
-                .ChainCallback(this, highlight => highlight.Loop());
+            tweens.Add(Sequence.Create()
+                           .Chain(Tween.Scale(target, 0.4f, 1.18f, 0.22f, Ease.OutCubic))
+                           .Chain(Tween.Scale(target, 1.18f, 1f, 0.28f, Ease.OutBack))
+                           .ChainCallback(this, highlight => highlight.Loop()));
             if (halo != null)
             {
-                Tween.Alpha(halo, 0f, 1f, 0.25f, Ease.OutCubic);
+                tweens.Add(Tween.Alpha(halo, 0f, 1f, 0.25f, Ease.OutCubic));
             }
         }
 
         public void End()
         {
-            pop.Stop();
-            breathing.Stop();
-            pulse.Stop();
-            sweep.Stop();
+            tweens.StopAll();
             target.localScale = Vector3.one;
             if (halo != null)
             {
-                Tween.StopAll(halo);
                 SetAlpha(halo, 0f);
             }
 
@@ -64,19 +57,25 @@ namespace GameKit
         // Breathing, a pulsing halo and a sweep of light, repeated until End
         private void Loop()
         {
-            breathing = Tween.Scale(target, 1f, breath, 0.7f, Ease.InOutSine, cycles: -1, cycleMode: CycleMode.Yoyo);
+            tweens.Add(UiMotion.Breathe(target, breath));
             if (halo != null)
             {
-                pulse = Tween.Alpha(halo, 1f, 0.4f, 0.7f, Ease.InOutSine, cycles: -1, cycleMode: CycleMode.Yoyo);
+                tweens.Add(UiMotion.Pulse(halo, 0.4f, 1f));
             }
 
             if (shine != null)
             {
-                shine.gameObject.SetActive(true);
-                float half = ((RectTransform)shine.parent).rect.width * 0.5f + shine.rect.width;
-                sweep = Tween.UIAnchoredPositionX(shine, -half, half, 0.55f, Ease.InOutSine, cycles: -1, cycleMode: CycleMode.Restart,
-                                                  endDelay: sweepEvery);
+                tweens.Add(Sweep());
             }
+        }
+
+        // The band of light crosses the control, then waits before crossing again
+        private Tween Sweep()
+        {
+            shine.gameObject.SetActive(true);
+            float half = ((RectTransform)shine.parent).rect.width * 0.5f + shine.rect.width;
+            return Tween.UIAnchoredPositionX(shine, -half, half, 0.55f, Ease.InOutSine, cycles: -1, cycleMode: CycleMode.Restart,
+                                             endDelay: sweepEvery);
         }
 
         private static void SetAlpha(Graphic graphic, float alpha)
@@ -88,10 +87,7 @@ namespace GameKit
 
         private void OnDisable()
         {
-            pop.Stop();
-            breathing.Stop();
-            pulse.Stop();
-            sweep.Stop();
+            tweens.StopAll();
         }
     }
 }
