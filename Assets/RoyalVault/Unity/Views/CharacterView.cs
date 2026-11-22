@@ -9,16 +9,25 @@ namespace RoyalVault.Unity
     // A guardian beside the reels
     public sealed class CharacterView : MonoBehaviour
     {
-        [SerializeField] private Image image;
-        [SerializeField] private float phase;
+        [SerializeField]
+        private Image image;
+        [SerializeField]
+        private float phase;
         [Header("Effects")]
-        [SerializeField] private Image aura;
-        [SerializeField] private RectTransform hand;
-        [SerializeField] private Image handGlow;
-        [SerializeField] private UiParticleEmitter flame;
-        [SerializeField] private UiParticleEmitter embers;
-        [SerializeField] private UiParticleEmitter sparks;
-        [SerializeField] private UiParticleEmitter dust;
+        [SerializeField]
+        private Image aura;
+        [SerializeField]
+        private RectTransform hand;
+        [SerializeField]
+        private Image handGlow;
+        [SerializeField]
+        private UiParticleEmitter flame;
+        [SerializeField]
+        private UiParticleEmitter embers;
+        [SerializeField]
+        private UiParticleEmitter sparks;
+        [SerializeField]
+        private UiParticleEmitter dust;
 
         private CharacterAnimation motion;  // the baked frames, or null for the still art
         private Vector2 staticAnchor;

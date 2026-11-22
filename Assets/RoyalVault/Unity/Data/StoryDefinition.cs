@@ -36,9 +36,11 @@ namespace RoyalVault.Unity
         public sealed class Scene
         {
             public string title;
-            [TextArea(2, 5)] public string caption;
+            [TextArea(2, 5)]
+            public string caption;
             [Tooltip("The scene told beat by beat, one line per click")]
-            [TextArea(1, 3)] public string[] lines = new string[0];
+            [TextArea(1, 3)]
+            public string[] lines = new string[0];
             public Sprite art;
             public Figure[] figures = new Figure[0];
             public StoryMoment moment;
@@ -47,11 +49,14 @@ namespace RoyalVault.Unity
             public string[] Beats => lines != null && lines.Length > 0 ? lines : new[] { caption };
         }
 
-        [Tooltip("Shown above each scene's title, e.g. CHAPTER")] public string chapterLabel = "Chapter";
-        [Tooltip("Seconds each intro scene stays on screen the first time the story is told")] public float secondsPerScene = 5f;
+        [Tooltip("Shown above each scene's title, e.g. CHAPTER")]
+        public string chapterLabel = "Chapter";
+        [Tooltip("Seconds each intro scene stays on screen the first time the story is told")]
+        public float secondsPerScene = 5f;
         public Scene[] scenes = new Scene[0];
         [Tooltip("First-visit hints: the spin button, the seal meter, the jackpots")]
-        [TextArea(1, 3)] public string[] controlHints = new string[0];
+        [TextArea(1, 3)]
+        public string[] controlHints = new string[0];
 
         // "CHAPTER III" style heading
         public static string ChapterName(string label, int number)

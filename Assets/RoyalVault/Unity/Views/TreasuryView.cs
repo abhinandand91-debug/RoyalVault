@@ -28,23 +28,36 @@ namespace RoyalVault.Unity
 
         private static readonly Color EyeRed = new Color(1f, 0.22f, 0.18f, 1f);
 
-        [SerializeField] private RectTransform board;
-        [SerializeField] private TextMeshProUGUI prompt;
-        [SerializeField] private CountingText collected;
-        [SerializeField] private TextMeshProUGUI multiplier;
-        [SerializeField] private Image shield;
-        [SerializeField] private UrnParts[] urns = new UrnParts[0];
-        [SerializeField] private UiParticleEmitter burst;
-        [SerializeField] private Image flash;
-        [SerializeField] private Button tapArea;
+        [SerializeField]
+        private RectTransform board;
+        [SerializeField]
+        private TextMeshProUGUI prompt;
+        [SerializeField]
+        private CountingText collected;
+        [SerializeField]
+        private TextMeshProUGUI multiplier;
+        [SerializeField]
+        private Image shield;
+        [SerializeField]
+        private UrnParts[] urns = new UrnParts[0];
+        [SerializeField]
+        private UiParticleEmitter burst;
+        [SerializeField]
+        private Image flash;
+        [SerializeField]
+        private Button tapArea;
         [Tooltip("Cracks spreading over an urn, smallest first")]
-        [SerializeField] private Sprite[] cracks = new Sprite[0];
+        [SerializeField]
+        private Sprite[] cracks = new Sprite[0];
         [Tooltip("Seconds without a tap before an urn is opened for the player")]
-        [SerializeField, Range(2f, 20f)] private float idleSeconds = 8f;
+        [SerializeField, Range(2f, 20f)]
+        private float idleSeconds = 8f;
         [Tooltip("Seconds between picks when the game opens the urns itself (auto play)")]
-        [SerializeField, Range(0.2f, 2f)] private float autoPickSeconds = 0.7f;
+        [SerializeField, Range(0.2f, 2f)]
+        private float autoPickSeconds = 0.7f;
         [Tooltip("Optional vault door over the board that turns and opens as the round begins")]
-        [SerializeField] private Image door;
+        [SerializeField]
+        private Image door;
 
         private Tween[] pulses = new Tween[0];
         private long totalBet;

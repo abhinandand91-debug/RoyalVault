@@ -15,14 +15,21 @@ namespace RoyalVault.Unity
     {
         private const int Flickers = 18;
 
-        [SerializeField] private RectTransform card;
-        [SerializeField] private Image symbol;
-        [SerializeField] private Image glow;
-        [SerializeField] private TextMeshProUGUI caption;
-        [SerializeField] private UiParticleEmitter burst;
-        [SerializeField] private Button tapArea;
+        [SerializeField]
+        private RectTransform card;
+        [SerializeField]
+        private Image symbol;
+        [SerializeField]
+        private Image glow;
+        [SerializeField]
+        private TextMeshProUGUI caption;
+        [SerializeField]
+        private UiParticleEmitter burst;
+        [SerializeField]
+        private Button tapArea;
         [Tooltip("Seconds the revealed relic stays up before free spins begin (a tap moves on sooner)")]
-        [SerializeField, Range(0.5f, 5f)] private float holdSeconds = 2.2f;
+        [SerializeField, Range(0.5f, 5f)]
+        private float holdSeconds = 2.2f;
 
         private readonly List<Sprite> faces = new List<Sprite>();
         private ThemeDefinition theme;

@@ -11,22 +11,35 @@ namespace RoyalVault.Unity
     // Both guardians hurl flames that meet over the reels before a big win
     public sealed class FlameClashView : MonoBehaviour
     {
-        [SerializeField] private RectTransform layer;
-        [SerializeField] private Image[] fireballs = new Image[0];
-        [SerializeField] private Image[] cores = new Image[0];
-        [SerializeField] private UiParticleEmitter[] trails = new UiParticleEmitter[0];
-        [SerializeField] private Image flash;
-        [SerializeField] private Image[] rings = new Image[0];
-        [SerializeField] private UiParticleEmitter burst;
-        [SerializeField] private UiParticleEmitter goldBurst;
-        [SerializeField] private RectTransform shakeTarget;
+        [SerializeField]
+        private RectTransform layer;
+        [SerializeField]
+        private Image[] fireballs = new Image[0];
+        [SerializeField]
+        private Image[] cores = new Image[0];
+        [SerializeField]
+        private UiParticleEmitter[] trails = new UiParticleEmitter[0];
+        [SerializeField]
+        private Image flash;
+        [SerializeField]
+        private Image[] rings = new Image[0];
+        [SerializeField]
+        private UiParticleEmitter burst;
+        [SerializeField]
+        private UiParticleEmitter goldBurst;
+        [SerializeField]
+        private RectTransform shakeTarget;
         [Tooltip("Play the clash before big wins and jackpots")]
-        [SerializeField] private bool playOnBigWins = true;
+        [SerializeField]
+        private bool playOnBigWins = true;
         [Tooltip("Where the flames meet, in canvas pixels from the centre of the screen")]
-        [SerializeField] private Vector2 meetingPoint = new Vector2(0f, 40f);
+        [SerializeField]
+        private Vector2 meetingPoint = new Vector2(0f, 40f);
         [Tooltip("Seconds a fireball takes to reach the centre")]
-        [SerializeField, Range(0.2f, 1.5f)] private float flightSeconds = 0.55f;
-        [SerializeField] private Color magic = new Color(0.35f, 0.75f, 1f, 1f);
+        [SerializeField, Range(0.2f, 1.5f)]
+        private float flightSeconds = 0.55f;
+        [SerializeField]
+        private Color magic = new Color(0.35f, 0.75f, 1f, 1f);
 
         private CharacterView[] guardians = new CharacterView[0];
         private GameObject impactVfx;

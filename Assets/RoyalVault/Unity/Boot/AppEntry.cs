@@ -7,10 +7,13 @@ namespace RoyalVault.Unity
     // Where the application starts (the Boot scene, first in the build)
     public sealed class AppEntry : MonoBehaviour
     {
-        [SerializeField] private LoadingScreen loadingScreen;
-        [SerializeField] private string gameScene = "Game";
+        [SerializeField]
+        private LoadingScreen loadingScreen;
+        [SerializeField]
+        private string gameScene = "Game";
         [Tooltip("The loading screen stays up at least this long")]
-        [SerializeField] private float minimumSeconds = 2.6f;
+        [SerializeField]
+        private float minimumSeconds = 2.6f;
 
         public void Setup(LoadingScreen screen, string scene)
         {

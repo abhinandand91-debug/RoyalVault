@@ -12,7 +12,8 @@ namespace RoyalVault.Unity
         public sealed class Hint
         {
             public RectTransform target;
-            [TextArea(1, 3)] public string text;
+            [TextArea(1, 3)]
+            public string text;
             public bool above = true;
         }
 

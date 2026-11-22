@@ -47,10 +47,13 @@ namespace RoyalVault.Unity
         public sealed class Sound
         {
             public SoundCue cue;
-            [Tooltip("One of these plays at random")] public AudioClip[] clips = new AudioClip[0];
-            [Range(0f, 1f)] public float volume = 1f;
+            [Tooltip("One of these plays at random")]
+            public AudioClip[] clips = new AudioClip[0];
+            [Range(0f, 1f)]
+            public float volume = 1f;
             [Tooltip("Random pitch change either way, so repeated sounds don't feel mechanical")]
-            [Range(0f, 0.3f)] public float pitchVariance = 0.03f;
+            [Range(0f, 0.3f)]
+            public float pitchVariance = 0.03f;
 
             // True when at least one clip is really there (a deleted file leaves an empty slot behind)
             public bool HasClips
@@ -96,11 +99,14 @@ namespace RoyalVault.Unity
         public AudioClip loadingMusic;
         public AudioClip baseGameMusic;
         public AudioClip freeSpinsMusic;
-        [Range(0f, 1f)] public float musicVolume = 0.55f;
-        [Tooltip("Seconds music takes to cross-fade into the next track")] public float musicFade = 1.2f;
+        [Range(0f, 1f)]
+        public float musicVolume = 0.55f;
+        [Tooltip("Seconds music takes to cross-fade into the next track")]
+        public float musicFade = 1.2f;
 
         [Header("Effects")]
-        [Range(0f, 1f)] public float effectsVolume = 1f;
+        [Range(0f, 1f)]
+        public float effectsVolume = 1f;
         public Sound[] sounds = new Sound[0];
 
         // The entry for cue, or null when the bank has none

@@ -10,15 +10,24 @@ namespace RoyalVault.Unity
     // Letterboxed story told beat by beat at the player's pace, ending on an "enter" button
     public sealed class StoryIntroView : MonoBehaviour
     {
-        [SerializeField] private CanvasGroup group;
-        [SerializeField] private StoryCardView[] cards = new StoryCardView[0];
-        [SerializeField] private RectTransform topBar;
-        [SerializeField] private RectTransform bottomBar;
-        [SerializeField] private Button tapArea;
-        [SerializeField] private Button skipButton;
-        [SerializeField] private CanvasGroup continuePrompt;
-        [SerializeField] private Button enterButton;
-        [SerializeField] private float barHeight = 96f;
+        [SerializeField]
+        private CanvasGroup group;
+        [SerializeField]
+        private StoryCardView[] cards = new StoryCardView[0];
+        [SerializeField]
+        private RectTransform topBar;
+        [SerializeField]
+        private RectTransform bottomBar;
+        [SerializeField]
+        private Button tapArea;
+        [SerializeField]
+        private Button skipButton;
+        [SerializeField]
+        private CanvasGroup continuePrompt;
+        [SerializeField]
+        private Button enterButton;
+        [SerializeField]
+        private float barHeight = 96f;
 
         private bool advance;
         private bool skipped;

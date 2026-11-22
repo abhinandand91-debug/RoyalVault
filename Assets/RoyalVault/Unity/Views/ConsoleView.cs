@@ -10,23 +10,37 @@ namespace RoyalVault.Unity
     // The control console: balance and win readouts, the bet stepper, auto play, spin, menu and sound
     public sealed class ConsoleView : MonoBehaviour
     {
-        [SerializeField] private CountingText balance;
-        [SerializeField] private TextMeshProUGUI winLabel;
-        [SerializeField] private CountingText win;
-        [SerializeField] private TextMeshProUGUI totalBet;
-        [SerializeField] private TextMeshProUGUI autoLabel;
-        [SerializeField] private SpinButtonView spin;
+        [SerializeField]
+        private CountingText balance;
+        [SerializeField]
+        private TextMeshProUGUI winLabel;
+        [SerializeField]
+        private CountingText win;
+        [SerializeField]
+        private TextMeshProUGUI totalBet;
+        [SerializeField]
+        private TextMeshProUGUI autoLabel;
+        [SerializeField]
+        private SpinButtonView spin;
 
         public RectTransform SpinButtonRect => (RectTransform)spin.transform;
-        [SerializeField] private Button betMinus;
-        [SerializeField] private Button betPlus;
-        [SerializeField] private Button auto;
-        [SerializeField] private Button menu;
-        [SerializeField] private Button sound;
-        [SerializeField] private Image soundIcon;
+        [SerializeField]
+        private Button betMinus;
+        [SerializeField]
+        private Button betPlus;
+        [SerializeField]
+        private Button auto;
+        [SerializeField]
+        private Button menu;
+        [SerializeField]
+        private Button sound;
+        [SerializeField]
+        private Image soundIcon;
         [Tooltip("Offered after a base-game win: double or nothing on Ruby's Last Hand")]
-        [SerializeField] private Button gamble;
-        [SerializeField] private AttentionHighlight gambleHighlight;
+        [SerializeField]
+        private Button gamble;
+        [SerializeField]
+        private AttentionHighlight gambleHighlight;
 
         public event Action SpinPressed;
         public event Action BetDownPressed;

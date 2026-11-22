@@ -9,12 +9,18 @@ namespace GameKit
     // and out
     public sealed class CoachMarkView : DialogView
     {
-        [SerializeField] private RectTransform[] shades = new RectTransform[4];
-        [SerializeField] private RectTransform ring;
-        [SerializeField] private RectTransform bubble;
-        [SerializeField] private TextMeshProUGUI message;
-        [SerializeField] private Button tapArea;
-        [SerializeField] private float padding = 18f;
+        [SerializeField]
+        private RectTransform[] shades = new RectTransform[4];
+        [SerializeField]
+        private RectTransform ring;
+        [SerializeField]
+        private RectTransform bubble;
+        [SerializeField]
+        private TextMeshProUGUI message;
+        [SerializeField]
+        private Button tapArea;
+        [SerializeField]
+        private float padding = 18f;
 
         private readonly TweenGroup tweens = new TweenGroup(2);
         private readonly Vector3[] corners = new Vector3[4];

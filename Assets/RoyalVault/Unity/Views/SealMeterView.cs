@@ -9,19 +9,30 @@ namespace RoyalVault.Unity
     // The story's golden seal on the vault door, set in the console
     public sealed class SealMeterView : MonoBehaviour
     {
-        [SerializeField] private RectTransform seal;
-        [SerializeField] private Image face;
-        [SerializeField] private Image[] cracks = new Image[0];
+        [SerializeField]
+        private RectTransform seal;
+        [SerializeField]
+        private Image face;
+        [SerializeField]
+        private Image[] cracks = new Image[0];
         [Tooltip("Dark fracture lines under the glowing cracks, so they read on the bright gold")]
-        [SerializeField] private Image[] fractures = new Image[0];
-        [SerializeField] private Image[] pips = new Image[0];
-        [SerializeField] private Image glow;
-        [SerializeField] private Image magic;
-        [SerializeField] private UiParticleEmitter sparks;
+        [SerializeField]
+        private Image[] fractures = new Image[0];
+        [SerializeField]
+        private Image[] pips = new Image[0];
+        [SerializeField]
+        private Image glow;
+        [SerializeField]
+        private Image magic;
+        [SerializeField]
+        private UiParticleEmitter sparks;
         [Tooltip("The free spin round's Sealed Relic, shown in the open seal")]
-        [SerializeField] private Image relic;
-        [SerializeField] private Color restColour = new Color(0.55f, 0.5f, 0.45f, 1f);
-        [SerializeField] private Color magicColour = new Color(0.35f, 0.75f, 1f, 1f);
+        [SerializeField]
+        private Image relic;
+        [SerializeField]
+        private Color restColour = new Color(0.55f, 0.5f, 0.45f, 1f);
+        [SerializeField]
+        private Color magicColour = new Color(0.35f, 0.75f, 1f, 1f);
 
         private int scatter = -1;
         private GameObject breakVfx;

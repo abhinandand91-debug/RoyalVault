@@ -6,8 +6,10 @@ namespace GameKit
     [RequireComponent(typeof(Canvas))]
     public sealed class CanvasAutoHide : MonoBehaviour
     {
-        [SerializeField] private Canvas canvas;
-        [SerializeField] private CanvasGroup group;
+        [SerializeField]
+        private Canvas canvas;
+        [SerializeField]
+        private CanvasGroup group;
 
         public void Setup(Canvas ownCanvas, CanvasGroup fadingGroup)
         {

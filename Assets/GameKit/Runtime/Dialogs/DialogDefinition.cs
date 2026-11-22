@@ -28,20 +28,27 @@ namespace GameKit
     [CreateAssetMenu(menuName = "GameKit/Dialog Definition", fileName = "Dialog")]
     public sealed class DialogDefinition : ScriptableObject
     {
-        [Tooltip("A name for sound, analytics and logs")] public string id;
+        [Tooltip("A name for sound, analytics and logs")]
+        public string id;
         public DialogLayer layer = DialogLayer.Popup;
         public DialogPolicy policy = DialogPolicy.Queue;
-        [Tooltip("Higher goes first when several wait on the same layer")] public int priority;
+        [Tooltip("Higher goes first when several wait on the same layer")]
+        public int priority;
 
         [Header("Motion")]
-        [Tooltip("Plays as the dialog opens; none appears at once")] public MotionPreset entry;
-        [Tooltip("Plays as the dialog closes; none disappears at once")] public MotionPreset exit;
+        [Tooltip("Plays as the dialog opens; none appears at once")]
+        public MotionPreset entry;
+        [Tooltip("Plays as the dialog closes; none disappears at once")]
+        public MotionPreset exit;
 
         [Header("Backdrop")]
         [Tooltip("How dark the shared backdrop goes behind this dialog (0 = none)")]
-        [Range(0f, 1f)] public float backdropAlpha = 0.78f;
-        [Tooltip("A tap on the backdrop closes this dialog")] public bool closeOnBackdropTap = true;
-        [Tooltip("Taps cannot reach anything beneath while this dialog is open")] public bool blocksInput = true;
+        [Range(0f, 1f)]
+        public float backdropAlpha = 0.78f;
+        [Tooltip("A tap on the backdrop closes this dialog")]
+        public bool closeOnBackdropTap = true;
+        [Tooltip("Taps cannot reach anything beneath while this dialog is open")]
+        public bool blocksInput = true;
 
         // A definition made in code, for defaults and tests
         public static DialogDefinition Create(string id, DialogLayer layer, DialogPolicy policy, MotionPreset entry = null, MotionPreset exit = null)

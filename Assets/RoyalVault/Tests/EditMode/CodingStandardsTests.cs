@@ -54,6 +54,28 @@ namespace RoyalVault.Tests
             AssertNone(violations, "lines with more than one statement");
         }
 
+        // Attributes sit on their own line, with the field, property, method or type they mark on the next
+        [Test]
+        public void AttributesSitAboveTheirDeclaration()
+        {
+            var violations = new List<string>();
+            foreach (string path in SourceFiles())
+            {
+                string[] lines = StripLiteralsAndComments(File.ReadAllText(path)).Split('\n');
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    if (AttributeThenDeclaration.IsMatch(lines[i]))
+                    {
+                        violations.Add(Where(path, i + 1));
+                    }
+                }
+            }
+
+            AssertNone(violations, "attributes sharing a line with their declaration");
+        }
+
+        private static readonly Regex AttributeThenDeclaration = new Regex(@"^\s*\[\s*[A-Za-z_][^\]]*\]\s*(\[[^\]]*\]\s*)*[A-Za-z_]");
+
         [Test]
         public void OpeningBracesSitOnTheirOwnLine()
         {

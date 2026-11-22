@@ -26,15 +26,21 @@ namespace GameKit
         public Color StartColor = Color.white;
         public Color EndColor = new Color(1f, 1f, 1f, 0f);
         public Vector2 SizeRange = new Vector2(10f, 20f);
-        [Tooltip("Size at the end of a particle's life, as a share of its start size")] public float EndSize = 0.3f;
-        [Tooltip("Fade in at birth and out towards the end of life; off keeps particles solid, like coins")] public bool Fades = true;
-        [Tooltip("Degrees per second each particle turns, picked between these")] public Vector2 SpinRange = new Vector2(-90f, 90f);
-        [Tooltip("Turns per second around the vertical axis, like a tumbling coin (0 = flat)")] public Vector2 FlipRange = Vector2.zero;
+        [Tooltip("Size at the end of a particle's life, as a share of its start size")]
+        public float EndSize = 0.3f;
+        [Tooltip("Fade in at birth and out towards the end of life; off keeps particles solid, like coins")]
+        public bool Fades = true;
+        [Tooltip("Degrees per second each particle turns, picked between these")]
+        public Vector2 SpinRange = new Vector2(-90f, 90f);
+        [Tooltip("Turns per second around the vertical axis, like a tumbling coin (0 = flat)")]
+        public Vector2 FlipRange = Vector2.zero;
 
         [Header("Emission")]
-        [Tooltip("Particles per second (0 = bursts only)")] public float Rate = 10f;
+        [Tooltip("Particles per second (0 = bursts only)")]
+        public float Rate = 10f;
         public Vector2 LifeRange = new Vector2(0.6f, 1.2f);
-        [Tooltip("Particles start anywhere in this box around the emitter")] public Vector2 Area = Vector2.zero;
+        [Tooltip("Particles start anywhere in this box around the emitter")]
+        public Vector2 Area = Vector2.zero;
         [Tooltip("Where new particles start, relative to the emitter; move it to leave a trail behind a moving thing")]
         public Vector2 Origin = Vector2.zero;
         public int MaxParticles = 80;
@@ -42,8 +48,10 @@ namespace GameKit
         [Header("Motion")]
         public Vector2 VelocityMin = new Vector2(-10f, 40f);
         public Vector2 VelocityMax = new Vector2(10f, 100f);
-        [Tooltip("Constant acceleration (positive y rises, like heat)")] public Vector2 Gravity = Vector2.zero;
-        [Tooltip("Sideways wobble: amplitude in pixels per second")] public float Swirl;
+        [Tooltip("Constant acceleration (positive y rises, like heat)")]
+        public Vector2 Gravity = Vector2.zero;
+        [Tooltip("Sideways wobble: amplitude in pixels per second")]
+        public float Swirl;
         public float SwirlFrequency = 6f;
         public float Drag;
 

@@ -8,13 +8,18 @@ namespace GameKit
     // light sweeps across it until it is hidden or used
     public sealed class AttentionHighlight : MonoBehaviour
     {
-        [SerializeField] private RectTransform target;
+        [SerializeField]
+        private RectTransform target;
         [Tooltip("A soft light behind the control")]
-        [SerializeField] private Graphic halo;
+        [SerializeField]
+        private Graphic halo;
         [Tooltip("A band of light that sweeps across the control, inside a mask")]
-        [SerializeField] private RectTransform shine;
-        [SerializeField, Range(0.5f, 4f)] private float sweepEvery = 1.6f;
-        [SerializeField, Range(1f, 1.2f)] private float breath = 1.06f;
+        [SerializeField]
+        private RectTransform shine;
+        [SerializeField, Range(0.5f, 4f)]
+        private float sweepEvery = 1.6f;
+        [SerializeField, Range(1f, 1.2f)]
+        private float breath = 1.06f;
 
         private readonly TweenGroup tweens = new TweenGroup(5);
 

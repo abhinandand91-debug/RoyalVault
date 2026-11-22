@@ -37,16 +37,21 @@ namespace RoyalVault.Unity
         [Serializable]
         public sealed class SymbolArt
         {
-            [Tooltip("Matches the symbol id in the machine definition")] public string id;
+            [Tooltip("Matches the symbol id in the machine definition")]
+            public string id;
             public Sprite sprite;
-            [Tooltip("Shown while the reel spins fast")] public Sprite blur;
-            [Tooltip("How it celebrates a win")] public SymbolStyle style;
-            [Tooltip("Colour of its glow and light")] public Color tint = new Color(1f, 0.85f, 0.45f, 1f);
+            [Tooltip("Shown while the reel spins fast")]
+            public Sprite blur;
+            [Tooltip("How it celebrates a win")]
+            public SymbolStyle style;
+            [Tooltip("Colour of its glow and light")]
+            public Color tint = new Color(1f, 0.85f, 0.45f, 1f);
             [Tooltip("Optional baked win animation (for example exported from an animation tool); plays instead of the pulse")]
             public CharacterAnimation winAnimation;
         }
 
-        [Tooltip("Which layout and styling the builder uses with this theme")] public ThemeLook look;
+        [Tooltip("Which layout and styling the builder uses with this theme")]
+        public ThemeLook look;
 
         [Header("Symbols")]
         public SymbolArt[] symbols = new SymbolArt[0];
@@ -58,51 +63,80 @@ namespace RoyalVault.Unity
         public Sprite reelCell;
         public Sprite logo;
         public Sprite niche;
-        [Tooltip("Stone housing with an open window, drawn over the edges of the reels (9-sliced around the window)")] public Sprite reelHousing;
-        [Tooltip("How large the housing's 9-slice borders draw (1 = the art's own pixels)")] public float housingBorderScale = 1f;
-        [Tooltip("How far the housing reaches over the edge of the reels, in canvas pixels, so they sit inside it")] public float housingOverlap = 8f;
-        [Tooltip("Soft shadow just inside the reel window (9-sliced), so the reels look set back into the housing")] public Sprite windowShadow;
-        [Tooltip("Optional guardian character (licensed art may be missing in a public checkout)")] public Sprite character;
-        [Tooltip("Where the character's magic burns, as a share of its art (0,0 = bottom left)")] public Vector2 characterEffectAnchor = new Vector2(0.89f, 0.837f);
-        [Tooltip("Optional baked animation for the character; without it the still art breathes procedurally")] public CharacterAnimation characterAnimation;
+        [Tooltip("Stone housing with an open window, drawn over the edges of the reels (9-sliced around the window)")]
+        public Sprite reelHousing;
+        [Tooltip("How large the housing's 9-slice borders draw (1 = the art's own pixels)")]
+        public float housingBorderScale = 1f;
+        [Tooltip("How far the housing reaches over the edge of the reels, in canvas pixels, so they sit inside it")]
+        public float housingOverlap = 8f;
+        [Tooltip("Soft shadow just inside the reel window (9-sliced), so the reels look set back into the housing")]
+        public Sprite windowShadow;
+        [Tooltip("Optional guardian character (licensed art may be missing in a public checkout)")]
+        public Sprite character;
+        [Tooltip("Where the character's magic burns, as a share of its art (0,0 = bottom left)")]
+        public Vector2 characterEffectAnchor = new Vector2(0.89f, 0.837f);
+        [Tooltip("Optional baked animation for the character; without it the still art breathes procedurally")]
+        public CharacterAnimation characterAnimation;
         public Color characterMagic = new Color(0.35f, 0.75f, 1f, 1f);
-        [Tooltip("Additive material for glows and particles")] public Material additive;
-        [Tooltip("Material for reel symbols (RoyalVault/UI Symbol): the shine sweep and flash")] public Material symbolMaterial;
-        [Tooltip("Rays drawn behind the grand symbols when they win")] public Sprite rays;
+        [Tooltip("Additive material for glows and particles")]
+        public Material additive;
+        [Tooltip("Material for reel symbols (RoyalVault/UI Symbol): the shine sweep and flash")]
+        public Material symbolMaterial;
+        [Tooltip("Rays drawn behind the grand symbols when they win")]
+        public Sprite rays;
 
         [Header("Store VFX (optional particle prefabs, drawn in the UI by UIParticle)")]
-        [Tooltip("Where the guardians' fireballs meet")] public GameObject clashImpactVfx;
-        [Tooltip("A second burst with the clash, e.g. sparks")] public GameObject clashSparksVfx;
-        [Tooltip("As the seal on the vault door shatters")] public GameObject sealBreakVfx;
-        [Tooltip("Particle effects are made in metres for 3D scenes: canvas pixels per metre")] public float vfxScale = 170f;
-        [Tooltip("Optional story told on the loading screen and at game moments")] public StoryDefinition story;
-        [Tooltip("The game's sounds and music; empty cues are silent")] public SoundBank sounds;
-        [Tooltip("Optional hero who celebrates big wins on the left (the prospector)")] public CharacterAnimation heroLeft;
-        [Tooltip("Optional hero who celebrates big wins on the right (the sharpshooter, mirrored to face the centre)")] public CharacterAnimation heroRight;
+        [Tooltip("Where the guardians' fireballs meet")]
+        public GameObject clashImpactVfx;
+        [Tooltip("A second burst with the clash, e.g. sparks")]
+        public GameObject clashSparksVfx;
+        [Tooltip("As the seal on the vault door shatters")]
+        public GameObject sealBreakVfx;
+        [Tooltip("Particle effects are made in metres for 3D scenes: canvas pixels per metre")]
+        public float vfxScale = 170f;
+        [Tooltip("Optional story told on the loading screen and at game moments")]
+        public StoryDefinition story;
+        [Tooltip("The game's sounds and music; empty cues are silent")]
+        public SoundBank sounds;
+        [Tooltip("Optional hero who celebrates big wins on the left (the prospector)")]
+        public CharacterAnimation heroLeft;
+        [Tooltip("Optional hero who celebrates big wins on the right (the sharpshooter, mirrored to face the centre)")]
+        public CharacterAnimation heroRight;
 
         [Header("Interface")]
         public Sprite consoleBar;
         public Sprite spinButton;
-        [Tooltip("Bronze rotor ring that turns around the spin button")] public Sprite spinRotor;
-        [Tooltip("Gold wings either side of the spin button")] public Sprite spinWings;
-        [Tooltip("Optional vault door that turns and opens as the Treasury begins")] public Sprite vaultDoor;
-        [Tooltip("Optional guardian portrait beside the first-visit hints (licensed art may be missing in a public checkout)")] public Sprite guidePortrait;
-        [Tooltip("Optional guardian who watches over the Treasury (licensed art may be missing in a public checkout)")] public Sprite guardianPose;
-        [Tooltip("Jackpot plaque, 9-sliced; tinted per tier")] public Sprite jackpotPlaque;
-        [Tooltip("Icon on each jackpot plaque: top tier first")] public Sprite[] jackpotIcons = new Sprite[0];
-        [Tooltip("Plaque colour per jackpot tier: top tier first")] public Color[] jackpotTints = new Color[0];
+        [Tooltip("Bronze rotor ring that turns around the spin button")]
+        public Sprite spinRotor;
+        [Tooltip("Gold wings either side of the spin button")]
+        public Sprite spinWings;
+        [Tooltip("Optional vault door that turns and opens as the Treasury begins")]
+        public Sprite vaultDoor;
+        [Tooltip("Optional guardian portrait beside the first-visit hints (licensed art may be missing in a public checkout)")]
+        public Sprite guidePortrait;
+        [Tooltip("Optional guardian who watches over the Treasury (licensed art may be missing in a public checkout)")]
+        public Sprite guardianPose;
+        [Tooltip("Jackpot plaque, 9-sliced; tinted per tier")]
+        public Sprite jackpotPlaque;
+        [Tooltip("Icon on each jackpot plaque: top tier first")]
+        public Sprite[] jackpotIcons = new Sprite[0];
+        [Tooltip("Plaque colour per jackpot tier: top tier first")]
+        public Color[] jackpotTints = new Color[0];
         public Sprite pillButton;
         public Sprite roundButton;
         public Sprite jackpotGrand;
         public Sprite jackpotMinor;
         public Sprite popupPanel;
-        [Tooltip("Rounded dark card with a gold edge (pay table entries)")] public Sprite card;
+        [Tooltip("Rounded dark card with a gold edge (pay table entries)")]
+        public Sprite card;
         [Tooltip("Ruby's Last Hand: a playing card's face and back, and the suits hearts, diamonds, clubs, spades")]
         public Sprite cardFace;
         public Sprite cardBack;
         public Sprite[] suits = new Sprite[4];
-        [Tooltip("A sealed urn in the Treasury")] public Sprite urn;
-        [Tooltip("The guardian's eye that ends a Treasury round (white, tinted in game)")] public Sprite eye;
+        [Tooltip("A sealed urn in the Treasury")]
+        public Sprite urn;
+        [Tooltip("The guardian's eye that ends a Treasury round (white, tinted in game)")]
+        public Sprite eye;
         public Sprite bigWinBanner;
         public Sprite coin;
         public Sprite sparkle;
@@ -128,15 +162,21 @@ namespace RoyalVault.Unity
         public Color ivory = new Color32(243, 233, 210, 255);
         public Color dimGold = new Color32(179, 154, 102, 255);
         public Color ink = new Color32(10, 9, 13, 255);
-        [Tooltip("Panels and the control deck")] public Color surface = new Color32(11, 38, 28, 255);
-        [Tooltip("Magic and active states")] public Color accent = new Color32(53, 216, 232, 255);
+        [Tooltip("Panels and the control deck")]
+        public Color surface = new Color32(11, 38, 28, 255);
+        [Tooltip("Magic and active states")]
+        public Color accent = new Color32(53, 216, 232, 255);
 
         [Header("Reel window (canvas units, 1920 x 1080 design)")]
-        [Tooltip("The largest area the reels may use; the machine is centred in it")] public Rect reelArea = new Rect(-555, -251, 1110, 541);
-        [Tooltip("Width / height of one cell")] public float cellAspect = 1.23f;
+        [Tooltip("The largest area the reels may use; the machine is centred in it")]
+        public Rect reelArea = new Rect(-555, -251, 1110, 541);
+        [Tooltip("Width / height of one cell")]
+        public float cellAspect = 1.23f;
         public float cellGap = 4f;
-        [Tooltip("Symbol size as a share of the cell height")] public float symbolScale = 0.94f;
-        [Tooltip("How large the frame's 9-slice borders draw (1 = the art's own pixels)")] public float frameBorderScale = 0.937f;
+        [Tooltip("Symbol size as a share of the cell height")]
+        public float symbolScale = 0.94f;
+        [Tooltip("How large the frame's 9-slice borders draw (1 = the art's own pixels)")]
+        public float frameBorderScale = 0.937f;
 
         [Header("Loading screen")]
         public string[] loadingTips = { "Polishing the gems", "Counting the gold", "Waking the guardians", "Opening the vault" };

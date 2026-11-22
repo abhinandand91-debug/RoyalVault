@@ -56,6 +56,8 @@ Follow traditional, clean, and consistent C# coding conventions throughout the e
 - Never combine multiple statements on a single line.
 - Keep method calls, assignments, declarations, and return statements on separate lines.
 - Avoid overly compressed or condensed code.
+- Attributes go on their own line, with the declaration they mark on the next line:
+  `[SerializeField, Tooltip("Centre, left, right")]` then `private Image[] plaques = new Image[0];`.
 
 ### 3. Conditional Statements
 

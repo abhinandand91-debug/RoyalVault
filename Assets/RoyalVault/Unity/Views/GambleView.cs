@@ -27,14 +27,21 @@ namespace RoyalVault.Unity
         private static readonly Color Red = new Color(0.72f, 0.08f, 0.12f, 1f);
         private static readonly Color Ink = new Color(0.1f, 0.09f, 0.12f, 1f);
 
-        [SerializeField] private TextMeshProUGUI result;
-        [SerializeField] private CardParts card;
-        [SerializeField] private CountingText stake;
+        [SerializeField]
+        private TextMeshProUGUI result;
+        [SerializeField]
+        private CardParts card;
+        [SerializeField]
+        private CountingText stake;
         [Tooltip("One button per call, in GambleChoice order: red, black, hearts, diamonds, clubs, spades")]
-        [SerializeField] private Button[] calls = new Button[6];
-        [SerializeField] private Button collect;
-        [SerializeField] private CardParts[] history = new CardParts[0];
-        [SerializeField] private Image ruby;
+        [SerializeField]
+        private Button[] calls = new Button[6];
+        [SerializeField]
+        private Button collect;
+        [SerializeField]
+        private CardParts[] history = new CardParts[0];
+        [SerializeField]
+        private Image ruby;
 
         private Sprite[] suits = new Sprite[0];
         private GambleSession session;

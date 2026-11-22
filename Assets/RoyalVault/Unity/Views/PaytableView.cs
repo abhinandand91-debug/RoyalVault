@@ -15,8 +15,10 @@ namespace RoyalVault.Unity
         private static readonly Color ActiveTab = new Color(1f, 0.86f, 0.52f, 1f);
         private static readonly Color IdleTab = new Color(1f, 1f, 1f, 0.55f);
 
-        [SerializeField] private RectTransform content;
-        [SerializeField] private Button close;
+        [SerializeField]
+        private RectTransform content;
+        [SerializeField]
+        private Button close;
 
         private readonly List<PayValues> pays = new List<PayValues>();
         private readonly List<CanvasGroup> pages = new List<CanvasGroup>();

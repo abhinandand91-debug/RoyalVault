@@ -7,10 +7,13 @@ namespace GameKit
     [RequireComponent(typeof(TMP_Text))]
     public sealed class TypewriterText : MonoBehaviour
     {
-        [SerializeField] private float charactersPerSecond = 38f;
-        [SerializeField] private float punctuationPause = 0.18f;
+        [SerializeField]
+        private float charactersPerSecond = 38f;
+        [SerializeField]
+        private float punctuationPause = 0.18f;
 
-        [SerializeField] private TMP_Text text;
+        [SerializeField]
+        private TMP_Text text;
         private float shown;
         private float pause;
 

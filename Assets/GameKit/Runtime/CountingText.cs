@@ -8,7 +8,8 @@ namespace GameKit
     public sealed class CountingText : MonoBehaviour
     {
         private readonly char[] buffer = new char[48];
-        [SerializeField] private TextMeshProUGUI label;
+        [SerializeField]
+        private TextMeshProUGUI label;
         private long written = long.MinValue;
         private double shown;
         private long target;

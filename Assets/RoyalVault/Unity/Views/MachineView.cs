@@ -26,24 +26,32 @@ namespace RoyalVault.Unity
 
         [Header("Reel timing")]
         [Tooltip("The order the reels start spinning in")]
-        [SerializeField] private ReelOrder startOrder = ReelOrder.Sequential;
+        [SerializeField]
+        private ReelOrder startOrder = ReelOrder.Sequential;
         [Tooltip("Seconds between one reel starting and the next")]
-        [SerializeField, Range(0f, 0.4f)] private float startGap = 0.05f;
+        [SerializeField, Range(0f, 0.4f)]
+        private float startGap = 0.05f;
         [Tooltip("The order the reels land in")]
-        [SerializeField] private ReelOrder stopOrder = ReelOrder.Sequential;
+        [SerializeField]
+        private ReelOrder stopOrder = ReelOrder.Sequential;
         [Tooltip("Seconds between one reel landing and the next")]
-        [SerializeField, Range(0f, 0.6f)] private float stopGap = 0.24f;
+        [SerializeField, Range(0f, 0.6f)]
+        private float stopGap = 0.24f;
         [Tooltip("Seconds between landings in quick spins (auto play, free spins)")]
-        [SerializeField, Range(0f, 0.3f)] private float fastStopGap = 0.1f;
+        [SerializeField, Range(0f, 0.3f)]
+        private float fastStopGap = 0.1f;
 
         [Header("Anticipation")]
         [Tooltip("When the landed reels are one seal short of free spins (or one crown short of a jackpot), the " +
                  "remaining reels spin longer, one by one, in a column of light. It only reacts to what has landed.")]
-        [SerializeField] private bool anticipation = true;
+        [SerializeField]
+        private bool anticipation = true;
         [Tooltip("Extra seconds each remaining reel spins while anticipating")]
-        [SerializeField, Range(0.3f, 4f)] private float anticipationSeconds = 1.6f;
+        [SerializeField, Range(0.3f, 4f)]
+        private float anticipationSeconds = 1.6f;
         [Tooltip("Extra seconds per reel in quick spins (auto play, free spins)")]
-        [SerializeField, Range(0f, 2f)] private float fastAnticipationSeconds = 0.8f;
+        [SerializeField, Range(0f, 2f)]
+        private float fastAnticipationSeconds = 0.8f;
 
         private MachineDefinition machine;
         private ThemeDefinition theme;

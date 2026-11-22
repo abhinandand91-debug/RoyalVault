@@ -8,17 +8,22 @@ namespace RoyalVault.Unity
     public sealed class GameBootstrap : MonoBehaviour
     {
         [Header("What to play")]
-        [SerializeField] private MachineDefinitionAsset machine;
-        [SerializeField] private ThemeDefinition theme;
+        [SerializeField]
+        private MachineDefinitionAsset machine;
+        [SerializeField]
+        private ThemeDefinition theme;
         [Tooltip("Fixed random seed for repeatable sessions; 0 = a new random session each time")]
-        [SerializeField] private int seed;
+        [SerializeField]
+        private int seed;
         [Tooltip("Keep credits, bet and jackpots between sessions")]
-        [SerializeField] private bool saveProgress = true;
+        [SerializeField]
+        private bool saveProgress = true;
 
         [Header("Testing")]
         [Tooltip("Every paid spin lands the next result in the list below, to check all the celebrations and effects. " +
                  "Real outcomes are found by the normal rules; progress is not saved while this is on at start.")]
-        [SerializeField] private bool showcaseWins;
+        [SerializeField]
+        private bool showcaseWins;
         [Tooltip("The results the showcase lands, in order, then from the top again")]
         [SerializeField]
         private ShowcaseWin[] showcaseOrder =
@@ -28,22 +33,38 @@ namespace RoyalVault.Unity
         };
 
         [Header("Views")]
-        [SerializeField] private MachineView machineView;
-        [SerializeField] private ConsoleView console;
-        [SerializeField] private JackpotPanelView jackpots;
-        [SerializeField] private WinPresenter presenter;
-        [SerializeField] private BigWinView bigWin;
-        [SerializeField] private PaytableView paytable;
-        [SerializeField] private MessageToast toast;
-        [SerializeField] private CharacterView[] characters = new CharacterView[0];
-        [SerializeField] private SealMeterView sealMeter;
-        [SerializeField] private FlameClashView flameClash;
-        [SerializeField] private ChapterCardView chapterCard;
-        [SerializeField] private CoachMarkView coachMarks;
-        [SerializeField] private GuardianFireView guardianFire;
-        [SerializeField] private RelicRevealView relicReveal;
-        [SerializeField] private GambleView gambleView;
-        [SerializeField] private TreasuryView treasuryView;
+        [SerializeField]
+        private MachineView machineView;
+        [SerializeField]
+        private ConsoleView console;
+        [SerializeField]
+        private JackpotPanelView jackpots;
+        [SerializeField]
+        private WinPresenter presenter;
+        [SerializeField]
+        private BigWinView bigWin;
+        [SerializeField]
+        private PaytableView paytable;
+        [SerializeField]
+        private MessageToast toast;
+        [SerializeField]
+        private CharacterView[] characters = new CharacterView[0];
+        [SerializeField]
+        private SealMeterView sealMeter;
+        [SerializeField]
+        private FlameClashView flameClash;
+        [SerializeField]
+        private ChapterCardView chapterCard;
+        [SerializeField]
+        private CoachMarkView coachMarks;
+        [SerializeField]
+        private GuardianFireView guardianFire;
+        [SerializeField]
+        private RelicRevealView relicReveal;
+        [SerializeField]
+        private GambleView gambleView;
+        [SerializeField]
+        private TreasuryView treasuryView;
 
         public GameSession Session { get; private set; }
         public SpinEngine Engine { get; private set; }

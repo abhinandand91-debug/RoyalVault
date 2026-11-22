@@ -11,14 +11,20 @@ namespace RoyalVault.Unity
     // Guardian's Fire: the guardians hurl flames at the cells SlotKit turned wild, and each burns into a wild as it lands
     public sealed class GuardianFireView : MonoBehaviour, ILandingStep
     {
-        [SerializeField] private RectTransform layer;
-        [SerializeField] private Image[] fireballs = new Image[0];
-        [SerializeField] private UiParticleEmitter[] trails = new UiParticleEmitter[0];
-        [SerializeField] private UiParticleEmitter burst;
+        [SerializeField]
+        private RectTransform layer;
+        [SerializeField]
+        private Image[] fireballs = new Image[0];
+        [SerializeField]
+        private UiParticleEmitter[] trails = new UiParticleEmitter[0];
+        [SerializeField]
+        private UiParticleEmitter burst;
         [Tooltip("Seconds a flame takes to reach its cell")]
-        [SerializeField, Range(0.2f, 1f)] private float flightSeconds = 0.42f;
+        [SerializeField, Range(0.2f, 1f)]
+        private float flightSeconds = 0.42f;
         [Tooltip("Seconds between one flame and the next")]
-        [SerializeField, Range(0f, 0.5f)] private float stagger = 0.18f;
+        [SerializeField, Range(0f, 0.5f)]
+        private float stagger = 0.18f;
 
         private CharacterView[] guardians = new CharacterView[0];
         private MachineView machine;

@@ -11,25 +11,41 @@ namespace RoyalVault.Unity
     // Boot screen: logo, gold progress bar, rotating tips and drifting dust
     public sealed class LoadingScreen : MonoBehaviour
     {
-        [SerializeField] private CanvasGroup group;
-        [SerializeField] private RectTransform logo;
-        [SerializeField] private RectTransform fillArea;
-        [SerializeField] private Image fill;
-        [SerializeField] private RectTransform tip;
-        [SerializeField] private RectTransform shine;
-        [SerializeField] private TextMeshProUGUI percent;
-        [SerializeField] private TextMeshProUGUI tipText;
-        [SerializeField] private RectTransform dustLayer;
-        [SerializeField] private Sprite dustSprite;
-        [SerializeField] private string[] tips = new string[0];
+        [SerializeField]
+        private CanvasGroup group;
+        [SerializeField]
+        private RectTransform logo;
+        [SerializeField]
+        private RectTransform fillArea;
+        [SerializeField]
+        private Image fill;
+        [SerializeField]
+        private RectTransform tip;
+        [SerializeField]
+        private RectTransform shine;
+        [SerializeField]
+        private TextMeshProUGUI percent;
+        [SerializeField]
+        private TextMeshProUGUI tipText;
+        [SerializeField]
+        private RectTransform dustLayer;
+        [SerializeField]
+        private Sprite dustSprite;
+        [SerializeField]
+        private string[] tips = new string[0];
         [Header("Story")]
-        [SerializeField] private StoryDefinition story;
-        [SerializeField] private StoryCardView[] cards = new StoryCardView[0];
-        [SerializeField] private CanvasGroup storyChrome;
+        [SerializeField]
+        private StoryDefinition story;
+        [SerializeField]
+        private StoryCardView[] cards = new StoryCardView[0];
+        [SerializeField]
+        private CanvasGroup storyChrome;
         [Header("Sound")]
-        [SerializeField] private SoundPlayer sound;
+        [SerializeField]
+        private SoundPlayer sound;
 
-        [SerializeField] private StoryIntroView introView;
+        [SerializeField]
+        private StoryIntroView introView;
 
         private const string IntroSeenKey = "royalvault.story.intro.seen";
 

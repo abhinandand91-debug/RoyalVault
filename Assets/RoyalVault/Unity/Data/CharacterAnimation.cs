@@ -11,15 +11,18 @@ namespace RoyalVault.Unity
         public sealed class Clip
         {
             public Sprite[] frames = new Sprite[0];
-            [Tooltip("Where the magic burns in each frame, as a share of the frame (0,0 = bottom left)")] public Vector2[] hand = new Vector2[0];
-            [Tooltip("How strongly the magic burns in each frame, 0 to 1")] public float[] flame = new float[0];
+            [Tooltip("Where the magic burns in each frame, as a share of the frame (0,0 = bottom left)")]
+            public Vector2[] hand = new Vector2[0];
+            [Tooltip("How strongly the magic burns in each frame, 0 to 1")]
+            public float[] flame = new float[0];
 
             public bool IsValid => frames != null && frames.Length > 0;
             public float Duration(float fps) => frames.Length / fps;
         }
 
         public float framesPerSecond = 24f;
-        [Tooltip("Height the frames are shown at, in canvas pixels")] public float displayHeight = 714f;
+        [Tooltip("Height the frames are shown at, in canvas pixels")]
+        public float displayHeight = 714f;
         [Tooltip("Share of a frame the still art covers: below 1 when the frames leave room for light and sparks around it")]
         public float figureShare = 1f;
         public Clip idle = new Clip();

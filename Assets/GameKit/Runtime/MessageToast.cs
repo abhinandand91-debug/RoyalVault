@@ -8,7 +8,8 @@ namespace GameKit
     // message replaces it
     public sealed class MessageToast : DialogView
     {
-        [SerializeField] private TextMeshProUGUI label;
+        [SerializeField]
+        private TextMeshProUGUI label;
 
         private float seconds = 2f;
 

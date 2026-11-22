@@ -8,11 +8,15 @@ namespace GameKit
     [RequireComponent(typeof(CanvasGroup))]
     public abstract class DialogView : MonoBehaviour
     {
-        [SerializeField] private DialogDefinition definition;
+        [SerializeField]
+        private DialogDefinition definition;
         [Tooltip("The part that moves; the backdrop stays put")]
-        [SerializeField] private RectTransform panel;
-        [SerializeField] private DialogManager manager;
-        [SerializeField] private CanvasGroup group;
+        [SerializeField]
+        private RectTransform panel;
+        [SerializeField]
+        private DialogManager manager;
+        [SerializeField]
+        private CanvasGroup group;
 
         private readonly TweenGroup tweens = new TweenGroup(4);
         private bool closeRequested;

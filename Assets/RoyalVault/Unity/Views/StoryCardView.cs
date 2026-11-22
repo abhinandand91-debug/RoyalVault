@@ -9,15 +9,24 @@ namespace RoyalVault.Unity
     // A full-screen story scene with figures stepping in and typed captions
     public sealed class StoryCardView : MonoBehaviour
     {
-        [SerializeField] private CanvasGroup group;
-        [SerializeField] private Image art;
-        [SerializeField] private Image[] figures = new Image[0];
-        [SerializeField] private TextMeshProUGUI chapter;
-        [SerializeField] private TextMeshProUGUI title;
-        [SerializeField] private TextMeshProUGUI caption;
-        [SerializeField] private TypewriterText typewriter;
-        [SerializeField] private float push = 0.07f;
-        [SerializeField] private float figureEntrance = 280f;
+        [SerializeField]
+        private CanvasGroup group;
+        [SerializeField]
+        private Image art;
+        [SerializeField]
+        private Image[] figures = new Image[0];
+        [SerializeField]
+        private TextMeshProUGUI chapter;
+        [SerializeField]
+        private TextMeshProUGUI title;
+        [SerializeField]
+        private TextMeshProUGUI caption;
+        [SerializeField]
+        private TypewriterText typewriter;
+        [SerializeField]
+        private float push = 0.07f;
+        [SerializeField]
+        private float figureEntrance = 280f;
 
         private float shownAt;
         private float duration = 5f;

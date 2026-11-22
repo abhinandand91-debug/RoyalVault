@@ -12,9 +12,12 @@ namespace GameKit
     public sealed class DialogManager : MonoBehaviour
     {
         [Tooltip("Full-screen image sharing the dialogs' parent; it darkens behind them and catches taps")]
-        [SerializeField] private Image backdrop;
-        [SerializeField] private Button backdropButton;
-        [SerializeField, Range(0.05f, 1f)] private float backdropSeconds = 0.25f;
+        [SerializeField]
+        private Image backdrop;
+        [SerializeField]
+        private Button backdropButton;
+        [SerializeField, Range(0.05f, 1f)]
+        private float backdropSeconds = 0.25f;
 
         private readonly Dictionary<DialogLayer, List<DialogHandle>> waiting = new Dictionary<DialogLayer, List<DialogHandle>>(3);
         private readonly Dictionary<DialogLayer, Stack<DialogHandle>> beneath = new Dictionary<DialogLayer, Stack<DialogHandle>>(3);

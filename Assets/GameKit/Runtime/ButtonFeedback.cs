@@ -8,9 +8,12 @@ namespace GameKit
     // A button presses in a little under the finger and springs back when let go, so every button feels the same
     public sealed class ButtonFeedback : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
-        [SerializeField] private RectTransform target;
-        [SerializeField] private Selectable selectable;
-        [SerializeField, Range(0.8f, 1f)] private float pressedScale = 0.93f;
+        [SerializeField]
+        private RectTransform target;
+        [SerializeField]
+        private Selectable selectable;
+        [SerializeField, Range(0.8f, 1f)]
+        private float pressedScale = 0.93f;
 
         private readonly TweenGroup tweens = new TweenGroup(1);
 

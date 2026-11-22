@@ -39,19 +39,30 @@ namespace RoyalVault.Unity
     // A dialog on the overlay layer: it pops its heading in, counts, showers coins and poses the heroes, then fades away
     public sealed class BigWinView : DialogView
     {
-        [SerializeField] private Image banner;
-        [SerializeField] private TextMeshProUGUI title;
-        [SerializeField] private TextMeshProUGUI subtitle;
-        [SerializeField] private CountingText amount;
-        [SerializeField] private RectTransform rays;
+        [SerializeField]
+        private Image banner;
+        [SerializeField]
+        private TextMeshProUGUI title;
+        [SerializeField]
+        private TextMeshProUGUI subtitle;
+        [SerializeField]
+        private CountingText amount;
+        [SerializeField]
+        private RectTransform rays;
         [Tooltip("Optional vault ring behind every celebration, turning the other way to the rays")]
-        [SerializeField] private RectTransform ring;
-        [SerializeField] private UiParticleEmitter coins;
-        [SerializeField] private Button skip;
+        [SerializeField]
+        private RectTransform ring;
+        [SerializeField]
+        private UiParticleEmitter coins;
+        [SerializeField]
+        private Button skip;
         [Header("Heroes")]
-        [SerializeField] private Image[] heroes = new Image[0];
-        [SerializeField] private CharacterAnimation[] heroMotion = new CharacterAnimation[0];
-        [SerializeField] private Vector2[] heroHome = new Vector2[0];
+        [SerializeField]
+        private Image[] heroes = new Image[0];
+        [SerializeField]
+        private CharacterAnimation[] heroMotion = new CharacterAnimation[0];
+        [SerializeField]
+        private Vector2[] heroHome = new Vector2[0];
 
         private readonly Queue<Celebration> requests = new Queue<Celebration>(4);
         private Celebration current;

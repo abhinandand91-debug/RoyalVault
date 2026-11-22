@@ -10,18 +10,29 @@ namespace RoyalVault.Unity
     {
         private static readonly int ShinePos = Shader.PropertyToID("_ShinePos");
 
-        [SerializeField] private Button button;
-        [SerializeField] private Image glow;
-        [SerializeField] private Image rays;
-        [SerializeField] private Image medallion;
-        [SerializeField] private TextMeshProUGUI label;
-        [SerializeField] private string idleText = "SPIN";
-        [SerializeField] private string spinningText = "STOP";
-        [SerializeField] private float idleRaySpeed = 8f;
-        [SerializeField] private float spinningRaySpeed = 140f;
+        [SerializeField]
+        private Button button;
+        [SerializeField]
+        private Image glow;
+        [SerializeField]
+        private Image rays;
+        [SerializeField]
+        private Image medallion;
+        [SerializeField]
+        private TextMeshProUGUI label;
+        [SerializeField]
+        private string idleText = "SPIN";
+        [SerializeField]
+        private string spinningText = "STOP";
+        [SerializeField]
+        private float idleRaySpeed = 8f;
+        [SerializeField]
+        private float spinningRaySpeed = 140f;
         [Tooltip("The rays' opacity at rest and while the reels run")]
-        [SerializeField] private Vector2 rayAlpha = new Vector2(0.35f, 0.75f);
-        [SerializeField] private float shineEvery = 4.5f;
+        [SerializeField]
+        private Vector2 rayAlpha = new Vector2(0.35f, 0.75f);
+        [SerializeField]
+        private float shineEvery = 4.5f;
 
         private bool spinning;
         private float raySpeed;

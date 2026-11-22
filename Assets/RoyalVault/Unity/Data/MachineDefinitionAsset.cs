@@ -12,9 +12,11 @@ namespace RoyalVault.Unity
         [Serializable]
         public sealed class SymbolEntry
         {
-            [Tooltip("Stable id; the theme finds the symbol's art by it")] public string id;
+            [Tooltip("Stable id; the theme finds the symbol's art by it")]
+            public string id;
             public SymbolKind kind;
-            [Tooltip("Line pay by count: pays[3] is three of a kind, as a multiple of the line bet")] public int[] pays = new int[0];
+            [Tooltip("Line pay by count: pays[3] is three of a kind, as a multiple of the line bet")]
+            public int[] pays = new int[0];
         }
 
         [Serializable]
@@ -27,7 +29,8 @@ namespace RoyalVault.Unity
         public sealed class ScatterEntry
         {
             public int count = 3;
-            [Tooltip("Pays the total bet times this")] public int totalBetMultiplier = 1;
+            [Tooltip("Pays the total bet times this")]
+            public int totalBetMultiplier = 1;
             public int freeSpins;
         }
 
@@ -35,32 +38,43 @@ namespace RoyalVault.Unity
         public sealed class JackpotEntry
         {
             public string name = "MINOR";
-            [Tooltip("Jackpot symbols anywhere needed to win this tier")] public int symbolCount = 3;
+            [Tooltip("Jackpot symbols anywhere needed to win this tier")]
+            public int symbolCount = 3;
             public long seed = 500;
-            [Tooltip("Percent of every paid bet added to this tier")] public double contributionPercent = 0.5;
+            [Tooltip("Percent of every paid bet added to this tier")]
+            public double contributionPercent = 0.5;
         }
 
         [Header("Machine")]
         public string machineName = "Machine";
-        [Min(1)] public int reels = 5;
-        [Min(1)] public int rows = 3;
+        [Min(1)]
+        public int reels = 5;
+        [Min(1)]
+        public int rows = 3;
 
         [Header("Symbols and reels")]
         public SymbolEntry[] symbols = new SymbolEntry[0];
-        [Tooltip("One strip of symbol indices per reel")] public IntRow[] strips = new IntRow[0];
-        [Tooltip("For each payline, the row (0 = top) it crosses on each reel")] public IntRow[] paylines = new IntRow[0];
+        [Tooltip("One strip of symbol indices per reel")]
+        public IntRow[] strips = new IntRow[0];
+        [Tooltip("For each payline, the row (0 = top) it crosses on each reel")]
+        public IntRow[] paylines = new IntRow[0];
 
         [Header("Awards")]
         public ScatterEntry[] scatterAwards = new ScatterEntry[0];
         public JackpotEntry[] jackpotTiers = new JackpotEntry[0];
-        [Min(1)] public int freeSpinMultiplier = 2;
-        [Tooltip("Win tiers as multiples of the total bet: Big, Mega, Epic")] public int[] winTierMultipliers = { 10, 25, 50 };
+        [Min(1)]
+        public int freeSpinMultiplier = 2;
+        [Tooltip("Win tiers as multiples of the total bet: Big, Mega, Epic")]
+        public int[] winTierMultipliers = { 10, 25, 50 };
 
         [Header("Random wilds (Guardian's Fire)")]
         [Tooltip("Losing base-game spins rescued with extra wilds, per thousand; 0 turns the feature off")]
-        [Range(0, 1000)] public int randomWildChancePerMille;
-        [Min(1)] public int randomWildMin = 2;
-        [Min(1)] public int randomWildMax = 3;
+        [Range(0, 1000)]
+        public int randomWildChancePerMille;
+        [Min(1)]
+        public int randomWildMin = 2;
+        [Min(1)]
+        public int randomWildMax = 3;
         [Header("Sealed Relic")]
         [Tooltip("Free spin rounds pick a relic symbol that expands over whole reels and pays on every line")]
         public bool expandingFreeSpinSymbol;
@@ -70,9 +84,11 @@ namespace RoyalVault.Unity
         [Header("Gamble (Ruby's Last Hand)")]
         [Tooltip("Offer double-or-nothing on base-game wins; turn off where gambles are not allowed")]
         public bool gambleEnabled;
-        [Min(1)] public int gambleMaxRounds = 5;
+        [Min(1)]
+        public int gambleMaxRounds = 5;
         [Tooltip("The gamble may not grow a win past this many total bets")]
-        [Min(2)] public int gambleMaxWinTotalBets = 50;
+        [Min(2)]
+        public int gambleMaxWinTotalBets = 50;
 
         [Header("Treasury (pick bonus)")]
         [Tooltip("A key symbol on every key reel of a base-game spin opens a pick-and-reveal round")]
@@ -80,20 +96,25 @@ namespace RoyalVault.Unity
         public string treasuryKeySymbol = "vault_key";
         [Tooltip("Reels (0 = leftmost) that must each show a key")]
         public int[] treasuryKeyReels = { 0, 2, 4 };
-        [Min(2)] public int treasuryUrns = 12;
+        [Min(2)]
+        public int treasuryUrns = 12;
         [Tooltip("Urns that end the round")]
-        [Min(1)] public int treasuryEyes = 2;
+        [Min(1)]
+        public int treasuryEyes = 2;
         [Tooltip("Urns that block the next eye")]
-        [Min(0)] public int treasuryShields = 1;
+        [Min(0)]
+        public int treasuryShields = 1;
         [Tooltip("Urns that add one to the round's multiplier")]
-        [Min(0)] public int treasuryMultipliers = 1;
+        [Min(0)]
+        public int treasuryMultipliers = 1;
         [Tooltip("What the other urns hold, in total bets")]
         public int[] treasuryCreditValues = { 1, 2, 3, 5, 10, 20 };
         [Tooltip("How likely each credit value is, matching the list above")]
         public int[] treasuryCreditWeights = { 30, 25, 20, 14, 8, 3 };
 
         [Tooltip("Version of the presets this asset was last brought up to; the builder adds new settings once")]
-        [HideInInspector] public int presetVersion;
+        [HideInInspector]
+        public int presetVersion;
 
         [Header("Betting")]
         public int[] lineBets = { 1 };

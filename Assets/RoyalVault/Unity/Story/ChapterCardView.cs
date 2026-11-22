@@ -9,9 +9,12 @@ namespace RoyalVault.Unity
     // it out
     public sealed class ChapterCardView : DialogView
     {
-        [SerializeField] private StoryCardView card;
-        [SerializeField] private Button tapArea;
-        [SerializeField] private CanvasGroup continuePrompt;
+        [SerializeField]
+        private StoryCardView card;
+        [SerializeField]
+        private Button tapArea;
+        [SerializeField]
+        private CanvasGroup continuePrompt;
 
         private readonly TweenGroup tweens = new TweenGroup(2);
         private bool advance;

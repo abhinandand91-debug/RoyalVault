@@ -13,7 +13,8 @@ namespace RoyalVault.Unity
         private const int Channels = 10;
         private const int HistoryLength = 64;
 
-        [SerializeField] private SoundBank bank;
+        [SerializeField]
+        private SoundBank bank;
 
         private readonly List<AudioSource> effects = new List<AudioSource>();
         private readonly Dictionary<SoundCue, AudioSource> loops = new Dictionary<SoundCue, AudioSource>();

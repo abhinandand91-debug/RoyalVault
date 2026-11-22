@@ -30,9 +30,11 @@ namespace GameKit
             [Tooltip("Start value: alpha, scale, pixels from rest or degrees, as the channel uses")]
             public float from;
             public float to;
-            [Min(0f)] public float duration;
+            [Min(0f)]
+            public float duration;
             [Tooltip("Seconds after the motion starts before this step begins")]
-            [Min(0f)] public float delay;
+            [Min(0f)]
+            public float delay;
             public Ease ease;
         }
 

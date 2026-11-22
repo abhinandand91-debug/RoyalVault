@@ -10,11 +10,14 @@ namespace RoyalVault.Unity
     // The jackpot plaques: the top tier in the centre, the next ones left and right, values counting live
     public sealed class JackpotPanelView : MonoBehaviour
     {
-        [SerializeField, Tooltip("Centre, left, right")] private Image[] plaques = new Image[0];
+        [SerializeField, Tooltip("Centre, left, right")]
+        private Image[] plaques = new Image[0];
 
         public RectTransform TopPlaque => plaques.Length > 0 ? plaques[0].rectTransform : null;
-        [SerializeField] private TextMeshProUGUI[] names = new TextMeshProUGUI[0];
-        [SerializeField] private CountingText[] values = new CountingText[0];
+        [SerializeField]
+        private TextMeshProUGUI[] names = new TextMeshProUGUI[0];
+        [SerializeField]
+        private CountingText[] values = new CountingText[0];
 
         private JackpotPool pool;
         // plaque slot for each tier, -1 when the tier has no plaque
