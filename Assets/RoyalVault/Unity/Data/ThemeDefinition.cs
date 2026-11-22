@@ -85,6 +85,9 @@ namespace RoyalVault.Unity
         public Sprite spinButton;
         [Tooltip("Bronze rotor ring that turns around the spin button")] public Sprite spinRotor;
         [Tooltip("Gold wings either side of the spin button")] public Sprite spinWings;
+        [Tooltip("Optional vault door that turns and opens as the Treasury begins")] public Sprite vaultDoor;
+        [Tooltip("Optional guardian portrait beside the first-visit hints (licensed art may be missing in a public checkout)")] public Sprite guidePortrait;
+        [Tooltip("Optional guardian who watches over the Treasury (licensed art may be missing in a public checkout)")] public Sprite guardianPose;
         [Tooltip("Jackpot plaque, 9-sliced; tinted per tier")] public Sprite jackpotPlaque;
         [Tooltip("Icon on each jackpot plaque: top tier first")] public Sprite[] jackpotIcons = new Sprite[0];
         [Tooltip("Plaque colour per jackpot tier: top tier first")] public Color[] jackpotTints = new Color[0];

@@ -28,6 +28,9 @@ namespace RoyalVault.EditorTools
             Write("emerald_disc", 256, 256, EmeraldDiscPixel);
             Write("spin_wings", 512, 192, SpinWingsPixel);
             Write("window_shadow", 64, 64, WindowShadowPixel);
+            Write("emerald_panel", 256, 256, EmeraldPanelPixel);
+            Write("emerald_card", 128, 128, (x, y) => RoundedRect(x, y, 128, 128, 18f, new Color32(9, 32, 24, 240), new Color32(150, 118, 58, 255), 2f));
+            Write("emerald_fill", 64, 16, (x, y) => Color.Lerp(new Color32(19, 158, 118, 255), new Color32(53, 216, 232, 255), x / 63f));
         }
 
         // Dark at the edge, fading out over 24 pixels: 9-sliced inside the reel window
@@ -36,6 +39,20 @@ namespace RoyalVault.EditorTools
             float edge = Mathf.Min(Mathf.Min(x, 63 - x), Mathf.Min(y, 63 - y));
             float t = 1f - Mathf.Clamp01(edge / 24f);
             return new Color(0f, 0f, 0f, 0.6f * t * t);
+        }
+
+        // Popups and the pay table: deep emerald fading darker, a gold edge and a fainter gold line inside it
+        private static Color EmeraldPanelPixel(int x, int y)
+        {
+            Color fill = Color.Lerp(new Color32(5, 22, 16, 250), new Color32(14, 44, 33, 250), y / 255f);
+            Color outer = RoundedRect(x, y, 256, 256, 30f, fill, new Color32(214, 170, 92, 255), 3f);
+            if (outer.a <= 0f)
+            {
+                return outer;
+            }
+
+            Color inner = RoundedRect(x - 12, y - 12, 232, 232, 20f, Color.clear, new Color32(214, 170, 92, 255), 1.5f);
+            return inner.a > 0f ? Color.Lerp(outer, new Color(inner.r, inner.g, inner.b, outer.a), inner.a * 0.4f) : outer;
         }
 
         // A dark emerald cell with a faint lighter edge, like the reel bands in the mockup
@@ -104,6 +121,20 @@ namespace RoyalVault.EditorTools
             theme.housingOverlap = 8f;
             EnsureSpriteBorder(Generated + "window_shadow.png", new Vector4(24, 24, 24, 24));
             theme.windowShadow = Sprite("Generated/window_shadow");
+            EnsureSpriteBorder(Generated + "emerald_panel.png", new Vector4(48, 48, 48, 48));
+            EnsureSpriteBorder(Generated + "emerald_card.png", new Vector4(24, 24, 24, 24));
+            EnsureSpriteBorder(Generated + "emerald_pill.png", new Vector4(62, 62, 62, 62));
+            EnsureSpriteBorder(Generated + "emerald_plaque.png", new Vector4(24, 24, 24, 24));
+            EnsureSpriteBorder(Generated + "emerald_plaque_edge.png", new Vector4(24, 24, 24, 24));
+            theme.popupPanel = Sprite("Generated/emerald_panel");
+            theme.card = Sprite("Generated/emerald_card");
+            theme.levelBar = Sprite("Generated/emerald_pill");
+            theme.levelFill = Sprite("Generated/emerald_fill");
+            // no banner art: a plain big win is spelled out over the vault ring
+            theme.bigWinBanner = null;
+            theme.vaultDoor = Sprite("Emerald/Environment/vault_door");
+            theme.guidePortrait = PrivateSprite("Characters/Emerald/anubis_portrait.png");
+            theme.guardianPose = PrivateSprite("Characters/Emerald/anubis_win.png");
             theme.reelCell = Sprite("Generated/emerald_cell");
             theme.niche = null;
             theme.consoleBar = Sprite("Generated/emerald_bar");
@@ -128,6 +159,12 @@ namespace RoyalVault.EditorTools
             theme.cellGap = 4f;
         }
 
+        // Licensed art kept out of the public repository, or null in a checkout without it
+        private static Sprite PrivateSprite(string relative)
+        {
+            return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(Root + "Art.Private/" + relative);
+        }
+
         // 9-slice borders (left, bottom, right, top, in the art's pixels), reimporting only when they differ
         private static void EnsureSpriteBorder(string path, Vector4 border)
         {
@@ -143,6 +180,9 @@ namespace RoyalVault.EditorTools
         {
             theme.reelHousing = null;
             theme.windowShadow = null;
+            theme.vaultDoor = null;
+            theme.guidePortrait = null;
+            theme.guardianPose = null;
             theme.gold = new Color32(232, 199, 122, 255);
             theme.paleGold = new Color32(255, 231, 166, 255);
             theme.ivory = new Color32(243, 233, 210, 255);

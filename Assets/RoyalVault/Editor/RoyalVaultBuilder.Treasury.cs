@@ -36,6 +36,8 @@ namespace RoyalVault.EditorTools
             }
 
             UiParticleEmitter burst = TreasuryBurst(board, theme);
+            TreasuryGuardian(overlay, theme);
+            Image door = TreasuryDoor(overlay, theme);
             (CountingText collected, TextMeshProUGUI multiplier, Image shield) = TreasuryReadouts(overlay, theme);
 
             Image flash = Stretch("Flash", overlay, theme.white);
@@ -50,7 +52,39 @@ namespace RoyalVault.EditorTools
             Sprite[] cracks = { Sprite("Generated/crack_1"), Sprite("Generated/crack_2"), Sprite("Generated/crack_3") };
             var view = overlay.gameObject.AddComponent<TreasuryView>();
             view.Setup(group, board, prompt, collected, multiplier, shield, urns, burst, flash, tap, cracks);
+            if (door != null)
+            {
+                view.SetupDoor(door);
+            }
+
             return view;
+        }
+
+        // A guardian watching over the urns from the left, when the art is there
+        private static void TreasuryGuardian(RectTransform overlay, ThemeDefinition theme)
+        {
+            if (theme.guardianPose == null)
+            {
+                return;
+            }
+
+            Image guardian = UiFactory.Image("Guardian", overlay, theme.guardianPose, new Vector2(-850, -540), new Vector2(560, 560));
+            guardian.rectTransform.pivot = new Vector2(0.5f, 0f);
+            guardian.rectTransform.anchoredPosition = new Vector2(-850, -540);
+            guardian.preserveAspect = true;
+        }
+
+        // The vault door over the board; it turns open when the round begins
+        private static Image TreasuryDoor(RectTransform overlay, ThemeDefinition theme)
+        {
+            if (theme.vaultDoor == null)
+            {
+                return null;
+            }
+
+            Image door = UiFactory.Image("Vault Door", overlay, theme.vaultDoor, new Vector2(0, -10), new Vector2(760, 760));
+            door.preserveAspect = true;
+            return door;
         }
 
         // The Treasury painting, covering the screen, darkened so the urns stand out

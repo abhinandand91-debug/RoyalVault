@@ -209,9 +209,27 @@ namespace RoyalVault.EditorTools
             Vector2 size = told ? new Vector2(400, 142) : new Vector2(760, 270);
             Image halo = UiFactory.Image("Halo", t, theme.glow, at, size * new Vector2(1.7f, 1.9f));
             halo.color = new Color(1f, 0.75f, 0.35f, told ? 0.16f : 0.22f);
+            if (theme.look == ThemeLook.Emerald)
+            {
+                return TextLogo(t, theme, at, size);
+            }
+
             Image logo = UiFactory.Image("Logo", t, theme.logo, at, size);
             logo.preserveAspect = true;
             return logo.rectTransform;
+        }
+
+        // The Emerald title in Cinzel with the sanctum's name beneath, sized to the logo's box
+        private static RectTransform TextLogo(Transform t, ThemeDefinition theme, Vector2 at, Vector2 size)
+        {
+            RectTransform logo = UiFactory.Rect("Logo", t, at, size);
+            TextMeshProUGUI title = UiFactory.Text("Title", logo, theme.headingFont, "ROYAL VAULT", size.y * 0.42f, Color.white,
+                                                   new Vector2(0, size.y * 0.1f), new Vector2(size.x * 1.4f, size.y * 0.55f), TextAlignmentOptions.Center, 6);
+            title.enableVertexGradient = true;
+            title.colorGradient = new VertexGradient(theme.paleGold, theme.paleGold, theme.gold, theme.gold);
+            UiFactory.Text("Subtitle", logo, theme.labelFont, "THE<space=1.2em>EMERALD<space=1.2em>SANCTUM", size.y * 0.11f, theme.dimGold,
+                           new Vector2(0, -size.y * 0.26f), new Vector2(size.x * 1.2f, size.y * 0.2f), TextAlignmentOptions.Center, 24);
+            return logo;
         }
 
         private struct LoadingBar

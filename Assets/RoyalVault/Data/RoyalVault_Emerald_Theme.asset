@@ -127,6 +127,9 @@ MonoBehaviour:
   spinButton: {fileID: 21300000, guid: 4bf846bdf31394985a6f378eab5a4f01, type: 3}
   spinRotor: {fileID: 21300000, guid: 60276f31e115c42edbcfa94f4fe028b7, type: 3}
   spinWings: {fileID: 21300000, guid: cda057f37512c415fbbfa5bdf0645e46, type: 3}
+  vaultDoor: {fileID: 21300000, guid: 250fbe74aa4c845f2a9799f543721f2c, type: 3}
+  guidePortrait: {fileID: 21300000, guid: 557ede588831545ce82c00747a9113a1, type: 3}
+  guardianPose: {fileID: 21300000, guid: 3d24b9759bf104e7fae095976318181c, type: 3}
   jackpotPlaque: {fileID: 21300000, guid: 282ce912cf91f48feae36fc01daae499, type: 3}
   jackpotIcons:
   - {fileID: 21300000, guid: 3aa5a8545521b4139b5ac15d9d2b3fc0, type: 3}
@@ -140,8 +143,8 @@ MonoBehaviour:
   roundButton: {fileID: 21300000, guid: deeca0c93946c4291b6c2335c963f61a, type: 3}
   jackpotGrand: {fileID: 21300000, guid: eba32eec514c043d38001b20e3be44d6, type: 3}
   jackpotMinor: {fileID: 21300000, guid: c9eb84cfa1cc54294b039356d90e4814, type: 3}
-  popupPanel: {fileID: 21300000, guid: 3f53bc29b96fd45ebb6610c772abd7b0, type: 3}
-  card: {fileID: 21300000, guid: ce72c95ad931d46239d368dc38463e34, type: 3}
+  popupPanel: {fileID: 21300000, guid: 4a9fd9a0900b54cddbcb3b8bb97e3d0c, type: 3}
+  card: {fileID: 21300000, guid: 090083f7b565d4d6f8bbcaf5ac313b9a, type: 3}
   cardFace: {fileID: 21300000, guid: e2f818a7f67864475b4d21ca01e7bc1e, type: 3}
   cardBack: {fileID: 21300000, guid: 94425e6e33dd141849a147f3f60df688, type: 3}
   suits:
@@ -151,14 +154,14 @@ MonoBehaviour:
   - {fileID: 21300000, guid: e52b4e3c1482045a88d1bcd4737f88c5, type: 3}
   urn: {fileID: 21300000, guid: 25b6fde6a2a0c4a5295512b18c29909a, type: 3}
   eye: {fileID: 21300000, guid: a9355333f345b477d9b6a1a9cf568eb2, type: 3}
-  bigWinBanner: {fileID: 21300000, guid: 275862cc3d97f437aad11f9077a1f685, type: 3}
+  bigWinBanner: {fileID: 0}
   coin: {fileID: 21300000, guid: 75ce2bdfc962b40b1b35d8e868b63f7f, type: 3}
   sparkle: {fileID: 21300000, guid: dd2dc367e58834f309ccd2443873b815, type: 3}
   glow: {fileID: 21300000, guid: fcc645abd5840410ab3a2ed0dfd1f715, type: 3}
   line: {fileID: 21300000, guid: a2e41093d405d48ed98115c33ffabaeb, type: 3}
   white: {fileID: 21300000, guid: 854f3f6636bd1406faab9a112006d240, type: 3}
-  levelBar: {fileID: 21300000, guid: 89250ce98570a42638ae838ec1f1d004, type: 3}
-  levelFill: {fileID: 21300000, guid: 19d202f0c96bb444cbec9e9362662e85, type: 3}
+  levelBar: {fileID: 21300000, guid: a6de832a686bf4fe2868224e6d896bee, type: 3}
+  levelFill: {fileID: 21300000, guid: d01d292def6774535bc2f76e3883b277, type: 3}
   iconMenu: {fileID: 21300000, guid: b4af16eda8ac54857adb022f66f1a552, type: 3}
   iconInfo: {fileID: 21300000, guid: 3533302d69ede4794a85e42dbf640b95, type: 3}
   iconSound: {fileID: 21300000, guid: a0d09a31bd8134e62a767a6d6ebf1321, type: 3}

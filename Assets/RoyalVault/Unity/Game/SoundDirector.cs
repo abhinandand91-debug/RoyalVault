@@ -209,6 +209,7 @@ namespace RoyalVault.Unity
             treasury.Cracked += () => sound.Play(SoundCue.SealCrack, 0.8f);
             treasury.Revealed += OnUrnRevealed;
             treasury.Totalled += amount => sound.Play(SoundCue.FreeSpinsTotal);
+            treasury.DoorOpened += () => sound.Play(SoundCue.SealBreak, 0.8f);
         }
 
         private void OnUrnRevealed(UrnPrize prize, bool ends)

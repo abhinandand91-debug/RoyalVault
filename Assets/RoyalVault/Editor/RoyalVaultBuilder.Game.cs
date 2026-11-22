@@ -680,6 +680,15 @@ namespace RoyalVault.EditorTools
             Image rays = UiFactory.Image("Rays", overlay, Sprite("Generated/rays"), new Vector2(0, 90), new Vector2(1500, 1500));
             Image halo = UiFactory.Image("Halo", overlay, theme.glow, new Vector2(0, 90), new Vector2(1100, 700));
             halo.color = new Color(1f, 0.78f, 0.38f, 0.35f);
+            // the Emerald look celebrates on the vault ring, in the sanctum's cyan light
+            Image ring = null;
+            if (theme.look == ThemeLook.Emerald && theme.spinRotor != null)
+            {
+                halo.color = new Color(theme.accent.r, theme.accent.g, theme.accent.b, 0.3f);
+                ring = UiFactory.Image("Vault Ring", overlay, theme.spinRotor, new Vector2(0, 40), new Vector2(820, 820));
+                ring.preserveAspect = true;
+            }
+
 
             CharacterAnimation[] motion = { theme.heroLeft, theme.heroRight };
             Vector2[] home = { new Vector2(-740, -560), new Vector2(760, -560) };
@@ -691,6 +700,11 @@ namespace RoyalVault.EditorTools
 
             var view = overlay.gameObject.AddComponent<BigWinView>();
             view.Setup(group, banner, title, subtitle, amount, rays.rectTransform, coins, skip);
+            if (ring != null)
+            {
+                view.SetupRing(ring.rectTransform);
+            }
+
             view.SetupHeroes(heroes, motion, home);
             return view;
         }
@@ -771,7 +785,9 @@ namespace RoyalVault.EditorTools
             dim.color = new Color(0.01f, 0.01f, 0.02f, 0.78f);
             dim.raycastTarget = true;
 
-            Image panel = UiFactory.Image("Panel", root, theme.popupPanel, new Vector2(0, 10), new Vector2(1320, 820));
+            // the Art Deco frame's ornaments fill its margins; the plain Emerald panel is cut to the story
+            Vector2 panelSize = theme.look == ThemeLook.Emerald ? new Vector2(1150, 640) : new Vector2(1320, 820);
+            Image panel = UiFactory.Image("Panel", root, theme.popupPanel, new Vector2(0, 10), panelSize);
             panel.type = Image.Type.Sliced;
             StoryCardView card = ChapterStory(panel.transform, theme);
             TextMeshProUGUI prompt = UiFactory.Text("Continue", root, theme.labelFont, "TAP TO CONTINUE", 15, theme.gold, new Vector2(0, -448), new Vector2(400, 30), TextAlignmentOptions.Center, 30);
@@ -827,7 +843,17 @@ namespace RoyalVault.EditorTools
             Image bubble = UiFactory.Image("Bubble", root, theme.popupPanel, Vector2.zero, new Vector2(880, 250));
             bubble.type = Image.Type.Sliced;
             bubble.pixelsPerUnitMultiplier = 3f;
-            TextMeshProUGUI message = UiFactory.Text("Message", bubble.transform, theme.bodyFont, "", 27, theme.ivory, new Vector2(0, 12), new Vector2(680, 104));
+            // a guardian's portrait at the bubble's left, when the art is there, moves the words to its right
+            float textX = 0f;
+            if (theme.guidePortrait != null)
+            {
+                Image portrait = UiFactory.Image("Guide", bubble.transform, theme.guidePortrait, new Vector2(-330, 8), new Vector2(230, 230));
+                portrait.preserveAspect = true;
+                textX = 95f;
+            }
+
+            TextMeshProUGUI message = UiFactory.Text("Message", bubble.transform, theme.bodyFont, "", 27, theme.ivory, new Vector2(textX, 12),
+                                                     new Vector2(theme.guidePortrait != null ? 600 : 680, 104));
             message.textWrappingMode = TextWrappingModes.Normal;
             UiFactory.Text("Continue", bubble.transform, theme.labelFont, "TAP TO CONTINUE", 13, theme.gold, new Vector2(0, -60), new Vector2(400, 24), TextAlignmentOptions.Center, 30);
 

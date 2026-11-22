@@ -22,6 +22,8 @@ namespace RoyalVault.Unity
         [SerializeField] private TextMeshProUGUI subtitle;
         [SerializeField] private CountingText amount;
         [SerializeField] private RectTransform rays;
+        [Tooltip("Optional vault ring behind every celebration, turning the other way to the rays")]
+        [SerializeField] private RectTransform ring;
         [SerializeField] private UiParticleEmitter coins;
         [SerializeField] private Button skip;
         [Header("Heroes")]
@@ -119,8 +121,19 @@ namespace RoyalVault.Unity
             yield return Show(heading, line, value, seconds, value > 0, kind);
         }
 
+        public void SetupRing(RectTransform vaultRing)
+        {
+            ring = vaultRing;
+        }
+
         private IEnumerator Show(string heading, string line, long value, float countSeconds, bool coinsOn, CelebrationKind kind)
         {
+            // without banner art a plain big win is spelled out
+            if (heading == null && banner.sprite == null)
+            {
+                heading = "BIG WIN";
+            }
+
             Open(heading, line, value, countSeconds);
             Opened?.Invoke(kind, value > 0);
             RectTransform hero = heading == null ? banner.rectTransform : title.rectTransform;
@@ -175,6 +188,11 @@ namespace RoyalVault.Unity
                 if (rays != null)
                 {
                     rays.localRotation = Quaternion.Euler(0f, 0f, -t * 12f);
+                }
+
+                if (ring != null)
+                {
+                    ring.localRotation = Quaternion.Euler(0f, 0f, t * 6f);
                 }
 
                 coins.Intensity = t < coinSeconds ? 1f : 0f;

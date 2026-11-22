@@ -44,6 +44,8 @@ namespace RoyalVault.Unity
         [SerializeField, Range(2f, 20f)] private float idleSeconds = 8f;
         [Tooltip("Seconds between picks when the game opens the urns itself (auto play)")]
         [SerializeField, Range(0.2f, 2f)] private float autoPickSeconds = 0.7f;
+        [Tooltip("Optional vault door over the board that turns and opens as the round begins")]
+        [SerializeField] private Image door;
 
         private Tween[] pulses = new Tween[0];
         private long totalBet;
@@ -59,6 +61,8 @@ namespace RoyalVault.Unity
         public event Action<UrnPrize, bool> Revealed;
         // The round's total is shown
         public event Action<long> Totalled;
+        // The vault door turns open
+        public event Action DoorOpened;
 
         public bool IsOpen { get; private set; }
 
@@ -77,6 +81,11 @@ namespace RoyalVault.Unity
             flash = flashImage;
             tapArea = tap;
             cracks = crackSprites;
+        }
+
+        public void SetupDoor(Image vaultDoor)
+        {
+            door = vaultDoor;
         }
 
         public void Bind(ThemeDefinition theme)
@@ -102,6 +111,11 @@ namespace RoyalVault.Unity
             totalBet = round.TotalBet;
             Open();
             yield return Tween.Alpha(group, 0f, 1f, 0.35f, Ease.OutCubic).ToYieldInstruction();
+            if (door != null)
+            {
+                yield return OpenDoor();
+            }
+
             for (int pick = 0; pick < round.Picks; pick++)
             {
                 yield return WaitForPick(automatic);
@@ -120,6 +134,17 @@ namespace RoyalVault.Unity
             Hide();
         }
 
+        // The door turns a third of a turn, swings towards the player and fades, showing the urns behind it
+        private IEnumerator OpenDoor()
+        {
+            yield return Tween.Delay(0.45f).ToYieldInstruction();
+            DoorOpened?.Invoke();
+            Tween.LocalEulerAngles(door.rectTransform, Vector3.zero, new Vector3(0f, 0f, -120f), 0.9f, Ease.InCubic);
+            Tween.Scale(door.rectTransform, 1f, 2.3f, 0.9f, Ease.InCubic);
+            yield return Tween.Alpha(door, 1f, 0f, 0.9f, Ease.InCubic).ToYieldInstruction();
+            door.gameObject.SetActive(false);
+        }
+
         private void Open()
         {
             IsOpen = true;
@@ -132,6 +157,14 @@ namespace RoyalVault.Unity
             collected.Set(0);
             multiplier.text = "x1";
             shield.enabled = false;
+            if (door != null)
+            {
+                door.gameObject.SetActive(true);
+                door.rectTransform.localRotation = Quaternion.identity;
+                door.rectTransform.localScale = Vector3.one;
+                door.color = Color.white;
+            }
+
             flash.color = new Color(EyeRed.r, EyeRed.g, EyeRed.b, 0f);
             for (int i = 0; i < urns.Length; i++)
             {

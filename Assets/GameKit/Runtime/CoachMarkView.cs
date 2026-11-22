@@ -49,7 +49,9 @@ namespace GameKit
             advance = false;
             Rect hole = Spotlight(target);
             message.text = text;
-            bubble.anchoredPosition = new Vector2(Mathf.Clamp(hole.center.x, -640f, 640f), above ? hole.yMax + 150f : hole.yMin - 150f);
+            // kept on screen: half the canvas less half the bubble and a margin
+            float reach = Mathf.Max(0f, ((RectTransform)bubble.parent).rect.width * 0.5f - bubble.rect.width * 0.5f - 24f);
+            bubble.anchoredPosition = new Vector2(Mathf.Clamp(hole.center.x, -reach, reach), above ? hole.yMax + 150f : hole.yMin - 150f);
             IsShowing = true;
             group.blocksRaycasts = true;
             transform.SetAsLastSibling();
