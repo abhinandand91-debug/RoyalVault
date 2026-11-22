@@ -19,6 +19,8 @@ namespace RoyalVault.Unity
         [SerializeField] private string spinningText = "STOP";
         [SerializeField] private float idleRaySpeed = 8f;
         [SerializeField] private float spinningRaySpeed = 140f;
+        [Tooltip("The rays' opacity at rest and while the reels run")]
+        [SerializeField] private Vector2 rayAlpha = new Vector2(0.35f, 0.75f);
         [SerializeField] private float shineEvery = 4.5f;
 
         private bool spinning;
@@ -70,6 +72,12 @@ namespace RoyalVault.Unity
         }
 
         // Pressing while spinning lands the reels early, so the label says STOP
+        // A solid part that turns (a rotor) rather than light rays that brighten
+        public void SetRayAlpha(float idle, float spinning)
+        {
+            rayAlpha = new Vector2(idle, spinning);
+        }
+
         public void SetSpinning(bool value)
         {
             spinning = value;
@@ -112,7 +120,7 @@ namespace RoyalVault.Unity
             float target = spinning ? spinningRaySpeed : idleRaySpeed;
             raySpeed = Mathf.MoveTowards(raySpeed, target, Time.deltaTime * 260f);
             rays.rectTransform.Rotate(0f, 0f, -raySpeed * Time.deltaTime);
-            rays.color = WithAlpha(rays.color, spinning ? 0.75f : 0.35f);
+            rays.color = WithAlpha(rays.color, spinning ? rayAlpha.y : rayAlpha.x);
         }
 
         private void UpdateGlow()

@@ -1,0 +1,189 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a549340f95cc54ce9836eac52bf2a03c, type: 3}
+  m_Name: RoyalVault_Emerald_Theme
+  m_EditorClassIdentifier: RoyalVault.Unity::RoyalVault.Unity.ThemeDefinition
+  look: 1
+  symbols:
+  - id: card_10
+    sprite: {fileID: 21300000, guid: 2af3346fb027e4a3faa023c67444ff7d, type: 3}
+    blur: {fileID: 21300000, guid: 2d462b622d743478fb8cbb83d9552489, type: 3}
+    style: 0
+    tint: {r: 1, g: 0.85, b: 0.5, a: 1}
+    winAnimation: {fileID: 0}
+  - id: card_J
+    sprite: {fileID: 21300000, guid: 1bf8f1c924b6945f58834c95b551b002, type: 3}
+    blur: {fileID: 21300000, guid: 1f3a9c305885a4affabdee43650cf197, type: 3}
+    style: 0
+    tint: {r: 1, g: 0.85, b: 0.5, a: 1}
+    winAnimation: {fileID: 0}
+  - id: card_Q
+    sprite: {fileID: 21300000, guid: 01a9c0ff1cea8432b917cb05d1067b12, type: 3}
+    blur: {fileID: 21300000, guid: 569256f49fa79496aa6b1e6b9608f914, type: 3}
+    style: 0
+    tint: {r: 1, g: 0.85, b: 0.5, a: 1}
+    winAnimation: {fileID: 0}
+  - id: card_K
+    sprite: {fileID: 21300000, guid: 85fc07d87186d4e6b85de57728824708, type: 3}
+    blur: {fileID: 21300000, guid: d01acfbc92337491c99ae65719d9843c, type: 3}
+    style: 0
+    tint: {r: 1, g: 0.85, b: 0.5, a: 1}
+    winAnimation: {fileID: 0}
+  - id: card_A
+    sprite: {fileID: 21300000, guid: 58694c3b2d1ad48edb121fa5d408daff, type: 3}
+    blur: {fileID: 21300000, guid: 3e26e77f73dd7461c8d4309e656e1322, type: 3}
+    style: 0
+    tint: {r: 1, g: 0.85, b: 0.5, a: 1}
+    winAnimation: {fileID: 0}
+  - id: emerald
+    sprite: {fileID: 21300000, guid: 02620b49241a6425180c050a4ce13f18, type: 3}
+    blur: {fileID: 21300000, guid: 3d57d96a1ad634c0aba9b8c9f80c9e39, type: 3}
+    style: 1
+    tint: {r: 0.35, g: 1, b: 0.55, a: 1}
+    winAnimation: {fileID: 0}
+  - id: sapphire
+    sprite: {fileID: 21300000, guid: 8f37c76213cff4115bee6b13acb4a722, type: 3}
+    blur: {fileID: 21300000, guid: efff9aba0d3384eabad33a05424dd4a5, type: 3}
+    style: 1
+    tint: {r: 0.4, g: 0.6, b: 1, a: 1}
+    winAnimation: {fileID: 0}
+  - id: ruby
+    sprite: {fileID: 21300000, guid: b6ce8d49086f74c5ba726a29b4da203b, type: 3}
+    blur: {fileID: 21300000, guid: e764af824e89248b9bb895c9774c5306, type: 3}
+    style: 1
+    tint: {r: 1, g: 0.3, b: 0.35, a: 1}
+    winAnimation: {fileID: 0}
+  - id: ankh
+    sprite: {fileID: 21300000, guid: 1ece57f6223c84ed6a102e7d8cfb80b2, type: 3}
+    blur: {fileID: 21300000, guid: 073b07ab4149a47f1b900a116a65b042, type: 3}
+    style: 2
+    tint: {r: 1, g: 0.8, b: 0.4, a: 1}
+    winAnimation: {fileID: 0}
+  - id: gold_bars
+    sprite: {fileID: 21300000, guid: 02a539e4631f84f95a32d23eb143f365, type: 3}
+    blur: {fileID: 21300000, guid: 427c600a4755c4d788f2bdd2419f51ec, type: 3}
+    style: 2
+    tint: {r: 1, g: 0.8, b: 0.4, a: 1}
+    winAnimation: {fileID: 0}
+  - id: vault_key
+    sprite: {fileID: 21300000, guid: a7f3758a7a81242fd811f10e0f23f5d6, type: 3}
+    blur: {fileID: 21300000, guid: a6cc59511dfa347208de21bc2887d11a, type: 3}
+    style: 2
+    tint: {r: 1, g: 0.8, b: 0.4, a: 1}
+    winAnimation: {fileID: 0}
+  - id: wild
+    sprite: {fileID: 21300000, guid: 13c6ac71d23d7407ba97055e0d7e4a37, type: 3}
+    blur: {fileID: 21300000, guid: 8eda0191f9aa6491dad7b5f3bc39e769, type: 3}
+    style: 3
+    tint: {r: 0.85, g: 0.95, b: 1, a: 1}
+    winAnimation: {fileID: 11400000, guid: 8f50de2f7e8b04866aac668dece8168d, type: 2}
+  - id: vault_seal
+    sprite: {fileID: 21300000, guid: 71e79c7453f17491696e497014fbe5fc, type: 3}
+    blur: {fileID: 21300000, guid: 719dbe4a357d945b88510f79d5fe04a0, type: 3}
+    style: 4
+    tint: {r: 0.4, g: 0.75, b: 1, a: 1}
+    winAnimation: {fileID: 0}
+  - id: crown
+    sprite: {fileID: 21300000, guid: 7be7485217f0242759cffb262763ad0c, type: 3}
+    blur: {fileID: 21300000, guid: 64320748b724b4c64b640c6edca6e3e0, type: 3}
+    style: 5
+    tint: {r: 1, g: 0.82, b: 0.4, a: 1}
+    winAnimation: {fileID: 0}
+  background: {fileID: 21300000, guid: c1df484f60d3a4360b634cb675cd713f, type: 3}
+  vignette: {fileID: 21300000, guid: f872f30ee3e2d46e38ee50f334d8bed5, type: 3}
+  reelFrame: {fileID: 0}
+  reelCell: {fileID: 21300000, guid: 7c07f028dccad43178644865bcdae287, type: 3}
+  logo: {fileID: 21300000, guid: 88f341947927e4dc594ecd48001200ed, type: 3}
+  niche: {fileID: 0}
+  reelHousing: {fileID: 21300000, guid: c6aaaad031ae3404794c9c0d0a0039af, type: 3}
+  housingBorderScale: 1
+  character: {fileID: 21300000, guid: 98663f0ca23be4091ab8354bcacca9a9, type: 3}
+  characterEffectAnchor: {x: 0.89, y: 0.837}
+  characterAnimation: {fileID: 11400000, guid: 148c3ddcc38204ef3a7dd9333d2621ae, type: 2}
+  characterMagic: {r: 0.35, g: 0.75, b: 1, a: 1}
+  additive: {fileID: 2100000, guid: 87cfb5d4bd56c432b83a1803eae1b483, type: 2}
+  symbolMaterial: {fileID: 2100000, guid: 7284114aa04e14d309421c3aa0c1a3d5, type: 2}
+  rays: {fileID: 21300000, guid: 5d0cc192600e942708d3d6aabaf48c8b, type: 3}
+  clashImpactVfx: {fileID: 2965222256817593503, guid: a164e676dbbd6e54587237e619372c98, type: 3}
+  clashSparksVfx: {fileID: 952961124639765284, guid: 1095a5c9f65bfbe4383f63d5d1886c65, type: 3}
+  sealBreakVfx: {fileID: 2944396702758532163, guid: e190bf97c041e58448af6b043116cba0, type: 3}
+  vfxScale: 170
+  story: {fileID: 11400000, guid: ced7b3d86de1841f9bd3e7d24fd11d34, type: 2}
+  sounds: {fileID: 11400000, guid: 89b77e2e548124804a9d37d2e28379ea, type: 2}
+  heroLeft: {fileID: 11400000, guid: ef808432880fa41b2b25aff5bf39c723, type: 2}
+  heroRight: {fileID: 11400000, guid: 0fd0465fd0bda48d39cac191605af63b, type: 2}
+  consoleBar: {fileID: 21300000, guid: b73ea9ea35ded40abb6b52d81736c649, type: 3}
+  spinButton: {fileID: 21300000, guid: 4bf846bdf31394985a6f378eab5a4f01, type: 3}
+  spinRotor: {fileID: 21300000, guid: 60276f31e115c42edbcfa94f4fe028b7, type: 3}
+  spinWings: {fileID: 21300000, guid: cda057f37512c415fbbfa5bdf0645e46, type: 3}
+  jackpotPlaque: {fileID: 21300000, guid: 282ce912cf91f48feae36fc01daae499, type: 3}
+  jackpotIcons:
+  - {fileID: 21300000, guid: 3aa5a8545521b4139b5ac15d9d2b3fc0, type: 3}
+  - {fileID: 21300000, guid: 3af57a8cbf2b4404a951efeb0e876c40, type: 3}
+  - {fileID: 21300000, guid: a8567d4fff2754aa09ec52ed695bdb65, type: 3}
+  jackpotTints:
+  - {r: 0.039215688, g: 0.07058824, b: 0.05882353, a: 1}
+  - {r: 0.047058824, g: 0.22745098, b: 0.16470589, a: 1}
+  - {r: 0.050980393, g: 0.12941177, b: 0.29803923, a: 1}
+  pillButton: {fileID: 21300000, guid: a6de832a686bf4fe2868224e6d896bee, type: 3}
+  roundButton: {fileID: 21300000, guid: deeca0c93946c4291b6c2335c963f61a, type: 3}
+  jackpotGrand: {fileID: 21300000, guid: eba32eec514c043d38001b20e3be44d6, type: 3}
+  jackpotMinor: {fileID: 21300000, guid: c9eb84cfa1cc54294b039356d90e4814, type: 3}
+  popupPanel: {fileID: 21300000, guid: 3f53bc29b96fd45ebb6610c772abd7b0, type: 3}
+  card: {fileID: 21300000, guid: ce72c95ad931d46239d368dc38463e34, type: 3}
+  cardFace: {fileID: 21300000, guid: e2f818a7f67864475b4d21ca01e7bc1e, type: 3}
+  cardBack: {fileID: 21300000, guid: 94425e6e33dd141849a147f3f60df688, type: 3}
+  suits:
+  - {fileID: 21300000, guid: a82c0eb8845dc43e3a5f55c8ddde0026, type: 3}
+  - {fileID: 21300000, guid: e6134dafb93854fa196645527c3a3013, type: 3}
+  - {fileID: 21300000, guid: 6c3da6ccd110e49d8b746f29bba813e0, type: 3}
+  - {fileID: 21300000, guid: e52b4e3c1482045a88d1bcd4737f88c5, type: 3}
+  urn: {fileID: 21300000, guid: 25b6fde6a2a0c4a5295512b18c29909a, type: 3}
+  eye: {fileID: 21300000, guid: a9355333f345b477d9b6a1a9cf568eb2, type: 3}
+  bigWinBanner: {fileID: 21300000, guid: 275862cc3d97f437aad11f9077a1f685, type: 3}
+  coin: {fileID: 21300000, guid: 75ce2bdfc962b40b1b35d8e868b63f7f, type: 3}
+  sparkle: {fileID: 21300000, guid: dd2dc367e58834f309ccd2443873b815, type: 3}
+  glow: {fileID: 21300000, guid: fcc645abd5840410ab3a2ed0dfd1f715, type: 3}
+  line: {fileID: 21300000, guid: a2e41093d405d48ed98115c33ffabaeb, type: 3}
+  white: {fileID: 21300000, guid: 854f3f6636bd1406faab9a112006d240, type: 3}
+  levelBar: {fileID: 21300000, guid: 89250ce98570a42638ae838ec1f1d004, type: 3}
+  levelFill: {fileID: 21300000, guid: 19d202f0c96bb444cbec9e9362662e85, type: 3}
+  iconMenu: {fileID: 21300000, guid: b4af16eda8ac54857adb022f66f1a552, type: 3}
+  iconInfo: {fileID: 21300000, guid: 3533302d69ede4794a85e42dbf640b95, type: 3}
+  iconSound: {fileID: 21300000, guid: a0d09a31bd8134e62a767a6d6ebf1321, type: 3}
+  iconClose: {fileID: 21300000, guid: bf218b786eb8b45acabc3ea4030880cd, type: 3}
+  displayFont: {fileID: 11400000, guid: d0cf596cdca7c4d7aa5b1430357f6720, type: 2}
+  headingFont: {fileID: 11400000, guid: fc8a1fc6e1d554122812a18e72f14b59, type: 2}
+  labelFont: {fileID: 11400000, guid: 19010ada75f2c42adba3b58784002a1b, type: 2}
+  bodyFont: {fileID: 11400000, guid: 86ab7a79ef1f14878b126aa8708d146b, type: 2}
+  gold: {r: 0.8509804, g: 0.6431373, b: 0.25490198, a: 1}
+  paleGold: {r: 1, g: 0.88235295, b: 0.627451, a: 1}
+  ivory: {r: 0.9529412, g: 0.9137255, b: 0.8235294, a: 1}
+  dimGold: {r: 0.7411765, g: 0.81960785, b: 0.7529412, a: 1}
+  ink: {r: 0.011764706, g: 0.07058824, b: 0.05490196, a: 1}
+  surface: {r: 0.043137256, g: 0.14901961, b: 0.10980392, a: 1}
+  accent: {r: 0.20784314, g: 0.84705883, b: 0.9098039, a: 1}
+  reelArea:
+    serializedVersion: 2
+    x: -494
+    y: -285
+    width: 988
+    height: 480
+  cellAspect: 1.23
+  cellGap: 4
+  symbolScale: 0.94
+  frameBorderScale: 0.937
+  loadingTips:
+  - Polishing the gems
+  - Counting the gold
+  - Waking the guardians
+  - Opening the vault

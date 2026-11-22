@@ -98,6 +98,7 @@ namespace RoyalVault.Unity
             }
 
             Vector2 windowSize = FitWindow();
+            BuildHousing(windowSize);
             BuildCells(windowSize);
             RectTransform fxBack = UiFactory.Rect("Symbol Light", transform, Vector2.zero, Vector2.zero);
             BuildReels(windowSize);
@@ -149,17 +150,34 @@ namespace RoyalVault.Unity
             }
         }
 
+        // Stone housing behind the reels: its pylons, lintel and sill keep their size around a window that fits the cells
+        private void BuildHousing(Vector2 windowSize)
+        {
+            if (theme.reelHousing == null)
+            {
+                return;
+            }
+
+            Image housing = UiFactory.Image("Housing", transform, theme.reelHousing, windowCentre, windowSize);
+            housing.type = Image.Type.Sliced;
+            housing.pixelsPerUnitMultiplier = 1f / theme.housingBorderScale;
+            Vector4 b = theme.reelHousing.border * theme.housingBorderScale; // left, bottom, right, top
+            const float margin = 10f;
+            housing.rectTransform.sizeDelta = windowSize + new Vector2(b.x + b.z + margin * 2f, b.y + b.w + margin * 2f);
+            housing.rectTransform.anchoredPosition = windowCentre + new Vector2((b.z - b.x) * 0.5f, (b.w - b.y) * 0.5f);
+        }
+
         // The frame wraps the window; its corners keep their size
         private void BuildFrame(Vector2 windowSize)
         {
-            Image frame = UiFactory.Image("Frame", transform, theme.reelFrame, windowCentre, windowSize);
-            frame.type = Image.Type.Sliced;
-            frame.pixelsPerUnitMultiplier = 1f / theme.frameBorderScale;
             if (theme.reelFrame == null)
             {
                 return;
             }
 
+            Image frame = UiFactory.Image("Frame", transform, theme.reelFrame, windowCentre, windowSize);
+            frame.type = Image.Type.Sliced;
+            frame.pixelsPerUnitMultiplier = 1f / theme.frameBorderScale;
             Vector4 b = theme.reelFrame.border * theme.frameBorderScale; // left, bottom, right, top
             frame.rectTransform.sizeDelta = windowSize + new Vector2(b.x + b.z, b.y + b.w);
             frame.rectTransform.anchoredPosition = windowCentre + new Vector2((b.z - b.x) * 0.5f, (b.w - b.y) * 0.5f);

@@ -20,9 +20,25 @@ namespace RoyalVault.EditorTools
         private const string DataPath = Root + "Data/";
         private const string TmpEssentials = "Packages/com.unity.ugui/Package Resources/TMP Essential Resources.unitypackage";
 
+        // The look the next build makes
+        private static ThemeLook look = ThemeLook.Emerald;
+
         [MenuItem("Royal Vault/Build Everything", priority = 1)]
         public static void BuildAll()
         {
+            BuildLook(ThemeLook.Emerald);
+        }
+
+        // The original black lacquer and gold look, kept while the Emerald look is finished
+        [MenuItem("Royal Vault/Build Everything (Art Deco look)", priority = 2)]
+        public static void BuildArtDeco()
+        {
+            BuildLook(ThemeLook.ArtDeco);
+        }
+
+        private static void BuildLook(ThemeLook chosen)
+        {
+            look = chosen;
             if (!AssetDatabase.IsValidFolder("Assets/TextMesh Pro"))
             {
                 Debug.Log("Royal Vault: importing the TextMesh Pro essentials first; run Build Everything again when it finishes.");
@@ -38,13 +54,18 @@ namespace RoyalVault.EditorTools
             GameObject prefab = BuildGamePrefab(main, theme);
             BuildScenes(prefab, theme, classic);
             AssetDatabase.SaveAssets();
-            Debug.Log("Royal Vault: build complete (Boot and Game scenes, RoyalVaultGame prefab, presets, theme).");
+            Debug.Log("Royal Vault: build complete (" + look + " look: Boot and Game scenes, RoyalVaultGame prefab, presets, theme).");
         }
 
         // Entry point for batch builds
         public static void BuildAllBatch()
         {
             BuildAll();
+        }
+
+        public static void BuildArtDecoBatch()
+        {
+            BuildArtDeco();
         }
 
         // Batch mode, first run only: imports the TextMesh Pro essentials (shaders and settings)
@@ -123,7 +144,7 @@ namespace RoyalVault.EditorTools
         private static ThemeDefinition CreateTheme(Fonts fonts)
         {
             EnsureFolder(DataPath);
-            string path = DataPath + "RoyalVault_Theme.asset";
+            string path = DataPath + (look == ThemeLook.Emerald ? "RoyalVault_Emerald_Theme.asset" : "RoyalVault_Theme.asset");
             var theme = AssetDatabase.LoadAssetAtPath<ThemeDefinition>(path);
             bool created = theme == null;
             if (created)
@@ -131,8 +152,18 @@ namespace RoyalVault.EditorTools
                 theme = ScriptableObject.CreateInstance<ThemeDefinition>();
             }
 
-            theme.symbols = SymbolArts();
+            theme.look = look;
+            theme.symbols = SymbolArts(look == ThemeLook.Emerald ? "Emerald/Symbols/" : "Symbols/");
             SetInterfaceArt(theme);
+            if (look == ThemeLook.Emerald)
+            {
+                SetEmeraldArt(theme);
+            }
+            else
+            {
+                SetArtDecoLayout(theme);
+            }
+
             SetCharacters(theme);
             SetEffects(theme);
             theme.displayFont = fonts.Display;
@@ -148,7 +179,7 @@ namespace RoyalVault.EditorTools
             return theme;
         }
 
-        private static ThemeDefinition.SymbolArt[] SymbolArts()
+        private static ThemeDefinition.SymbolArt[] SymbolArts(string folder)
         {
             string[] ids = { "card_10", "card_J", "card_Q", "card_K", "card_A", "emerald", "sapphire", "ruby", "ankh", "gold_bars", "vault_key", "wild", "vault_seal", "crown" };
             return ids.Select(id =>
@@ -157,8 +188,8 @@ namespace RoyalVault.EditorTools
                 return new ThemeDefinition.SymbolArt
                 {
                     id = id,
-                    sprite = Sprite("Symbols/" + id),
-                    blur = Sprite("Symbols/Blur/" + id),
+                    sprite = Sprite(folder + id),
+                    blur = Sprite(folder + "Blur/" + id),
                     style = style,
                     tint = tint,
                     winAnimation = SymbolWinAnimation(id),
@@ -346,6 +377,7 @@ namespace RoyalVault.EditorTools
             Write("card", 128, 128, (x, y) => RoundedRect(x, y, 128, 128, 18f, new Color32(14, 12, 18, 235), new Color32(150, 112, 52, 255), 2f));
             WriteCardTextures();
             WriteTreasuryTextures();
+            WriteEmeraldTextures();
             AssetDatabase.Refresh();
         }
 

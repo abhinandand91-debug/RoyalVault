@@ -14,10 +14,10 @@ namespace RoyalVault.EditorTools
         // Phones cannot show more detail than this on a full-screen background
         private const int MobileBackgroundSize = 2048;
 
-        private static readonly string[] Paintings = { "Art/Machine/bg", "Art/Story/scene_" };
+        private static readonly string[] Paintings = { "Art/Machine/bg", "Art/Story/scene_", "Art/Emerald/Environment/bg" };
         // Animated characters and symbols: many large frames, soft painted detail
         private static readonly string[] Frames = { "Art.Private/Characters/", "Art.Private/Symbols/" };
-        private static readonly string[] Backgrounds = { "Art/Machine/bg" };
+        private static readonly string[] Backgrounds = { "Art/Machine/bg", "Art/Emerald/Environment/bg" };
 
         [MenuItem("Royal Vault/Apply Texture and Audio Budget")]
         public static void Apply()

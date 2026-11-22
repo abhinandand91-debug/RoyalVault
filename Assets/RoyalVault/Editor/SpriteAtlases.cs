@@ -13,6 +13,7 @@ namespace RoyalVault.EditorTools
         private const string PublicAtlases = "Assets/RoyalVault/Art/Atlases";
         private const string PrivateArt = "Assets/RoyalVault/Art.Private";
         private const string SymbolArt = "Assets/RoyalVault/Art/Symbols";
+        private const string EmeraldSymbolArt = "Assets/RoyalVault/Art/Emerald/Symbols";
         private const int Padding = 8;
         private const int PageSize = 2048;
 
@@ -23,6 +24,12 @@ namespace RoyalVault.EditorTools
             SetMeshType(SymbolArt, SpriteMeshType.FullRect);
             Create(PublicAtlases, "Symbols", Sprites(SymbolArt));
             Create(PublicAtlases, "SymbolsBlur", Sprites(SymbolArt + "/Blur"));
+            if (AssetDatabase.IsValidFolder(EmeraldSymbolArt))
+            {
+                SetMeshType(EmeraldSymbolArt, SpriteMeshType.FullRect);
+                Create(PublicAtlases, "EmeraldSymbols", Sprites(EmeraldSymbolArt));
+                Create(PublicAtlases, "EmeraldSymbolsBlur", Sprites(EmeraldSymbolArt + "/Blur"));
+            }
             // baked animation frames stay plain rectangles: tight outlines would rebuild thousands of vertices each frame
             foreach (string folder in AnimationFolders())
             {

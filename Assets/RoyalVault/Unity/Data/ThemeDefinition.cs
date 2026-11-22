@@ -21,6 +21,15 @@ namespace RoyalVault.Unity
         Jackpot,
     }
 
+    // The overall look a theme is built for
+    public enum ThemeLook
+    {
+        // Black lacquer and gold, the original look
+        ArtDeco,
+        // The Emerald Sanctum: emerald, obsidian and antique gold
+        Emerald,
+    }
+
     // Art, fonts and colours for a machine
     [CreateAssetMenu(menuName = "Royal Vault/Theme", fileName = "Theme")]
     public sealed class ThemeDefinition : ScriptableObject
@@ -37,6 +46,8 @@ namespace RoyalVault.Unity
             public CharacterAnimation winAnimation;
         }
 
+        [Tooltip("Which layout and styling the builder uses with this theme")] public ThemeLook look;
+
         [Header("Symbols")]
         public SymbolArt[] symbols = new SymbolArt[0];
 
@@ -47,6 +58,8 @@ namespace RoyalVault.Unity
         public Sprite reelCell;
         public Sprite logo;
         public Sprite niche;
+        [Tooltip("Stone housing drawn behind the reels (9-sliced around the window), used instead of a frame over them")] public Sprite reelHousing;
+        [Tooltip("How large the housing's 9-slice borders draw (1 = the art's own pixels)")] public float housingBorderScale = 1f;
         [Tooltip("Optional guardian character (licensed art may be missing in a public checkout)")] public Sprite character;
         [Tooltip("Where the character's magic burns, as a share of its art (0,0 = bottom left)")] public Vector2 characterEffectAnchor = new Vector2(0.89f, 0.837f);
         [Tooltip("Optional baked animation for the character; without it the still art breathes procedurally")] public CharacterAnimation characterAnimation;
@@ -68,6 +81,11 @@ namespace RoyalVault.Unity
         [Header("Interface")]
         public Sprite consoleBar;
         public Sprite spinButton;
+        [Tooltip("Bronze rotor ring that turns around the spin button")] public Sprite spinRotor;
+        [Tooltip("Gold wings either side of the spin button")] public Sprite spinWings;
+        [Tooltip("Jackpot plaque, 9-sliced; tinted per tier")] public Sprite jackpotPlaque;
+        [Tooltip("Icon on each jackpot plaque: top tier first")] public Sprite[] jackpotIcons = new Sprite[0];
+        [Tooltip("Plaque colour per jackpot tier: top tier first")] public Color[] jackpotTints = new Color[0];
         public Sprite pillButton;
         public Sprite roundButton;
         public Sprite jackpotGrand;
@@ -105,6 +123,8 @@ namespace RoyalVault.Unity
         public Color ivory = new Color32(243, 233, 210, 255);
         public Color dimGold = new Color32(179, 154, 102, 255);
         public Color ink = new Color32(10, 9, 13, 255);
+        [Tooltip("Panels and the control deck")] public Color surface = new Color32(11, 38, 28, 255);
+        [Tooltip("Magic and active states")] public Color accent = new Color32(53, 216, 232, 255);
 
         [Header("Reel window (canvas units, 1920 x 1080 design)")]
         [Tooltip("The largest area the reels may use; the machine is centred in it")] public Rect reelArea = new Rect(-555, -251, 1110, 541);

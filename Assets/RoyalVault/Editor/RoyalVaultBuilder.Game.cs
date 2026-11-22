@@ -17,16 +17,27 @@ namespace RoyalVault.EditorTools
             EnsureFolder(Root + "Prefabs");
             GameObject root = OverlayCanvas("RoyalVaultGame");
             Transform t = root.transform;
+            bool emerald = theme.look == ThemeLook.Emerald;
             Backdrop(t, theme, Color.white);
-            CharacterView[] guardians = Guardians(t, theme);
+            // the Art Deco guardians stand in niches behind the frame; the Emerald guardians stand in front of the housing
+            CharacterView[] guardians = emerald ? null : Guardians(t, theme);
             RectTransform machineRect = UiFactory.Stretch("Machine", t);
             UiFactory.NestedCanvas(machineRect.gameObject, false);
             var machineView = machineRect.gameObject.AddComponent<MachineView>();
-            Image logo = UiFactory.Image("Logo", t, theme.logo, new Vector2(0, 455), new Vector2(480, 171));
-            logo.preserveAspect = true;
-            JackpotPanelView jackpots = Jackpots(t, theme);
+            if (emerald)
+            {
+                guardians = Guardians(t, theme);
+                EmeraldLogo(t, theme);
+            }
+            else
+            {
+                Image logo = UiFactory.Image("Logo", t, theme.logo, new Vector2(0, 455), new Vector2(480, 171));
+                logo.preserveAspect = true;
+            }
+
+            JackpotPanelView jackpots = emerald ? EmeraldJackpots(t, theme) : Jackpots(t, theme);
             ConsoleView console = Console(t, theme);
-            SealMeterView sealMeter = SealMeter(console.transform, theme);
+            SealMeterView sealMeter = SealMeter(console.transform, theme, LayoutFor(theme).Seal);
             FlameClashView flameClash = FlameClash(t, theme, machineRect);
             GuardianFireView guardianFire = GuardianFire(t, theme);
             MessageToast toast = Toast(t, theme);
@@ -75,8 +86,12 @@ namespace RoyalVault.EditorTools
 
         private static CharacterView[] Guardians(Transform t, ThemeDefinition theme)
         {
-            UiFactory.Image("Niche Left", t, theme.niche, new Vector2(-800, -13), new Vector2(232, 751));
-            UiFactory.Image("Niche Right", t, theme.niche, new Vector2(800, -13), new Vector2(232, 751));
+            if (theme.niche != null)
+            {
+                UiFactory.Image("Niche Left", t, theme.niche, new Vector2(-800, -13), new Vector2(232, 751));
+                UiFactory.Image("Niche Right", t, theme.niche, new Vector2(800, -13), new Vector2(232, 751));
+            }
+
             return new[] { Character("Guardian Left", t, theme, -785f, false, 0f), Character("Guardian Right", t, theme, 785f, true, 1.7f) };
         }
 
@@ -341,9 +356,9 @@ namespace RoyalVault.EditorTools
         }
 
         // The Vault Seal medallion: face, cracks and pips
-        private static SealMeterView SealMeter(Transform parent, ThemeDefinition theme)
+        private static SealMeterView SealMeter(Transform parent, ThemeDefinition theme, Vector2 position)
         {
-            RectTransform holder = UiFactory.Rect("Seal Meter", parent, new Vector2(-250, -452), new Vector2(120, 120));
+            RectTransform holder = UiFactory.Rect("Seal Meter", parent, position, new Vector2(120, 120));
             Image magic = UiFactory.Image("Vault Light", holder, theme.glow, Vector2.zero, new Vector2(230, 230));
             magic.material = theme.additive;
             magic.color = new Color(0f, 0f, 0f, 0f);
@@ -468,21 +483,61 @@ namespace RoyalVault.EditorTools
             return view;
         }
 
+        // Where each console control sits in a look
+        private struct ConsoleLayout
+        {
+            public Vector2 Spin, Auto, AutoSize, Stepper, StepperSize, Menu, Sound, Gamble, Seal;
+            public float BalanceX, DividerX, WinX, LabelY, ValueY;
+        }
+
+        // Art Deco: spin in the middle; Emerald: readouts on the left and spin in the right-hand corner, under the thumb
+        private static ConsoleLayout LayoutFor(ThemeDefinition theme)
+        {
+            if (theme.look == ThemeLook.Emerald)
+            {
+                return new ConsoleLayout
+                {
+                    Spin = new Vector2(800, -458), Auto = new Vector2(590, -466), AutoSize = new Vector2(132, 60),
+                    Stepper = new Vector2(355, -466), StepperSize = new Vector2(300, 64), Menu = new Vector2(-884, -466),
+                    Sound = new Vector2(-812, -466), Gamble = new Vector2(110, -466), Seal = new Vector2(-60, -456),
+                    BalanceX = -745, DividerX = -505, WinX = -470, LabelY = -444, ValueY = -482,
+                };
+            }
+
+            return new ConsoleLayout
+            {
+                Spin = new Vector2(0, -460), Auto = new Vector2(362, -471), AutoSize = new Vector2(168, 64), Stepper = new Vector2(640, -471),
+                StepperSize = new Vector2(340, 64), Menu = new Vector2(-884, -471), Sound = new Vector2(884, -471), Gamble = new Vector2(-388, -462),
+                Seal = new Vector2(-250, -452), BalanceX = -810, DividerX = -596, WinX = -560, LabelY = -444, ValueY = -482,
+            };
+        }
+
         private static ConsoleView Console(Transform parent, ThemeDefinition theme)
         {
+            ConsoleLayout layout = LayoutFor(theme);
+            bool emerald = theme.look == ThemeLook.Emerald;
             RectTransform console = UiFactory.Stretch("Console", parent);
             UiFactory.NestedCanvas(console.gameObject, true);
-            ConsoleBar(console);
-            (CountingText balance, TextMeshProUGUI winLabel, CountingText win) = Readouts(console, theme);
-            SpinButtonView spin = SpinButton(console, theme, new Vector2(0, -460));
+            if (emerald)
+            {
+                EmeraldDeck(console, theme);
+            }
+            else
+            {
+                ConsoleBar(console);
+            }
 
-            Image autoPill = Pill("Auto", console, theme, new Vector2(362, -471), new Vector2(168, 64));
-            TextMeshProUGUI autoText = UiFactory.Text("Label", autoPill.transform, theme.headingFont, "AUTO", 17, theme.gold, Vector2.zero, new Vector2(168, 64), TextAlignmentOptions.Center, 22);
-            (Button minus, Button plus, TextMeshProUGUI totalBet) = BetStepper(console, theme);
-            Button menu = IconButton("Menu", console, theme, theme.iconMenu, new Vector2(-884, -471), out _);
-            Button sound = IconButton("Sound", console, theme, theme.iconSound, new Vector2(884, -471), out Image soundIcon);
+            (CountingText balance, TextMeshProUGUI winLabel, CountingText win) = Readouts(console, theme, layout);
+            SpinButtonView spin = emerald ? EmeraldSpinButton(console, theme, layout.Spin) : SpinButton(console, theme, layout.Spin);
 
-            (Button gambleButton, AttentionHighlight gambleHighlight) = GambleButton(console, theme);
+            Image autoPill = Pill("Auto", console, theme, layout.Auto, layout.AutoSize);
+            TextMeshProUGUI autoText = UiFactory.Text("Label", autoPill.transform, theme.headingFont, "AUTO", 17, theme.gold, Vector2.zero, layout.AutoSize,
+                                                      TextAlignmentOptions.Center, 22);
+            (Button minus, Button plus, TextMeshProUGUI totalBet) = BetStepper(console, theme, layout);
+            Button menu = IconButton("Menu", console, theme, theme.iconMenu, layout.Menu, out _);
+            Button sound = IconButton("Sound", console, theme, theme.iconSound, layout.Sound, out Image soundIcon);
+
+            (Button gambleButton, AttentionHighlight gambleHighlight) = GambleButton(console, theme, layout.Gamble);
 
             var view = console.gameObject.AddComponent<ConsoleView>();
             view.Setup(balance, winLabel, win, totalBet, autoText, spin, minus, plus, UiFactory.Button(autoPill), menu, sound, soundIcon);
@@ -491,10 +546,10 @@ namespace RoyalVault.EditorTools
         }
 
         // The gamble offer: a pill with a soft halo behind it and a band of light that sweeps across it while it waits
-        private static (Button button, AttentionHighlight highlight) GambleButton(RectTransform console, ThemeDefinition theme)
+        private static (Button button, AttentionHighlight highlight) GambleButton(RectTransform console, ThemeDefinition theme, Vector2 position)
         {
             Vector2 size = new Vector2(136, 50);
-            RectTransform holder = UiFactory.Rect("Gamble Offer", console, new Vector2(-388, -462), size);
+            RectTransform holder = UiFactory.Rect("Gamble Offer", console, position, size);
             Image halo = UiFactory.Image("Halo", holder, theme.glow, Vector2.zero, new Vector2(340, 170));
             halo.material = theme.additive;
             halo.color = new Color(1f, 0.78f, 0.36f, 0f);
@@ -523,23 +578,25 @@ namespace RoyalVault.EditorTools
             UiFactory.Image("Spin Socket", console, Sprite("Generated/socket"), new Vector2(0, -460), new Vector2(320, 320));
         }
 
-        private static (CountingText, TextMeshProUGUI, CountingText) Readouts(RectTransform console, ThemeDefinition theme)
+        private static (CountingText, TextMeshProUGUI, CountingText) Readouts(RectTransform console, ThemeDefinition theme, ConsoleLayout layout)
         {
-            Left("Balance Label", console, theme.labelFont, "BALANCE", 15, theme.dimGold, -810, -444, 28);
-            TextMeshProUGUI balance = Left("Balance", console, theme.headingFont, "0", 34, theme.ivory, -810, -482, 0);
-            Image divider = UiFactory.Image("Divider", console, theme.white, new Vector2(-596, -462), new Vector2(1, 56));
+            Left("Balance Label", console, theme.labelFont, "BALANCE", 15, theme.dimGold, layout.BalanceX, layout.LabelY, 28);
+            TextMeshProUGUI balance = Left("Balance", console, theme.headingFont, "0", 34, theme.ivory, layout.BalanceX, layout.ValueY, 0);
+            Image divider = UiFactory.Image("Divider", console, theme.white, new Vector2(layout.DividerX, (layout.LabelY + layout.ValueY) * 0.5f),
+                                            new Vector2(1, 56));
             divider.color = new Color(theme.gold.r, theme.gold.g, theme.gold.b, 0.5f);
-            TextMeshProUGUI winLabel = Left("Win Label", console, theme.labelFont, "WIN", 15, theme.dimGold, -560, -444, 28);
-            TextMeshProUGUI win = Left("Win", console, theme.headingFont, "0", 34, theme.paleGold, -560, -482, 0);
+            TextMeshProUGUI winLabel = Left("Win Label", console, theme.labelFont, "WIN", 15, theme.dimGold, layout.WinX, layout.LabelY, 28);
+            TextMeshProUGUI win = Left("Win", console, theme.headingFont, "0", 34, theme.paleGold, layout.WinX, layout.ValueY, 0);
             return (balance.gameObject.AddComponent<CountingText>(), winLabel, win.gameObject.AddComponent<CountingText>());
         }
 
-        private static (Button, Button, TextMeshProUGUI) BetStepper(RectTransform console, ThemeDefinition theme)
+        private static (Button, Button, TextMeshProUGUI) BetStepper(RectTransform console, ThemeDefinition theme, ConsoleLayout layout)
         {
-            Image stepper = Pill("Bet Stepper", console, theme, new Vector2(640, -471), new Vector2(340, 64));
+            Image stepper = Pill("Bet Stepper", console, theme, layout.Stepper, layout.StepperSize);
             stepper.raycastTarget = false;
-            Button minus = RoundButton("Bet Minus", stepper.transform, theme, new Vector2(-138, 0), 48, false);
-            Button plus = RoundButton("Bet Plus", stepper.transform, theme, new Vector2(138, 0), 48, true);
+            float end = layout.StepperSize.x * 0.5f - 32f;
+            Button minus = RoundButton("Bet Minus", stepper.transform, theme, new Vector2(-end, 0), 48, false);
+            Button plus = RoundButton("Bet Plus", stepper.transform, theme, new Vector2(end, 0), 48, true);
             UiFactory.Text("Total Bet Label", stepper.transform, theme.labelFont, "TOTAL BET", 12, theme.dimGold, new Vector2(0, 14), new Vector2(200, 20), TextAlignmentOptions.Center, 26);
             TextMeshProUGUI total = UiFactory.Text("Total Bet", stepper.transform, theme.headingFont, "0", 26, theme.ivory, new Vector2(0, -9), new Vector2(200, 36));
             return (minus, plus, total);

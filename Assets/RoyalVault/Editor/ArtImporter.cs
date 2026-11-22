@@ -55,6 +55,11 @@ namespace RoyalVault.EditorTools
             {
                 importer.spriteBorder = new Vector4(138, 130, 141, 137);
             }
+            else if (assetPath.EndsWith("Emerald/Environment/reel_housing.png"))
+            {
+                // the pylons, the lintel and the sill around the reel window
+                importer.spriteBorder = new Vector4(231, 127, 231, 135);
+            }
             else if (assetPath.EndsWith("UI/popup_panel.png"))
             {
                 importer.spriteBorder = new Vector4(171, 170, 171, 170);
@@ -64,6 +69,14 @@ namespace RoyalVault.EditorTools
                 importer.spriteBorder = new Vector4(65, 0, 65, 1);
             }
             else if (assetPath.EndsWith("Generated/card.png"))
+            {
+                importer.spriteBorder = new Vector4(24, 24, 24, 24);
+            }
+            else if (assetPath.EndsWith("Generated/emerald_pill.png"))
+            {
+                importer.spriteBorder = new Vector4(62, 62, 62, 62);
+            }
+            else if (assetPath.EndsWith("Generated/emerald_plaque.png") || assetPath.EndsWith("Generated/emerald_plaque_edge.png"))
             {
                 importer.spriteBorder = new Vector4(24, 24, 24, 24);
             }
