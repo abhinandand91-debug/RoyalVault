@@ -480,15 +480,35 @@ namespace RoyalVault.EditorTools
             Button menu = IconButton("Menu", console, theme, theme.iconMenu, new Vector2(-884, -471), out _);
             Button sound = IconButton("Sound", console, theme, theme.iconSound, new Vector2(884, -471), out Image soundIcon);
 
-            Image gamblePill = Pill("Gamble", console, theme, new Vector2(-388, -462), new Vector2(136, 50));
-            UiFactory.Text("Label", gamblePill.transform, theme.headingFont, "GAMBLE", 16, theme.paleGold, Vector2.zero, new Vector2(136, 50),
-                           TextAlignmentOptions.Center, 14);
-            Button gambleButton = UiFactory.Button(gamblePill);
+            (Button gambleButton, AttentionHighlight gambleHighlight) = GambleButton(console, theme);
 
             var view = console.gameObject.AddComponent<ConsoleView>();
             view.Setup(balance, winLabel, win, totalBet, autoText, spin, minus, plus, UiFactory.Button(autoPill), menu, sound, soundIcon);
-            view.SetupGamble(gambleButton);
+            view.SetupGamble(gambleButton, gambleHighlight);
             return view;
+        }
+
+        // The gamble offer: a pill with a soft halo behind it and a band of light that sweeps across it while it waits
+        private static (Button button, AttentionHighlight highlight) GambleButton(RectTransform console, ThemeDefinition theme)
+        {
+            Vector2 size = new Vector2(136, 50);
+            RectTransform holder = UiFactory.Rect("Gamble Offer", console, new Vector2(-388, -462), size);
+            Image halo = UiFactory.Image("Halo", holder, theme.glow, Vector2.zero, new Vector2(340, 170));
+            halo.material = theme.additive;
+            halo.color = new Color(1f, 0.78f, 0.36f, 0f);
+            Image pill = Pill("Gamble", holder, theme, Vector2.zero, size);
+            RectTransform mask = UiFactory.Rect("Shine Mask", pill.transform, Vector2.zero, size - new Vector2(10, 8));
+            mask.gameObject.AddComponent<RectMask2D>();
+            Image shine = UiFactory.Image("Shine", mask, theme.glow, Vector2.zero, new Vector2(34, 110));
+            shine.material = theme.additive;
+            shine.color = new Color(1f, 0.92f, 0.7f, 0.85f);
+            shine.rectTransform.localRotation = Quaternion.Euler(0f, 0f, -22f);
+            shine.gameObject.SetActive(false);
+            UiFactory.Text("Label", pill.transform, theme.headingFont, "GAMBLE", 16, theme.paleGold, Vector2.zero, size,
+                           TextAlignmentOptions.Center, 14);
+            var highlight = holder.gameObject.AddComponent<AttentionHighlight>();
+            highlight.Setup(pill.rectTransform, halo, shine.rectTransform);
+            return (UiFactory.Button(pill), highlight);
         }
 
         // Full-width lacquer bar with a double gold rule and the spin socket

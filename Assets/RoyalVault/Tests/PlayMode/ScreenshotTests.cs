@@ -168,6 +168,8 @@ namespace RoyalVault.Tests
             var view = Object.FindFirstObjectByType<GambleView>(FindObjectsInactive.Include);
             Button offer = ButtonNamed("Gamble");
             yield return ShotWhen(() => offer.gameObject.activeInHierarchy, 0.5f, "31_gamble_offer");
+            yield return new WaitForSeconds(0.28f);
+            yield return Shot("31b_gamble_shine");
             offer.onClick.Invoke();
             yield return ShotWhen(() => view.IsOpen, 0.5f, "32_gamble_table");
             ButtonNamed("RED  x2").onClick.Invoke();

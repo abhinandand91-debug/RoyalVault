@@ -1,6 +1,5 @@
 using System;
 using GameKit;
-using PrimeTween;
 using SlotKit;
 using TMPro;
 using UnityEngine.UI;
@@ -27,6 +26,7 @@ namespace RoyalVault.Unity
         [SerializeField] private Image soundIcon;
         [Tooltip("Offered after a base-game win: double or nothing on Ruby's Last Hand")]
         [SerializeField] private Button gamble;
+        [SerializeField] private AttentionHighlight gambleHighlight;
 
         public event Action SpinPressed;
         public event Action BetDownPressed;
@@ -91,9 +91,10 @@ namespace RoyalVault.Unity
             win.Set(value, 0.4f);
         }
 
-        public void SetupGamble(Button gambleButton)
+        public void SetupGamble(Button gambleButton, AttentionHighlight highlight)
         {
             gamble = gambleButton;
+            gambleHighlight = highlight;
         }
 
         public void OfferGamble(bool offered)
@@ -103,10 +104,20 @@ namespace RoyalVault.Unity
                 return;
             }
 
-            gamble.gameObject.SetActive(offered);
+            if (gambleHighlight == null)
+            {
+                gamble.gameObject.SetActive(offered);
+                return;
+            }
+
             if (offered)
             {
-                Tween.Scale(gamble.transform, 0.6f, 1f, 0.35f, Ease.OutBack);
+                gambleHighlight.Begin();
+            }
+            else
+            {
+                gambleHighlight.End();
+                gambleHighlight.gameObject.SetActive(false);
             }
         }
 
