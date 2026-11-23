@@ -42,6 +42,7 @@ namespace RoyalVault.EditorTools
             SealMeterView sealMeter = SealMeter(console.transform, theme, LayoutFor(theme).Seal);
             FlameClashView flameClash = FlameClash(t, theme, machineRect);
             GuardianFireView guardianFire = GuardianFire(t, theme);
+            WinStripView winStrip = emerald ? WinStrip(t, theme) : null;
             MessageToast toast = Toast(t, theme, dialogs);
 
             // overlays, last so they draw on top
@@ -49,14 +50,16 @@ namespace RoyalVault.EditorTools
             RelicRevealView relicReveal = RelicReveal(t, theme, dialogs);
             GambleView gamble = Gamble(t, theme, dialogs);
             TreasuryView treasury = Treasury(t, theme, dialogs);
+            BonusActivationView bonusActivation = emerald ? BonusActivation(t, theme, dialogs) : null;
             PaytableView paytable = Paytable(t, theme, dialogs);
             ChapterCardView chapterCard = ChapterCard(t, theme, dialogs);
             CoachMarkView coachMarks = CoachMarks(t, theme, dialogs);
 
             var presenter = root.AddComponent<WinPresenter>();
-            root.AddComponent<GameBootstrap>().Setup(machine, theme, machineView, console, jackpots, presenter, bigWin, paytable, toast, guardians,
-                                                     sealMeter, flameClash, chapterCard, coachMarks, guardianFire, relicReveal, gamble,
-                                                     treasury);
+            var bootstrap = root.AddComponent<GameBootstrap>();
+            bootstrap.Setup(machine, theme, machineView, console, jackpots, presenter, bigWin, paytable, toast, guardians,
+                            sealMeter, flameClash, chapterCard, coachMarks, guardianFire, relicReveal, gamble, treasury);
+            bootstrap.SetupEmerald(winStrip, bonusActivation);
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             Object.DestroyImmediate(root);
             return prefab;
@@ -88,6 +91,11 @@ namespace RoyalVault.EditorTools
 
         private static CharacterView[] Guardians(Transform t, ThemeDefinition theme)
         {
+            if (theme.look == ThemeLook.Emerald)
+            {
+                return new[] { Character("Guardian", t, theme, -735f, false, 0f, new Vector2(800, 800)) };
+            }
+
             if (theme.niche != null)
             {
                 UiFactory.Image("Niche Left", t, theme.niche, new Vector2(-800, -13), new Vector2(232, 751));
@@ -106,7 +114,8 @@ namespace RoyalVault.EditorTools
             return image;
         }
 
-        private static CharacterView Character(string name, Transform parent, ThemeDefinition theme, float x, bool mirrored, float phase)
+        private static CharacterView Character(string name, Transform parent, ThemeDefinition theme, float x, bool mirrored, float phase,
+                                               Vector2? figureSize = null)
         {
             RectTransform holder = UiFactory.Rect(name, parent, new Vector2(x, -380), new Vector2(250, 705));
             holder.pivot = new Vector2(0.5f, 0f);
@@ -114,8 +123,10 @@ namespace RoyalVault.EditorTools
             UiFactory.NestedCanvas(holder.gameObject, false);
             Image aura = UiFactory.Image("Aura", holder, theme.glow, new Vector2(0, 40), new Vector2(560, 940));
             aura.material = theme.additive;
-            aura.color = new Color(1f, 0.72f, 0.32f, 0.14f);
-            Image figure = Figure(holder, mirrored);
+            aura.color = theme.look == ThemeLook.Emerald
+                ? new Color(theme.accent.r, theme.accent.g, theme.accent.b, 0.2f)
+                : new Color(1f, 0.72f, 0.32f, 0.14f);
+            Image figure = Figure(holder, mirrored, figureSize ?? new Vector2(250, 705));
             UiParticleEmitter dust = FigureDust(holder, theme);
 
             RectTransform hand = UiFactory.Rect("Hand", holder, Vector2.zero, Vector2.one * 10f);
@@ -126,12 +137,20 @@ namespace RoyalVault.EditorTools
             var view = holder.gameObject.AddComponent<CharacterView>();
             view.Setup(figure, phase);
             view.SetupEffects(aura, hand, handGlow, HandFlame(hand, theme), HandEmbers(hand, theme), HandSparks(hand, theme), dust);
+            if (figureSize.HasValue)
+            {
+                Image fade = Stretch("Pose Fade", figure.rectTransform, null);
+                fade.preserveAspect = true;
+                fade.gameObject.SetActive(false);
+                view.SetupPoses(fade);
+            }
+
             return view;
         }
 
-        private static Image Figure(RectTransform holder, bool mirrored)
+        private static Image Figure(RectTransform holder, bool mirrored, Vector2 size)
         {
-            Image image = UiFactory.Image("Figure", holder, null, Vector2.zero, new Vector2(250, 705));
+            Image image = UiFactory.Image("Figure", holder, null, Vector2.zero, size);
             image.rectTransform.pivot = new Vector2(0.5f, 0f);
             image.rectTransform.anchoredPosition = new Vector2(0, -352.5f);
             image.preserveAspect = true;
@@ -534,8 +553,15 @@ namespace RoyalVault.EditorTools
             SpinButtonView spin = emerald ? EmeraldSpinButton(console, theme, layout.Spin) : SpinButton(console, theme, layout.Spin);
 
             Image autoPill = Pill("Auto", console, theme, layout.Auto, layout.AutoSize);
-            TextMeshProUGUI autoText = UiFactory.Text("Label", autoPill.transform, theme.headingFont, "AUTO", 17, theme.gold, Vector2.zero, layout.AutoSize,
+            Vector2 autoLabel = emerald ? new Vector2(16, 0) : Vector2.zero;
+            TextMeshProUGUI autoText = UiFactory.Text("Label", autoPill.transform, theme.headingFont, "AUTO", 17, theme.gold, autoLabel, layout.AutoSize,
                                                       TextAlignmentOptions.Center, 22);
+            if (emerald)
+            {
+                Image autoIcon = UiFactory.Image("Icon", autoPill.transform, Sprite("Generated/icon_auto"), new Vector2(-40, 0), new Vector2(26, 26));
+                autoIcon.color = theme.gold;
+            }
+
             (Button minus, Button plus, TextMeshProUGUI totalBet) = BetStepper(console, theme, layout);
             Button menu = IconButton("Menu", console, theme, theme.iconMenu, layout.Menu, out _);
             Button sound = IconButton("Sound", console, theme, theme.iconSound, layout.Sound, out Image soundIcon);
@@ -681,15 +707,17 @@ namespace RoyalVault.EditorTools
             dim.color = new Color(0.02f, 0.02f, 0.03f, 0.8f);
             Button skip = UiFactory.Button(dim);
             skip.transition = Selectable.Transition.None;
-            Image rays = UiFactory.Image("Rays", overlay, Sprite("Generated/rays"), new Vector2(0, 90), new Vector2(1500, 1500));
-            Image halo = UiFactory.Image("Halo", overlay, theme.glow, new Vector2(0, 90), new Vector2(1100, 700));
+            bool emerald = theme.look == ThemeLook.Emerald;
+            Vector2 focus = emerald ? new Vector2(0, -35) : new Vector2(0, 90);
+            Image rays = UiFactory.Image("Rays", overlay, Sprite("Generated/rays"), focus, new Vector2(1500, 1500));
+            Image halo = UiFactory.Image("Halo", overlay, theme.glow, focus, new Vector2(1100, 700));
             halo.color = new Color(1f, 0.78f, 0.38f, 0.35f);
             // the Emerald look celebrates on the vault ring, in the sanctum's cyan light
             Image ring = null;
-            if (theme.look == ThemeLook.Emerald && theme.spinRotor != null)
+            if (emerald && theme.spinRotor != null)
             {
                 halo.color = new Color(theme.accent.r, theme.accent.g, theme.accent.b, 0.3f);
-                ring = UiFactory.Image("Vault Ring", overlay, theme.spinRotor, new Vector2(0, 40), new Vector2(820, 820));
+                ring = UiFactory.Image("Vault Ring", overlay, theme.spinRotor, focus, new Vector2(900, 900));
                 ring.preserveAspect = true;
             }
 
@@ -699,8 +727,14 @@ namespace RoyalVault.EditorTools
             Image[] heroes = { Hero("Hero Left", overlay, motion[0], home[0], false), Hero("Hero Right", overlay, motion[1], home[1], true) };
             Image banner = UiFactory.Image("Banner", overlay, theme.bigWinBanner, new Vector2(0, 130), new Vector2(1200, 400));
             banner.preserveAspect = true;
-            (TextMeshProUGUI title, TextMeshProUGUI subtitle, CountingText amount) = BigWinText(overlay, theme);
+            // coins fall behind the words so the amount stays readable
             UiParticleEmitter coins = CoinShower(overlay, theme);
+            (TextMeshProUGUI title, TextMeshProUGUI subtitle, CountingText amount) = BigWinText(overlay, theme);
+            if (emerald)
+            {
+                title.fontSize = 104f;
+            }
+
 
             var view = overlay.gameObject.AddComponent<BigWinView>();
             view.Setup(banner, title, subtitle, amount, rays.rectTransform, coins, skip);
@@ -709,10 +743,41 @@ namespace RoyalVault.EditorTools
             if (ring != null)
             {
                 view.SetupRing(ring.rectTransform);
+                view.SetupTiers(halo, ring, TierColours(theme));
+            }
+
+            if (emerald && theme.guardianPoses.Length > (int)GuardianPose.Jackpot)
+            {
+                (Image guardian, CanvasGroup words) = CelebrationGuardian(overlay, theme);
+                view.SetupGuardian(guardian, theme.guardianPoses[(int)GuardianPose.Win], theme.guardianPoses[(int)GuardianPose.Jackpot], words);
             }
 
             view.SetupHeroes(heroes, motion, home);
             return view;
+        }
+
+        // Halo colours in CelebrationKind order: gold, amethyst, cyan, emerald, then the titles
+        private static Color[] TierColours(ThemeDefinition theme)
+        {
+            Color gold = new Color32(255, 199, 97, 255);
+            Color amethyst = new Color32(168, 107, 255, 255);
+            Color emeraldLight = new Color32(46, 224, 150, 255);
+            return new Color[] { gold, amethyst, theme.accent, emeraldLight, emeraldLight, gold, theme.accent };
+        }
+
+        // The guardian beside the heading, and its words under the amount
+        private static (Image, CanvasGroup) CelebrationGuardian(RectTransform overlay, ThemeDefinition theme)
+        {
+            Image guardian = UiFactory.Image("Guardian", overlay, theme.guardianPoses[(int)GuardianPose.Win], new Vector2(-715, -545), new Vector2(660, 660));
+            guardian.rectTransform.pivot = new Vector2(0.5f, 0f);
+            guardian.rectTransform.anchoredPosition = new Vector2(-715, -545);
+            guardian.preserveAspect = true;
+            RectTransform words = UiFactory.Rect("Guardian Reaction", overlay, new Vector2(0, -225), new Vector2(900, 80));
+            var group = words.gameObject.AddComponent<CanvasGroup>();
+            UiFactory.Text("Approves", words, theme.headingFont, "THE GUARDIAN APPROVES", 30, theme.paleGold, new Vector2(0, 18), new Vector2(900, 40),
+                           TextAlignmentOptions.Center, 16);
+            UiFactory.Text("Line", words, theme.bodyFont, "A royal victory, worthy of the vault.", 23, theme.ivory, new Vector2(0, -20), new Vector2(900, 32));
+            return (guardian, group);
         }
 
         // Gold coins thrown up from the foot of the screen, tumbling as they fall

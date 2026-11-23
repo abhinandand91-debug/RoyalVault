@@ -28,7 +28,19 @@ namespace RoyalVault.Unity
         private UiParticleEmitter sparks;
         [SerializeField]
         private UiParticleEmitter dust;
+        [Tooltip("Shows the last pose fading out over the new one")]
+        [SerializeField]
+        private Image poseFade;
 
+        private const float CalmDelay = 14f;
+        private const float FloatHeight = 5f;
+        private const float FloatSpeed = Mathf.PI * 2f / 2.4f;
+
+        private Sprite[] poses = new Sprite[0];
+        private GuardianPose pose;
+        private Tween fading;
+        private float calmAt;
+        private Vector2 handHome;
         private CharacterAnimation motion;  // the baked frames, or null for the still art
         private Vector2 staticAnchor;
         private CharacterAnimation.Clip clip;
@@ -64,6 +76,58 @@ namespace RoyalVault.Unity
             embers = emberEmitter;
             sparks = sparkEmitter;
             dust = dustEmitter;
+        }
+
+        public void SetupPoses(Image fadeImage)
+        {
+            poseFade = fadeImage;
+        }
+
+        // Gives the guardian its stills, in GuardianPose order
+        public void BindPoses(Sprite[] stills)
+        {
+            poses = stills ?? new Sprite[0];
+            calmAt = Time.time + CalmDelay;
+        }
+
+        // Crossfades to a pose; a pose the theme lacks is ignored
+        public void ShowPose(GuardianPose next)
+        {
+            int index = (int)next;
+            if (next == pose || index >= poses.Length || poses[index] == null)
+            {
+                return;
+            }
+
+            pose = next;
+            poseFade.sprite = image.sprite;
+            poseFade.gameObject.SetActive(true);
+            image.sprite = poses[index];
+            fading.Stop();
+            fading = Tween.Alpha(poseFade, 1f, 0f, 0.25f, Ease.OutCubic)
+                .OnComplete(poseFade, faded => faded.gameObject.SetActive(false));
+        }
+
+        // Hides the figure while a full-screen moment shows the guardian in its own pose
+        public void SetShown(bool shown)
+        {
+            image.enabled = shown;
+            aura.enabled = shown;
+            hand.gameObject.SetActive(shown);
+            if (!shown)
+            {
+                poseFade.gameObject.SetActive(false);
+            }
+        }
+
+        // A new spin: the guardian raises its flame again
+        public void Wake()
+        {
+            calmAt = Time.time + CalmDelay;
+            if (celebrate == null)
+            {
+                ShowPose(GuardianPose.Stance);
+            }
         }
 
         // effectAnchor is where the magic burns, as a share of the art
@@ -110,6 +174,8 @@ namespace RoyalVault.Unity
             }
 
             StopThrow();
+            calmAt = Time.time + CalmDelay;
+            ShowPose(GuardianPose.Stance);
             throwing = StartCoroutine(WindUpRoutine());
         }
 
@@ -204,7 +270,8 @@ namespace RoyalVault.Unity
         {
             Vector2 size = image.rectTransform.sizeDelta;
             float mirror = Mathf.Sign(image.rectTransform.localScale.x);
-            hand.anchoredPosition = new Vector2((share.x - 0.5f) * size.x * mirror, share.y * size.y);
+            handHome = new Vector2((share.x - 0.5f) * size.x * mirror, share.y * size.y);
+            hand.anchoredPosition = handHome;
         }
 
         // Shows the current frame of the baked animation and moves the hand effects with it
@@ -280,8 +347,37 @@ namespace RoyalVault.Unity
                 Animate();
                 return;
             }
+            if (poses.Length > 0)
+            {
+                Float(time, sign, lean);
+                return;
+            }
+
             r.localScale = new Vector3(sign * (1f + lift * 0.04f), 1f + 0.012f * breath + lift * 0.05f, 1f);
             r.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(time * 0.6f) * 0.35f + lean);
+        }
+
+        // A posed guardian hovers a few pixels and settles into its calm stance when nothing has happened for a while
+        private void Float(float time, float sign, float lean)
+        {
+            RectTransform r = image.rectTransform;
+            Vector2 drift = new Vector2(0f, Mathf.Sin(time * FloatSpeed) * FloatHeight);
+            r.anchoredPosition += drift;
+            float grow = 1f + lift * 0.04f + lunge * 0.03f;
+            r.localScale = new Vector3(sign * grow, grow, 1f);
+            r.localRotation = Quaternion.Euler(0f, 0f, lean);
+            if (hand != null)
+            {
+                hand.anchoredPosition = handHome + drift;
+            }
+
+            if (pose == GuardianPose.Stance && celebrate == null && throwing == null && Time.time >= calmAt)
+            {
+                ShowPose(GuardianPose.Calm);
+            }
+
+            float target = pose == GuardianPose.Stance ? 1f : 0f;
+            flameWeight = Mathf.MoveTowards(flameWeight, target, Time.deltaTime * 6f);
         }
 
         // The flame flares up every few seconds
@@ -298,7 +394,8 @@ namespace RoyalVault.Unity
 
         private void Burn(float time, float breath)
         {
-            float baseFlame = motion != null ? 0.45f : 1f;
+            bool posed = poses.Length > 0;
+            float baseFlame = posed ? 0.3f : motion != null ? 0.45f : 1f;
             flame.Intensity = flameWeight * (baseFlame + surge * 2f + lift * 3f);
             embers.Intensity = flameWeight;
             float flicker = (0.55f + 0.2f * Mathf.PerlinNoise(time * 7f, phase) + surge * 0.35f + lift * 0.4f) * flameWeight;
@@ -306,10 +403,11 @@ namespace RoyalVault.Unity
             handGlow.color = new Color(g.r, g.g, g.b, Mathf.Clamp01(flicker));
             handGlow.rectTransform.localScale = Vector3.one * (1f + 0.15f * Mathf.Sin(time * 9f) + surge * 0.5f + lift * 0.8f);
             Color a = aura.color;
-            aura.color = new Color(a.r, a.g, a.b, 0.12f + 0.06f * breath + lift * 0.45f);
+            float auraRest = posed ? 0.2f + 0.12f * breath : 0.12f + 0.06f * breath;
+            aura.color = new Color(a.r, a.g, a.b, auraRest + lift * 0.45f);
         }
 
-        public void Celebrate()
+        public void Celebrate(GuardianPose victory = GuardianPose.Win)
         {
             if (!isActiveAndEnabled)
             {
@@ -322,7 +420,7 @@ namespace RoyalVault.Unity
             }
 
             lifting.Stop();
-
+            ShowPose(victory);
             celebrate = StartCoroutine(CelebrateRoutine());
         }
 
@@ -354,6 +452,8 @@ namespace RoyalVault.Unity
             lifting = Tween.Custom(this, 1f, 0f, 0.6f, (view, value) => view.Lift(value), Ease.InOutSine);
             yield return lifting.ToYieldInstruction();
             celebrate = null;
+            calmAt = Time.time + CalmDelay;
+            ShowPose(GuardianPose.Stance);
         }
 
         // Raises the figure in a warm light; 0 is at rest

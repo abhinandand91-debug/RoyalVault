@@ -63,7 +63,29 @@ namespace RoyalVault.Unity
         private CharacterAnimation[] heroMotion = new CharacterAnimation[0];
         [SerializeField]
         private Vector2[] heroHome = new Vector2[0];
+        [Header("Guardian")]
+        [Tooltip("Optional lone guardian who takes the heroes' place")]
+        [SerializeField]
+        private Image guardian;
+        [SerializeField]
+        private Sprite winPose;
+        [SerializeField]
+        private Sprite jackpotPose;
+        [Tooltip("The guardian's words under the amount")]
+        [SerializeField]
+        private CanvasGroup reaction;
+        [Header("Tiers")]
+        [SerializeField]
+        private Image halo;
+        [SerializeField]
+        private Image ringArt;
+        [Tooltip("Halo colour per CelebrationKind")]
+        [SerializeField]
+        private Color[] tierColours = new Color[0];
 
+        private Vector2 restingGuardian;
+        private Vector2 guardianHome;
+        private bool guardianActs;
         private readonly Queue<Celebration> requests = new Queue<Celebration>(4);
         private Celebration current;
         private bool skipped;
@@ -99,6 +121,21 @@ namespace RoyalVault.Unity
             heroHome = home;
         }
 
+        public void SetupGuardian(Image guardianImage, Sprite win, Sprite jackpot, CanvasGroup words)
+        {
+            guardian = guardianImage;
+            winPose = win;
+            jackpotPose = jackpot;
+            reaction = words;
+        }
+
+        public void SetupTiers(Image haloImage, Image ringImage, Color[] colours)
+        {
+            halo = haloImage;
+            ringArt = ringImage;
+            tierColours = colours;
+        }
+
         private bool HasHero(int i) => i < heroMotion.Length && heroMotion[i] != null && heroMotion[i].IsValid;
 
         // Shows the heroes' frames at t seconds and slides them in by enter (0..1)
@@ -122,9 +159,54 @@ namespace RoyalVault.Unity
             }
         }
 
+        // The guardian strides in beside the heading; its words follow once the amount is rolling
+        private void PoseGuardian(float t, float enter)
+        {
+            if (guardian == null || !guardianActs)
+            {
+                return;
+            }
+
+            float slide = 1f - Easing.Evaluate(enter, Ease.OutCubic);
+            float hover = Mathf.Sin(t * Mathf.PI * 2f / 2.4f) * 5f;
+            guardian.rectTransform.anchoredPosition = guardianHome + new Vector2(-420f * slide, hover);
+            guardian.color = new Color(1f, 1f, 1f, enter);
+            reaction.alpha = Mathf.Clamp01((t - 0.9f) / 0.4f);
+        }
+
+        // The colours and the guardian for this kind of celebration
+        private void ApplyTier(CelebrationKind kind)
+        {
+            int index = (int)kind;
+            if (halo != null && index < tierColours.Length)
+            {
+                Color c = tierColours[index];
+                halo.color = new Color(c.r, c.g, c.b, 0.42f);
+                Color tint = Color.Lerp(Color.white, c, 0.4f);
+                ringArt.color = new Color(tint.r, tint.g, tint.b, 0.4f);
+            }
+
+            guardianActs = guardian != null && kind <= CelebrationKind.Jackpot;
+            if (guardian == null)
+            {
+                return;
+            }
+
+            guardianHome = restingGuardian;
+            guardian.gameObject.SetActive(guardianActs);
+            reaction.gameObject.SetActive(guardianActs);
+            reaction.alpha = 0f;
+            guardian.sprite = kind == CelebrationKind.Jackpot ? jackpotPose : winPose;
+        }
+
         protected override void Awake()
         {
             base.Awake();
+            if (guardian != null)
+            {
+                restingGuardian = guardian.rectTransform.anchoredPosition;
+            }
+
             skip.onClick.AddListener(() => skipped = true);
             coins.Intensity = 0f;
         }
@@ -165,6 +247,7 @@ namespace RoyalVault.Unity
             Open(heading, current.Line, current.Value, current.Seconds);
             Opened?.Invoke(current.Kind, current.Value > 0);
             heroClock = 0f;
+            ApplyTier(current.Kind);
             popping = heading == null ? banner.rectTransform : title.rectTransform;
         }
 
@@ -221,6 +304,8 @@ namespace RoyalVault.Unity
                 t += Time.deltaTime;
                 heroClock += Time.deltaTime;
                 PoseHeroes(heroClock, Mathf.Clamp01(heroClock / stride));
+                PoseGuardian(heroClock, Mathf.Clamp01(heroClock / stride));
+                PulseHeading(t);
                 if (rays != null)
                 {
                     rays.localRotation = Quaternion.Euler(0f, 0f, -t * 12f);
@@ -238,11 +323,21 @@ namespace RoyalVault.Unity
             coins.Intensity = 0f;
         }
 
+        // The larger wins keep beating, 1.00 to 1.04
+        private void PulseHeading(float t)
+        {
+            if (current.Kind == CelebrationKind.MegaWin || current.Kind == CelebrationKind.EpicWin || current.Kind == CelebrationKind.Jackpot)
+            {
+                popping.localScale = Vector3.one * (1.02f + 0.02f * Mathf.Sin(t * 4f));
+            }
+        }
+
         private void FadeOut(float k)
         {
             Group.alpha = 1f - k;
             heroClock += Time.deltaTime;
             PoseHeroes(heroClock, 1f);
+            PoseGuardian(heroClock, 1f);
         }
 
     }

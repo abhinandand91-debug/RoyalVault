@@ -68,12 +68,14 @@ namespace RoyalVault.Unity
         public void Bind(ThemeDefinition theme, CharacterAnimation rubyMotion)
         {
             suits = theme.suits;
-            bool hasRuby = rubyMotion != null && rubyMotion.IsValid;
-            ruby.gameObject.SetActive(hasRuby);
-            if (hasRuby)
+            Sprite host = theme.guardianBust;
+            if (host == null && rubyMotion != null && rubyMotion.IsValid)
             {
-                ruby.sprite = rubyMotion.idle.frames[0];
+                host = rubyMotion.idle.frames[0];
             }
+
+            ruby.gameObject.SetActive(host != null);
+            ruby.sprite = host;
 
             for (int i = 0; i < calls.Length; i++)
             {

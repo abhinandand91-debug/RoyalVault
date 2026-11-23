@@ -11,6 +11,8 @@ namespace RoyalVault.EditorTools
     {
         private static readonly Color EmeraldGold = new Color32(217, 164, 65, 255);
         private static readonly Color EmeraldInk = new Color32(3, 18, 14, 255);
+        // Where the reels are centred, right of the guardian
+        private const float ReelsX = 225f;
 
         #region textures
         // Plain shapes the Emerald look needs; the painted art comes from the Figma file
@@ -30,7 +32,21 @@ namespace RoyalVault.EditorTools
             Write("window_shadow", 64, 64, WindowShadowPixel);
             Write("emerald_panel", 256, 256, EmeraldPanelPixel);
             Write("emerald_card", 128, 128, (x, y) => RoundedRect(x, y, 128, 128, 18f, new Color32(9, 32, 24, 240), new Color32(150, 118, 58, 255), 2f));
+            Write("icon_auto", 64, 64, AutoIconPixel);
             Write("emerald_fill", 64, 16, (x, y) => Color.Lerp(new Color32(19, 158, 118, 255), new Color32(53, 216, 232, 255), x / 63f));
+        }
+
+        // A circular arrow for the auto play pill
+        private static Color AutoIconPixel(int x, int y)
+        {
+            Vector2 p = new Vector2(x - 31.5f, y - 31.5f);
+            float angle = Mathf.Atan2(p.y, p.x) * Mathf.Rad2Deg;
+            float band = Mathf.Clamp01(4.5f - Mathf.Abs(p.magnitude - 22f));
+            float arc = angle > 20f && angle < 70f ? 0f : band;
+            Vector2 tip = p - new Vector2(21f, 15f);
+            float head = Mathf.Clamp01(1f + Mathf.Min(tip.y + 9f, Mathf.Min(10f - tip.x - tip.y * 0.8f, 10f + tip.x - tip.y * 0.8f)));
+            float alpha = Mathf.Max(arc, head);
+            return new Color(1f, 1f, 1f, alpha);
         }
 
         // Dark at the edge, fading out over 24 pixels: 9-sliced inside the reel window
@@ -117,8 +133,8 @@ namespace RoyalVault.EditorTools
             // set here as well as on import: art copied in before the importer compiles is imported without it
             EnsureSpriteBorder(ArtPath + "Emerald/Environment/reel_housing.png", new Vector4(231, 127, 231, 135));
             theme.reelHousing = Sprite("Emerald/Environment/reel_housing");
-            theme.housingBorderScale = 1f;
-            theme.housingOverlap = 8f;
+            theme.housingBorderScale = 0.62f;
+            theme.housingOverlap = 6f;
             EnsureSpriteBorder(Generated + "window_shadow.png", new Vector4(24, 24, 24, 24));
             theme.windowShadow = Sprite("Generated/window_shadow");
             EnsureSpriteBorder(Generated + "emerald_panel.png", new Vector4(48, 48, 48, 48));
@@ -134,7 +150,7 @@ namespace RoyalVault.EditorTools
             theme.bigWinBanner = null;
             theme.vaultDoor = Sprite("Emerald/Environment/vault_door");
             theme.guidePortrait = PrivateSprite("Characters/Emerald/anubis_portrait.png");
-            theme.guardianPose = PrivateSprite("Characters/Emerald/anubis_win.png");
+            theme.guardianPose = PrivateSprite("Characters/Emerald/Poses/guardian_win.png");
             theme.reelCell = Sprite("Generated/emerald_cell");
             theme.niche = null;
             theme.consoleBar = Sprite("Generated/emerald_bar");
@@ -153,10 +169,87 @@ namespace RoyalVault.EditorTools
             theme.ink = EmeraldInk;
             theme.surface = new Color32(11, 38, 28, 255);
             theme.accent = new Color32(53, 216, 232, 255);
-            // a reel window shaped like the housing's, sitting a little low so the jackpots clear its lintel
-            theme.reelArea = new Rect(-494, -285, 988, 480);
-            theme.cellAspect = 1.23f;
+            // Figma's placement: wide reels to the right of the guardian, the jackpots over them
+            theme.reelArea = new Rect(ReelsX - 575, -296, 1150, 482);
+            theme.cellAspect = 1.435f;
             theme.cellGap = 4f;
+        }
+
+        // One guardian, from the Figma poses; without them (a public checkout) no guardian is drawn
+        private static void SetEmeraldGuardian(ThemeDefinition theme)
+        {
+            const string poses = "Characters/Emerald/Poses/guardian_";
+            Sprite stance = PrivateSprite(poses + "full.png");
+            theme.guardianPoses = stance == null
+                ? new Sprite[0]
+                : new[] { stance, PrivateSprite(poses + "idle.png"), PrivateSprite(poses + "win.png"), PrivateSprite(poses + "jackpot.png") };
+            theme.guardianBust = PrivateSprite("Characters/Emerald/anubis_upper.png");
+            theme.character = stance;
+            theme.characterAnimation = null;
+            theme.characterEffectAnchor = new Vector2(0.618f, 0.784f);
+            theme.heroLeft = null;
+            theme.heroRight = null;
+        }
+
+        // The strip on the housing's sill: lines, what won, what it pays
+        private static WinStripView WinStrip(Transform parent, ThemeDefinition theme)
+        {
+            const float width = 1040f;
+            RectTransform strip = UiFactory.Rect("Win Strip", parent, new Vector2(ReelsX, -338), new Vector2(width, 40));
+            UiFactory.NestedCanvas(strip.gameObject, false);
+            Image bed = UiFactory.Image("Bed", strip, theme.jackpotPlaque, Vector2.zero, new Vector2(width, 40));
+            bed.type = Image.Type.Sliced;
+            bed.color = new Color(0.02f, 0.09f, 0.07f, 0.92f);
+            Image edge = UiFactory.Image("Edge", strip, Sprite("Generated/emerald_plaque_edge"), Vector2.zero, new Vector2(width, 40));
+            edge.type = Image.Type.Sliced;
+            edge.color = new Color(1f, 1f, 1f, 0.5f);
+            TextMeshProUGUI lines = UiFactory.Text("Lines", strip, theme.labelFont, "20 LINES", 16, theme.dimGold, new Vector2(-400, 0), new Vector2(200, 30),
+                                                   TextAlignmentOptions.Left, 16);
+            TextMeshProUGUI message = UiFactory.Text("Message", strip, theme.labelFont, "", 18, theme.ivory, Vector2.zero, new Vector2(560, 30),
+                                                     TextAlignmentOptions.Center, 10);
+            TextMeshProUGUI pays = UiFactory.Text("Pays", strip, theme.headingFont, "", 22, theme.paleGold, new Vector2(400, 0), new Vector2(200, 34),
+                                                  TextAlignmentOptions.Right, 4);
+            var view = strip.gameObject.AddComponent<WinStripView>();
+            view.Setup(lines, message, pays);
+            return view;
+        }
+
+        // The crest, its energy links and the banner when a free spins round begins
+        private static BonusActivationView BonusActivation(Transform parent, ThemeDefinition theme, DialogManager dialogs)
+        {
+            RectTransform overlay = UiFactory.Stretch("Bonus Activation", parent);
+            var group = overlay.gameObject.AddComponent<CanvasGroup>();
+            UiFactory.NestedCanvas(overlay.gameObject, true, group);
+            Image dim = Stretch("Dim", overlay, theme.white);
+            dim.color = new Color(0.01f, 0.05f, 0.04f, 0.5f);
+            dim.raycastTarget = true;
+            var links = new Image[15];
+            for (int i = 0; i < links.Length; i++)
+            {
+                links[i] = UiFactory.Image("Link " + (i + 1), overlay, theme.glow, Vector2.zero, new Vector2(100, 26));
+                links[i].rectTransform.pivot = new Vector2(0f, 0.5f);
+                links[i].material = theme.additive;
+                links[i].color = new Color32(70, 240, 170, 255);
+            }
+
+            Vector2 centre = theme.reelArea.center;
+            RectTransform crest = UiFactory.Rect("Crest", overlay, centre, new Vector2(300, 300));
+            Image light = UiFactory.Image("Light", crest, theme.glow, Vector2.zero, new Vector2(560, 560));
+            light.material = theme.additive;
+            light.color = new Color(0.27f, 0.94f, 0.67f, 0.6f);
+            Image ring = UiFactory.Image("Ring", crest, theme.spinRotor, Vector2.zero, new Vector2(300, 300));
+            ring.preserveAspect = true;
+            Image gem = UiFactory.Image("Gem", crest, IconFor(theme, 1), Vector2.zero, new Vector2(130, 130));
+            gem.preserveAspect = true;
+            RectTransform bannerRect = UiFactory.Rect("Banner", overlay, centre + new Vector2(0, -190), new Vector2(900, 90));
+            var banner = bannerRect.gameObject.AddComponent<CanvasGroup>();
+            TextMeshProUGUI text = UiFactory.Text("Label", bannerRect, theme.displayFont, "BONUS ACTIVATED", 62, theme.paleGold, Vector2.zero, new Vector2(900, 90));
+            text.outlineWidth = 0.12f;
+            text.outlineColor = new Color32(3, 30, 22, 255);
+            var view = overlay.gameObject.AddComponent<BonusActivationView>();
+            view.Setup(crest, ring.rectTransform, banner, links);
+            view.SetupDialog(OverlayDialog("Bonus Activated", FadeIn("Bonus In", 0.2f), FadeOut("Bonus Out", 0.3f)), overlay, dialogs, group);
+            return view;
         }
 
         // Licensed art kept out of the public repository, or null in a checkout without it
@@ -196,11 +289,11 @@ namespace RoyalVault.EditorTools
         // The title set in Cinzel with a gold gradient, and the sanctum's name beneath it
         private static void EmeraldLogo(Transform parent, ThemeDefinition theme)
         {
-            TextMeshProUGUI title = UiFactory.Text("Logo", parent, theme.headingFont, "ROYAL VAULT", 50, Color.white, new Vector2(0, 503), new Vector2(700, 64),
+            TextMeshProUGUI title = UiFactory.Text("Logo", parent, theme.headingFont, "ROYAL VAULT", 50, Color.white, new Vector2(ReelsX, 503), new Vector2(700, 64),
                                                    TextAlignmentOptions.Center, 6);
             title.enableVertexGradient = true;
             title.colorGradient = new VertexGradient(theme.paleGold, theme.paleGold, theme.gold, theme.gold);
-            UiFactory.Text("Subtitle", parent, theme.labelFont, "THE<space=1.2em>EMERALD<space=1.2em>SANCTUM", 13, theme.dimGold, new Vector2(0, 468), new Vector2(500, 20),
+            UiFactory.Text("Subtitle", parent, theme.labelFont, "THE<space=1.2em>EMERALD<space=1.2em>SANCTUM", 13, theme.dimGold, new Vector2(ReelsX, 468), new Vector2(500, 20),
                            TextAlignmentOptions.Center, 24);
         }
 
@@ -212,8 +305,9 @@ namespace RoyalVault.EditorTools
             var plaques = new Image[3];
             var names = new TextMeshProUGUI[3];
             var values = new CountingText[3];
-            Vector2[] positions = { new Vector2(0, 390), new Vector2(-575, 392), new Vector2(575, 392) };
-            Vector2[] sizes = { new Vector2(500, 120), new Vector2(330, 100), new Vector2(330, 100) };
+            // Major, Grand and Minor side by side, centred over the reels
+            Vector2[] positions = { new Vector2(ReelsX, 372), new Vector2(ReelsX - 397, 372), new Vector2(ReelsX + 397, 372) };
+            Vector2[] sizes = { new Vector2(440, 116), new Vector2(330, 96), new Vector2(330, 96) };
             for (int i = 0; i < 3; i++)
             {
                 bool top = i == 0;
@@ -256,20 +350,18 @@ namespace RoyalVault.EditorTools
         private static void EmeraldDeck(RectTransform console, ThemeDefinition theme)
         {
             RectTransform bar = BottomStrip("Deck", console, theme.consoleBar, 150, 0, 0).rectTransform;
-            Image edge = BottomStrip("Gold Edge", bar, Sprite("Generated/rule"), 2, 148, 64);
+            Image edge = BottomStrip("Gold Edge", bar, Sprite("Generated/rule"), 2, 148, 0);
             edge.color = theme.gold;
-            Image inner = BottomStrip("Inner Line", bar, theme.white, 1, 140, 160);
+            Image inner = BottomStrip("Inner Line", bar, theme.white, 1, 140, 0);
             inner.color = new Color(theme.gold.r, theme.gold.g, theme.gold.b, 0.25f);
         }
 
-        // A cyan glow, the gold wings, the bronze rotor that turns (faster while the reels run) and the emerald face
+        // A cyan glow, the bronze rotor that turns (faster while the reels run) and the emerald face
         private static SpinButtonView EmeraldSpinButton(Transform parent, ThemeDefinition theme, Vector2 position)
         {
             Image glow = UiFactory.Image("Spin Glow", parent, theme.glow, position, new Vector2(330, 330));
             glow.material = theme.additive;
             glow.color = new Color(theme.accent.r, theme.accent.g, theme.accent.b, 0.35f);
-            Image wings = UiFactory.Image("Spin Wings", parent, theme.spinWings, position, new Vector2(270, 101));
-            wings.preserveAspect = true;
             Image rotor = UiFactory.Image("Spin Rotor", parent, theme.spinRotor, position, new Vector2(212, 212));
             rotor.preserveAspect = true;
 

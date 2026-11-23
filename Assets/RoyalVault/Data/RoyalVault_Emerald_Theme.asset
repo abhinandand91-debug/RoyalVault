@@ -105,12 +105,12 @@ MonoBehaviour:
   logo: {fileID: 21300000, guid: 88f341947927e4dc594ecd48001200ed, type: 3}
   niche: {fileID: 0}
   reelHousing: {fileID: 21300000, guid: c6aaaad031ae3404794c9c0d0a0039af, type: 3}
-  housingBorderScale: 1
-  housingOverlap: 8
+  housingBorderScale: 0.62
+  housingOverlap: 6
   windowShadow: {fileID: 21300000, guid: 2318cac7b78924aa8831ac43a3988005, type: 3}
-  character: {fileID: 21300000, guid: 98663f0ca23be4091ab8354bcacca9a9, type: 3}
-  characterEffectAnchor: {x: 0.89, y: 0.837}
-  characterAnimation: {fileID: 11400000, guid: 148c3ddcc38204ef3a7dd9333d2621ae, type: 2}
+  character: {fileID: 21300000, guid: e6dd949b787f749c3a22f896d3a3d39b, type: 3}
+  characterEffectAnchor: {x: 0.618, y: 0.784}
+  characterAnimation: {fileID: 0}
   characterMagic: {r: 0.35, g: 0.75, b: 1, a: 1}
   additive: {fileID: 2100000, guid: 87cfb5d4bd56c432b83a1803eae1b483, type: 2}
   symbolMaterial: {fileID: 2100000, guid: 7284114aa04e14d309421c3aa0c1a3d5, type: 2}
@@ -121,15 +121,21 @@ MonoBehaviour:
   vfxScale: 170
   story: {fileID: 11400000, guid: ced7b3d86de1841f9bd3e7d24fd11d34, type: 2}
   sounds: {fileID: 11400000, guid: 89b77e2e548124804a9d37d2e28379ea, type: 2}
-  heroLeft: {fileID: 11400000, guid: ef808432880fa41b2b25aff5bf39c723, type: 2}
-  heroRight: {fileID: 11400000, guid: 0fd0465fd0bda48d39cac191605af63b, type: 2}
+  heroLeft: {fileID: 0}
+  heroRight: {fileID: 0}
   consoleBar: {fileID: 21300000, guid: b73ea9ea35ded40abb6b52d81736c649, type: 3}
   spinButton: {fileID: 21300000, guid: 4bf846bdf31394985a6f378eab5a4f01, type: 3}
   spinRotor: {fileID: 21300000, guid: 60276f31e115c42edbcfa94f4fe028b7, type: 3}
   spinWings: {fileID: 21300000, guid: cda057f37512c415fbbfa5bdf0645e46, type: 3}
   vaultDoor: {fileID: 21300000, guid: 250fbe74aa4c845f2a9799f543721f2c, type: 3}
   guidePortrait: {fileID: 21300000, guid: 557ede588831545ce82c00747a9113a1, type: 3}
-  guardianPose: {fileID: 21300000, guid: 3d24b9759bf104e7fae095976318181c, type: 3}
+  guardianPose: {fileID: 21300000, guid: 92ff69f1979e149c28b0ca3402741454, type: 3}
+  guardianPoses:
+  - {fileID: 21300000, guid: e6dd949b787f749c3a22f896d3a3d39b, type: 3}
+  - {fileID: 21300000, guid: f070fb858824143f3a9307cb61603610, type: 3}
+  - {fileID: 21300000, guid: 92ff69f1979e149c28b0ca3402741454, type: 3}
+  - {fileID: 21300000, guid: 11aef78fd2732425eadc33b64cae709d, type: 3}
+  guardianBust: {fileID: 21300000, guid: 090bfc782e8894d15a1bde9b8586bb80, type: 3}
   jackpotPlaque: {fileID: 21300000, guid: 282ce912cf91f48feae36fc01daae499, type: 3}
   jackpotIcons:
   - {fileID: 21300000, guid: 3aa5a8545521b4139b5ac15d9d2b3fc0, type: 3}
@@ -179,11 +185,11 @@ MonoBehaviour:
   accent: {r: 0.20784314, g: 0.84705883, b: 0.9098039, a: 1}
   reelArea:
     serializedVersion: 2
-    x: -494
-    y: -285
-    width: 988
-    height: 480
-  cellAspect: 1.23
+    x: -350
+    y: -296
+    width: 1150
+    height: 482
+  cellAspect: 1.435
   cellGap: 4
   symbolScale: 0.94
   frameBorderScale: 0.937

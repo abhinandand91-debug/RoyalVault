@@ -116,6 +116,10 @@ namespace RoyalVault.Unity
         public Sprite guidePortrait;
         [Tooltip("Optional guardian who watches over the Treasury (licensed art may be missing in a public checkout)")]
         public Sprite guardianPose;
+        [Tooltip("Optional stills in GuardianPose order: a theme with them has one guardian who changes pose")]
+        public Sprite[] guardianPoses = new Sprite[0];
+        [Tooltip("Optional guardian from the waist up, who keeps the gamble table")]
+        public Sprite guardianBust;
         [Tooltip("Jackpot plaque, 9-sliced; tinted per tier")]
         public Sprite jackpotPlaque;
         [Tooltip("Icon on each jackpot plaque: top tier first")]

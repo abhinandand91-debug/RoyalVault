@@ -235,10 +235,19 @@ namespace RoyalVault.EditorTools
 
         private static void SetCharacters(ThemeDefinition theme)
         {
-            theme.character = AssetDatabase.LoadAssetAtPath<Sprite>(Root + "Art.Private/Characters/anubis.png");
-            theme.characterAnimation = CreateCharacterAnimation(Root + "Art.Private/Characters/Anubis");
             theme.story = CreateStory();
             theme.sounds = CreateSounds();
+            if (theme.look == ThemeLook.Emerald)
+            {
+                SetEmeraldGuardian(theme);
+                return;
+            }
+
+            theme.guardianPoses = new Sprite[0];
+            theme.guardianBust = null;
+            theme.characterEffectAnchor = new Vector2(0.89f, 0.837f);
+            theme.character = AssetDatabase.LoadAssetAtPath<Sprite>(Root + "Art.Private/Characters/anubis.png");
+            theme.characterAnimation = CreateCharacterAnimation(Root + "Art.Private/Characters/Anubis");
             theme.heroLeft = CreateCharacterAnimation(Root + "Art.Private/Characters/Cole");
             theme.heroRight = CreateCharacterAnimation(Root + "Art.Private/Characters/Ruby");
         }

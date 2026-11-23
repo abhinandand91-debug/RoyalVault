@@ -88,6 +88,12 @@ namespace RoyalVault.Unity
             HideAll();
         }
 
+        // Where the flames land
+        public void MeetAt(Vector2 point)
+        {
+            meetingPoint = point;
+        }
+
         private void HideAll()
         {
             foreach (Image f in fireballs)
@@ -163,7 +169,8 @@ namespace RoyalVault.Unity
         // Releases the flames and returns where each ball starts, left one first
         private Vector2[] Throw(List<CharacterView> active)
         {
-            int count = Mathf.Min(2, fireballs.Length);
+            // a lone guardian throws one flame
+            int count = Mathf.Min(active.Count == 1 ? 1 : 2, fireballs.Length);
             var starts = new Vector2[count];
             for (int i = 0; i < count; i++)
             {

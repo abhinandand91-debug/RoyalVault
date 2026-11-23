@@ -37,7 +37,7 @@ namespace RoyalVault.EditorTools
 
             UiParticleEmitter burst = TreasuryBurst(board, theme);
             TreasuryGuardian(overlay, theme);
-            Image door = TreasuryDoor(overlay, theme);
+            TreasuryView.DoorParts door = TreasuryDoor(overlay, theme);
             (CountingText collected, TextMeshProUGUI multiplier, Image shield) = TreasuryReadouts(overlay, theme);
 
             Image flash = Stretch("Flash", overlay, theme.white);
@@ -53,10 +53,7 @@ namespace RoyalVault.EditorTools
             var view = overlay.gameObject.AddComponent<TreasuryView>();
             view.Setup(board, prompt, collected, multiplier, shield, urns, burst, flash, tap, cracks);
             view.SetupDialog(OverlayDialog("Treasury", FadeIn("Treasury In", 0.35f), FadeOut("Treasury Out", 0.35f)), overlay, dialogs, group);
-            if (door != null)
-            {
-                view.SetupDoor(door);
-            }
+            view.SetupDoor(door);
 
             return view;
         }
@@ -69,23 +66,51 @@ namespace RoyalVault.EditorTools
                 return;
             }
 
-            Image guardian = UiFactory.Image("Guardian", overlay, theme.guardianPose, new Vector2(-850, -540), new Vector2(560, 560));
+            Image guardian = UiFactory.Image("Guardian", overlay, theme.guardianPose, new Vector2(-835, -540), new Vector2(560, 560));
             guardian.rectTransform.pivot = new Vector2(0.5f, 0f);
-            guardian.rectTransform.anchoredPosition = new Vector2(-850, -540);
+            guardian.rectTransform.anchoredPosition = new Vector2(-835, -540);
             guardian.preserveAspect = true;
         }
 
-        // The vault door over the board; it turns open when the round begins
-        private static Image TreasuryDoor(RectTransform overlay, ThemeDefinition theme)
+        // The vault door over the board, cut down the middle, with two rings over it and light behind its seam
+        private static TreasuryView.DoorParts TreasuryDoor(RectTransform overlay, ThemeDefinition theme)
         {
             if (theme.vaultDoor == null)
             {
-                return null;
+                return default;
             }
 
-            Image door = UiFactory.Image("Vault Door", overlay, theme.vaultDoor, new Vector2(0, -10), new Vector2(760, 760));
-            door.preserveAspect = true;
-            return door;
+            const float size = TreasuryView.DoorHalf * 4f;
+            RectTransform root = UiFactory.Rect("Vault Door", overlay, new Vector2(0, -10), new Vector2(size, size));
+            // the rings turn behind the door and show as its halves part
+            Image outer = UiFactory.Image("Ring Outer", root, theme.spinRotor, Vector2.zero, new Vector2(size * 1.06f, size * 1.06f));
+            outer.preserveAspect = true;
+            Image inner = UiFactory.Image("Ring Inner", root, theme.spinRotor, Vector2.zero, new Vector2(size * 0.8f, size * 0.8f));
+            inner.preserveAspect = true;
+            Image spill = UiFactory.Image("Spill", root, theme.glow, Vector2.zero, new Vector2(size * 1.5f, size * 1.3f));
+            spill.material = theme.additive;
+            spill.color = new Color(theme.accent.r, theme.accent.g, theme.accent.b, 0f);
+            RectTransform left = DoorHalf("Door Left", root, theme, -1f, size);
+            RectTransform right = DoorHalf("Door Right", root, theme, 1f, size);
+            return new TreasuryView.DoorParts
+            {
+                group = root.gameObject.AddComponent<CanvasGroup>(),
+                left = left,
+                right = right,
+                ringOuter = outer.rectTransform,
+                ringInner = inner.rectTransform,
+                spill = spill,
+            };
+        }
+
+        // One half of the door: the whole painting, masked to its side
+        private static RectTransform DoorHalf(string name, RectTransform root, ThemeDefinition theme, float side, float size)
+        {
+            RectTransform half = UiFactory.Rect(name, root, new Vector2(side * TreasuryView.DoorHalf, 0), new Vector2(size * 0.5f, size));
+            half.gameObject.AddComponent<RectMask2D>();
+            Image art = UiFactory.Image("Art", half, theme.vaultDoor, new Vector2(-side * TreasuryView.DoorHalf, 0), new Vector2(size, size));
+            art.preserveAspect = true;
+            return half;
         }
 
         // The Treasury painting, covering the screen, darkened so the urns stand out

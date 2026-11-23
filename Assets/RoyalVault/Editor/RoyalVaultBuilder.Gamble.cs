@@ -21,7 +21,8 @@ namespace RoyalVault.EditorTools
             dim.raycastTarget = true;
 
             Image ruby = GambleRuby(overlay, theme);
-            UiFactory.Text("Title", overlay, theme.headingFont, "RUBY'S LAST HAND", 52, theme.gold, new Vector2(0, 400), new Vector2(1100, 70),
+            string gambleTitle = theme.guardianBust != null ? "THE GUARDIAN'S WAGER" : "RUBY'S LAST HAND";
+            UiFactory.Text("Title", overlay, theme.headingFont, gambleTitle, 52, theme.gold, new Vector2(0, 400), new Vector2(1100, 70),
                            TextAlignmentOptions.Center, 18);
             TextMeshProUGUI result = UiFactory.Text("Result", overlay, theme.headingFont, "", 30, theme.paleGold, new Vector2(0, 330), new Vector2(900, 44),
                                                     TextAlignmentOptions.Center, 10);
@@ -48,7 +49,13 @@ namespace RoyalVault.EditorTools
             ruby.color = Color.white;
             ruby.preserveAspect = true;
             CharacterAnimation motion = theme.heroRight;
-            if (motion != null && motion.IsValid)
+            if (theme.guardianBust != null)
+            {
+                ruby.sprite = theme.guardianBust;
+                ruby.rectTransform.sizeDelta = new Vector2(640, 640);
+                ruby.rectTransform.anchoredPosition = new Vector2(-760, -540);
+            }
+            else if (motion != null && motion.IsValid)
             {
                 Sprite first = motion.idle.frames[0];
                 ruby.rectTransform.sizeDelta = new Vector2(height * first.rect.width / first.rect.height, height);

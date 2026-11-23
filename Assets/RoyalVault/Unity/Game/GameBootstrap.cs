@@ -50,6 +50,10 @@ namespace RoyalVault.Unity
         [SerializeField]
         private CharacterView[] characters = new CharacterView[0];
         [SerializeField]
+        private WinStripView winStrip;
+        [SerializeField]
+        private BonusActivationView bonusActivation;
+        [SerializeField]
         private SealMeterView sealMeter;
         [SerializeField]
         private FlameClashView flameClash;
@@ -104,6 +108,13 @@ namespace RoyalVault.Unity
             {
                 machine = value;
             }
+        }
+
+        // The Emerald look's strip under the reels and its bonus moment
+        public void SetupEmerald(WinStripView strip, BonusActivationView activation)
+        {
+            winStrip = strip;
+            bonusActivation = activation;
         }
 
         public void Setup(MachineDefinitionAsset machineAsset, ThemeDefinition themeAsset, MachineView machineViewRef, ConsoleView consoleView,
@@ -167,11 +178,17 @@ namespace RoyalVault.Unity
             foreach (CharacterView c in characters)
             {
                 c.Bind(theme.character, theme.characterEffectAnchor, theme.characterMagic, theme.characterAnimation);
+                c.BindPoses(theme.guardianPoses);
             }
 
             if (flameClash != null)
             {
                 flameClash.Bind(characters, theme.characterMagic);
+                if (theme.look == ThemeLook.Emerald)
+                {
+                    flameClash.MeetAt(theme.reelArea.center);
+                }
+
                 flameClash.SetStoreEffects(theme.clashImpactVfx, theme.clashSparksVfx, theme.vfxScale);
             }
             if (sealMeter != null)
@@ -208,6 +225,19 @@ namespace RoyalVault.Unity
             Story = gameObject.AddComponent<StoryDirector>();
             Story.Bind(theme.story, chapterCard, coachMarks, FirstVisitHints());
             presenter.Bind(machineView, console, bigWin, jackpots, characters, flameClash, Story);
+            if (winStrip != null)
+            {
+                winStrip.Bind(Machine);
+                presenter.BindStrip(winStrip);
+            }
+
+            if (bonusActivation != null)
+            {
+                bonusActivation.Bind(machineView);
+            }
+
+            StageGuardian();
+
             var player = gameObject.AddComponent<SoundPlayer>();
             player.Setup(theme.sounds);
             Sound = gameObject.AddComponent<SoundDirector>();
@@ -239,13 +269,40 @@ namespace RoyalVault.Unity
             Showcase = new WinShowcase(Engine, Session, Flow, toast, () => showcaseWins, () => showcaseOrder);
         }
 
+        // One guardian on screen: it steps off the stage while a celebration or the gamble table shows it
+        private void StageGuardian()
+        {
+            if (theme.guardianPoses.Length == 0)
+            {
+                return;
+            }
+
+            bigWin.Opened += (kind, counts) => ShowGuardians(kind > CelebrationKind.Jackpot);
+            bigWin.Closed += () => ShowGuardians(true);
+            if (gambleView == null)
+            {
+                return;
+            }
+
+            gambleView.Manager.Opened += dialog => ShowGuardians(dialog != gambleView.Definition);
+            gambleView.Manager.Closed += dialog => ShowGuardians(true);
+        }
+
+        private void ShowGuardians(bool shown)
+        {
+            foreach (CharacterView guardian in characters)
+            {
+                guardian.SetShown(shown);
+            }
+        }
+
         // The moments after a spin's wins, in the order they play: the Treasury, then free spins starting, more free spins,
         // and a round's closing total
         private void AddPresentationSteps(RoundController round)
         {
             var autoPlay = Flow.Features.Get<AutoPlayFeature>();
             round.AddPresentationStep(new TreasuryStep(Session, machineView, bigWin, treasuryView, console, autoPlay));
-            round.AddPresentationStep(new FreeSpinsAwardedStep(Session, Story, bigWin, relicReveal, round.Tally));
+            round.AddPresentationStep(new FreeSpinsAwardedStep(Session, Story, bigWin, relicReveal, round.Tally, bonusActivation));
             round.AddPresentationStep(new FreeSpinsRetriggeredStep(bigWin));
             round.AddPresentationStep(new FreeSpinsTotalStep(Session, bigWin, round.Tally));
         }

@@ -187,6 +187,7 @@ namespace RoyalVault.Tests
             yield return SpinTo(game, new[] { 6, 0, 2, 0, 15 });
             yield return ShotWhen(() => game.Session.Treasury.Round != null && Celebrating(), 0.7f, "34_treasury_title");
             yield return ShotWhen(() => view.IsOpen, 1.2f, "35_treasury_board");
+            yield return ShotWhen(() => view.IsOpen, 0.2f, "35b_vault_parting");
             TreasuryRound round = game.Session.Treasury.Round;
             var urns = new System.Collections.Generic.List<Button>();
             foreach (Button button in view.GetComponentsInChildren<Button>(true))
@@ -290,6 +291,8 @@ namespace RoyalVault.Tests
             var seal = Object.FindFirstObjectByType<SealMeterView>();
             yield return ShotWhen(() => seal.Count >= 2, 0.25f, "16_seal_cracking");
             yield return ShotWhen(() => seal.IsOpen, 0.25f, "24_seal_break");
+            var activation = Object.FindFirstObjectByType<BonusActivationView>(FindObjectsInactive.Include);
+            yield return ShotWhen(() => activation.IsOpen, 1.6f, "09a_bonus_activated");
             yield return ShotWhen(Celebrating, 0.9f, "09_free_spins_awarded");
             game.ForceNextStops(relicStops);
             yield return ShotWhen(() => settled, 0.6f, "29_relic_reveal");

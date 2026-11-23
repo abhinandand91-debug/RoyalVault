@@ -11,10 +11,12 @@ namespace RoyalVault.Unity
         private readonly BigWinView titles;
         private readonly RelicRevealView relicReveal;
         private readonly FreeSpinTally tally;
+        private readonly BonusActivationView activation;
 
         public FreeSpinsAwardedStep(GameSession gameSession, StoryDirector storyDirector, BigWinView titleView, RelicRevealView relicView,
-                                    FreeSpinTally roundTally)
+                                    FreeSpinTally roundTally, BonusActivationView bonusActivation = null)
         {
+            activation = bonusActivation;
             session = gameSession;
             story = storyDirector;
             titles = titleView;
@@ -29,6 +31,11 @@ namespace RoyalVault.Unity
 
         public IEnumerator Run(SpinContext context)
         {
+            if (activation != null && context.Outcome.Scatter != null)
+            {
+                yield return activation.Play(context.Outcome.Scatter.Positions);
+            }
+
             if (story != null)
             {
                 yield return story.TellOnce(StoryMoment.FreeSpins);

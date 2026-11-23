@@ -17,6 +17,7 @@ namespace RoyalVault.Unity
         private CharacterView[] characters;
         private FlameClashView clash;
         private StoryDirector story;
+        private WinStripView strip;
         private Coroutine routine;
         private readonly List<GridPosition> wonCells = new List<GridPosition>();
         private readonly WaitForSeconds linePause = new WaitForSeconds(1.5f);
@@ -31,6 +32,11 @@ namespace RoyalVault.Unity
             bigWin = bigWinView;
             jackpots = jackpotView;
             characters = characterViews;
+        }
+
+        public void BindStrip(WinStripView winStrip)
+        {
+            strip = winStrip;
         }
 
         // Presents a paid spin; onShown runs once the player has seen it and may spin again
@@ -52,6 +58,15 @@ namespace RoyalVault.Unity
 
             routine = null;
             machine.ClearWins();
+            foreach (CharacterView character in characters)
+            {
+                character.Wake();
+            }
+
+            if (strip != null)
+            {
+                strip.Clear();
+            }
         }
 
         private IEnumerator PresentRoutine(SpinContext context, bool quick, Action onShown)
@@ -99,6 +114,11 @@ namespace RoyalVault.Unity
                 machine.ShowLine(outcome.LineWins[i].Line, 0, i);
             }
 
+            if (strip != null)
+            {
+                strip.ShowTotal(outcome.LineWins.Count, outcome.TotalWin);
+            }
+
             console.ShowWin(outcome.TotalWin, Mathf.Clamp(outcome.TotalWin / (float)Math.Max(1, outcome.TotalBet) * 0.25f, 0.4f, 2.5f));
             yield return Waits.Seconds(seconds);
             machine.HideLines();
@@ -132,7 +152,7 @@ namespace RoyalVault.Unity
 
             foreach (CharacterView character in characters)
             {
-                character.Celebrate();
+                character.Celebrate(outcome.JackpotTier >= 0 ? GuardianPose.Jackpot : GuardianPose.Win);
             }
 
             if (outcome.JackpotTier >= 0)
@@ -158,6 +178,11 @@ namespace RoyalVault.Unity
                     machine.HideLines();
                     machine.HighlightCells(line.Positions, 1.5f);
                     machine.ShowLine(line.Line, line.Amount * outcome.Multiplier, 0);
+                    if (strip != null)
+                    {
+                        strip.ShowLine(line, outcome.Multiplier);
+                    }
+
                     yield return linePause;
                 }
             }

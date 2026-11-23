@@ -13,6 +13,18 @@ namespace RoyalVault.Unity
     // eye ends the round. The view never decides anything, it only shows the round
     public sealed class TreasuryView : DialogView
     {
+        // The vault door's moving parts
+        [Serializable]
+        public struct DoorParts
+        {
+            public CanvasGroup group;
+            public RectTransform left;
+            public RectTransform right;
+            public RectTransform ringOuter;
+            public RectTransform ringInner;
+            public Image spill;
+        }
+
         // The parts of one urn
         [Serializable]
         public sealed class UrnParts
@@ -55,9 +67,13 @@ namespace RoyalVault.Unity
         [Tooltip("Seconds between picks when the game opens the urns itself (auto play)")]
         [SerializeField, Range(0.2f, 2f)]
         private float autoPickSeconds = 0.7f;
-        [Tooltip("Optional vault door over the board that turns and opens as the round begins")]
+        [Tooltip("Optional vault door over the board: its rings turn, then its halves part")]
         [SerializeField]
-        private Image door;
+        private DoorParts door;
+
+        // Half the door's width, and how far each half slides
+        public const float DoorHalf = 165f;
+        private const float DoorTravel = 440f;
 
         private Tween[] pulses = new Tween[0];
         private long totalBet;
@@ -94,7 +110,7 @@ namespace RoyalVault.Unity
             cracks = crackSprites;
         }
 
-        public void SetupDoor(Image vaultDoor)
+        public void SetupDoor(DoorParts vaultDoor)
         {
             door = vaultDoor;
         }
@@ -126,7 +142,7 @@ namespace RoyalVault.Unity
         // The door opens, urns are picked until the round ends, the board shows what was missed, and the total counts up
         protected override IEnumerator Content()
         {
-            if (door != null)
+            if (door.group != null)
             {
                 yield return OpenDoor();
             }
@@ -147,15 +163,19 @@ namespace RoyalVault.Unity
             yield return Hold(automatic ? 1.6f : 3.5f);
         }
 
-        // The door turns a third of a turn, swings towards the player and fades, showing the urns behind it
+        // The rings turn against each other, cyan light spills from the seam and the halves part, showing the urns
         private IEnumerator OpenDoor()
         {
             yield return Waits.Seconds(0.45f);
             DoorOpened?.Invoke();
-            Tween.LocalEulerAngles(door.rectTransform, Vector3.zero, new Vector3(0f, 0f, -120f), 0.9f, Ease.InCubic);
-            Tween.Scale(door.rectTransform, 1f, 2.3f, 0.9f, Ease.InCubic);
-            yield return Tween.Alpha(door, 1f, 0f, 0.9f, Ease.InCubic).ToYieldInstruction();
-            door.gameObject.SetActive(false);
+            Tween.LocalEulerAngles(door.ringOuter, Vector3.zero, new Vector3(0f, 0f, -150f), 1.5f, Ease.InOutCubic);
+            Tween.LocalEulerAngles(door.ringInner, Vector3.zero, new Vector3(0f, 0f, 150f), 1.5f, Ease.InOutCubic);
+            Tween.Alpha(door.spill, 0f, 0.9f, 0.6f, Ease.OutCubic);
+            yield return Waits.Seconds(0.55f);
+            Tween.UIAnchoredPositionX(door.left, -DoorHalf, -DoorHalf - DoorTravel, 0.95f, Ease.InOutCubic);
+            Tween.UIAnchoredPositionX(door.right, DoorHalf, DoorHalf + DoorTravel, 0.95f, Ease.InOutCubic);
+            yield return Tween.Alpha(door.group, 1f, 0f, 0.95f, Ease.InCubic).ToYieldInstruction();
+            door.group.gameObject.SetActive(false);
         }
 
         protected override void OnOpening()
@@ -167,12 +187,9 @@ namespace RoyalVault.Unity
             collected.Set(0);
             multiplier.text = "x1";
             shield.enabled = false;
-            if (door != null)
+            if (door.group != null)
             {
-                door.gameObject.SetActive(true);
-                door.rectTransform.localRotation = Quaternion.identity;
-                door.rectTransform.localScale = Vector3.one;
-                door.color = Color.white;
+                ResetDoor();
             }
 
             flash.color = new Color(EyeRed.r, EyeRed.g, EyeRed.b, 0f);
@@ -180,6 +197,18 @@ namespace RoyalVault.Unity
             {
                 ResetUrn(urns[i], i);
             }
+        }
+
+        private void ResetDoor()
+        {
+            door.group.gameObject.SetActive(true);
+            door.group.alpha = 1f;
+            door.left.anchoredPosition = new Vector2(-DoorHalf, 0f);
+            door.right.anchoredPosition = new Vector2(DoorHalf, 0f);
+            door.ringOuter.localRotation = Quaternion.identity;
+            door.ringInner.localRotation = Quaternion.identity;
+            Color light = door.spill.color;
+            door.spill.color = new Color(light.r, light.g, light.b, 0f);
         }
 
         private void ResetUrn(UrnParts urn, int index)

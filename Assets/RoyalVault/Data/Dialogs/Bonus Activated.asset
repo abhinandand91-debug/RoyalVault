@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff42d397738654003ad851557cc8addf, type: 3}
+  m_Name: Bonus Activated
+  m_EditorClassIdentifier: GameKit::GameKit.DialogDefinition
+  id: Bonus Activated
+  layer: 1
+  policy: 0
+  priority: 0
+  entry: {fileID: 11400000, guid: 3c3c42632d38d42eb8e980056c6be2b9, type: 2}
+  exit: {fileID: 11400000, guid: 16a1ae19e106f4aabb4729a1af3143c2, type: 2}
+  backdropAlpha: 0
+  closeOnBackdropTap: 0
+  blocksInput: 1
