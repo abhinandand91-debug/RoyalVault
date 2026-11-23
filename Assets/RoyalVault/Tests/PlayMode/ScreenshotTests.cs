@@ -151,6 +151,10 @@ namespace RoyalVault.Tests
 
         private static IEnumerator LineWin()
         {
+            var console = Object.FindFirstObjectByType<ConsoleView>();
+            console.SetAuto(true, 100);
+            yield return Shot("02b_auto_running");
+            console.SetAuto(false, 0);
             yield return SpinTo(game, new[] { 19, 18, 40, 46, 23 });
             yield return new WaitForSeconds(0.7f);
             yield return Shot("03_spinning");

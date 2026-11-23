@@ -20,6 +20,13 @@ namespace RoyalVault.Unity
         private TextMeshProUGUI totalBet;
         [SerializeField]
         private TextMeshProUGUI autoLabel;
+        [Tooltip("Optional icon beside AUTO, hidden while the longer STOP count shows")]
+        [SerializeField]
+        private Image autoIcon;
+        [SerializeField]
+        private Vector2 autoLabelRest;
+        [SerializeField]
+        private float autoSpacingRest;
         [SerializeField]
         private SpinButtonView spin;
 
@@ -49,6 +56,8 @@ namespace RoyalVault.Unity
         public event Action MenuPressed;
         public event Action SoundPressed;
         public event Action GamblePressed;
+
+        private const float ActiveAutoSpacing = 3f;
 
         public void Setup(CountingText balanceText, TextMeshProUGUI winCaption, CountingText winText, TextMeshProUGUI totalBetText,
                           TextMeshProUGUI autoText, SpinButtonView spinButton, Button minus, Button plus, Button autoButton,
@@ -155,9 +164,24 @@ namespace RoyalVault.Unity
             winLabel.text = multiplier > 1 ? spins + "   ×" + multiplier : spins;
         }
 
+        public void SetupAutoIcon(Image icon)
+        {
+            autoIcon = icon;
+            autoLabelRest = autoLabel.rectTransform.anchoredPosition;
+            autoSpacingRest = autoLabel.characterSpacing;
+        }
+
         public void SetAuto(bool active, int remaining)
         {
             autoLabel.text = active ? "STOP  " + remaining : "AUTO";
+            if (autoIcon == null)
+            {
+                return;
+            }
+
+            autoIcon.gameObject.SetActive(!active);
+            autoLabel.rectTransform.anchoredPosition = active ? Vector2.zero : autoLabelRest;
+            autoLabel.characterSpacing = active ? ActiveAutoSpacing : autoSpacingRest;
         }
 
         // Which controls the player may use right now

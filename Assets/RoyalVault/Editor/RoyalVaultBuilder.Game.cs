@@ -556,9 +556,10 @@ namespace RoyalVault.EditorTools
             Vector2 autoLabel = emerald ? new Vector2(16, 0) : Vector2.zero;
             TextMeshProUGUI autoText = UiFactory.Text("Label", autoPill.transform, theme.headingFont, "AUTO", 17, theme.gold, autoLabel, layout.AutoSize,
                                                       TextAlignmentOptions.Center, 22);
+            Image autoIcon = null;
             if (emerald)
             {
-                Image autoIcon = UiFactory.Image("Icon", autoPill.transform, Sprite("Generated/icon_auto"), new Vector2(-40, 0), new Vector2(26, 26));
+                autoIcon = UiFactory.Image("Icon", autoPill.transform, Sprite("Generated/icon_auto"), new Vector2(-40, 0), new Vector2(26, 26));
                 autoIcon.color = theme.gold;
             }
 
@@ -571,6 +572,11 @@ namespace RoyalVault.EditorTools
             var view = console.gameObject.AddComponent<ConsoleView>();
             view.Setup(balance, winLabel, win, totalBet, autoText, spin, minus, plus, UiFactory.PressButton(autoPill), menu, sound, soundIcon);
             view.SetupGamble(gambleButton, gambleHighlight);
+            if (autoIcon != null)
+            {
+                view.SetupAutoIcon(autoIcon);
+            }
+
             return view;
         }
 
